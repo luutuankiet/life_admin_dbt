@@ -1,0 +1,51 @@
+name: dbt prod trigger
+
+on:
+  repository_dispatch:
+    types: [airbyte_sync_completed]
+
+jobs:
+  dbt_run:
+    runs-on: ubuntu-latest
+    
+    # We set an output for the entire job based on the check step's result
+    outputs:
+      status: ${{ steps.check_id.outputs.run_job }}
+
+    steps:
+      # Step 1: A lightweight check that uses secrets
+      - name: Check Airbyte Connection ID
+        id: check_id
+        run: |
+          if [[ "${{ github.event.client_payload.connection.id }}" == "${{ secrets.AIRBYTE_CONNECTION_ID }}" ]]; then
+            echo "Connection ID matches. Proceeding."
+            echo "run_job=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Connection ID does not match. Stopping."
+            echo "run_job=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Subsequent steps only run if the check above passes
+      - name: Checkout repository
+        if: steps.check_id.outputs.run_job == 'true'
+        uses: actions/checkout@v4
+
+      - name: Install dbt fusion
+        if: steps.check_id.outputs.run_job == 'true'
+        run: |
+          curl -fsSL https://public.cdn.getdbt.com/fs/install/install.sh | sh -s -- --update
+
+          # add bin to github runner path 
+          echo "/home/runner/.local/bin" >> $GITHUB_PATH
+
+
+      - name: Run dbt
+        if: steps.check_id.outputs.run_job == 'true'
+        run: |
+          echo "Running dbt commands..."
+          dbt snapshot && dbt run
+        env: 
+            DBT_TARGET: 'prod'
+            DBT_BQ_KEYFILE_JSON: ${{ secrets.DBT_BQ_KEYFILE_JSON }}
+            DBT_BQ_LOCATION: ${{ secrets.DBT_BQ_LOCATION }}
+            DBT_BQ_PROJECT: ${{ secrets.DBT_BQ_PROJECT }}
