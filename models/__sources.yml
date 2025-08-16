@@ -1,0 +1,18 @@
+version: 2
+
+sources:
+  - name: raw_data
+    schema: "ticktick_dev"
+    description: raw tasks data from ticktick api
+    tables:
+      - name: tasks
+        description: raw tasks data from tickpy
+        # meta:
+        #   dagster:
+        #     asset_key : ["tasks_raw"]
+
+      - name: projects
+        description: raw project data from ticktick api
+        # meta:
+        #   dagster:
+        #     asset_key : ["projects_raw"]

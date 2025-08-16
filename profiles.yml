@@ -1,0 +1,21 @@
+ticktick_dbt:
+  target: "{{ env_var('DBT_TARGET','dev') }}"
+  outputs:
+    dev:
+      type: bigquery
+      location: "{{ env_var('DBT_BQ_LOCATION') }}"
+      project: "{{ env_var('DBT_BQ_PROJECT') }}"
+      method: service-account-json
+      dataset: ticktick_dbt_dev
+      # Use keyfile_json and an environment variable. This is a base64 string NOT a json object
+      # how to gen the base64 string: base64 -w 0 bq_sa.json > sa.txt
+      keyfile_json: "{{ env_var('DBT_BQ_KEYFILE_JSON') }}"
+      threads: 16
+    prod:
+      type: bigquery
+      location: "{{ env_var('DBT_BQ_LOCATION') }}"
+      project: "{{ env_var('DBT_BQ_PROJECT') }}"
+      method: service-account-json
+      dataset: ticktick_dbt_prod
+      keyfile_json: "{{ env_var('DBT_BQ_KEYFILE_JSON') }}"
+      threads: 16
