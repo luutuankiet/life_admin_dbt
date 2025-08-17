@@ -11,6 +11,13 @@ clean-targets:
   - "target"
   - "dbt_packages"
 
+vars:
+  airbyte_meta_fields:
+    - '_airbyte_raw_id'
+    - '_airbyte_extracted_at'
+    - '_airbyte_meta'
+    - '_airbyte_generation_id'
+
 seeds:
   # Builds seeds into '<your_schema_name>_raw'
   ticktick_dbt:
