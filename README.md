@@ -1,4 +1,4 @@
-[![dbt prod trigger](https://github.com/luutuankiet/ticktick_dbt/actions/workflows/airbyte_dbt_trigger.yml/badge.svg)](https://github.com/luutuankiet/ticktick_dbt/actions/workflows/airbyte_dbt_trigger.yml)
+[![Incremental dbt run](https://github.com/luutuankiet/ticktick_dbt/actions/workflows/dbt_snapshot.yml/badge.svg?branch=incremental_run_gha)](https://github.com/luutuankiet/ticktick_dbt/actions/workflows/dbt_snapshot.yml)
 # TickTick dbt Project
 
 This dbt project is designed for transforming data sourced from the TickTick official Open API. It currently supports two primary data streams: `projects` and `tasks`.
