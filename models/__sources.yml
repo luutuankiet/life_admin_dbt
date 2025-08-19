@@ -9,10 +9,21 @@ sources:
         description: raw tasks data from tickpy
         # meta:
         #   dagster:
-        #     asset_key : ["tasks_raw"]
+        #     asset_key : ["tasks_raw"]z
 
       - name: projects
         description: raw project data from ticktick api
         # meta:
         #   dagster:
         #     asset_key : ["projects_raw"]
+
+
+  - name: gcs_snapshot
+    tables:
+     - name: tasks
+       config:
+        external_location: "s3://ticktick_raw/dev/raw_tasks.csv"
+       
+     - name: projects
+       config:
+         external_location: "s3://ticktick_raw/dev/raw_projects.csv"

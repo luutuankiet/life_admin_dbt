@@ -1,16 +1,7 @@
 snapshots:
-  - name: snp_tasks_raw
-    relation: source('raw_data', 'tasks')
-    description: "Tracks historical changes for the raw tasks data, capturing hard deletes as completed/archived tasks."
-    config:
-      strategy: check
-      unique_key: id
-      check_cols:
-        - id
-      invalidate_hard_deletes: true
 
   - name: snp_projects_raw
-    relation: source('raw_data', 'projects')
+    relation: source('gcs_snapshot', 'projects')
     description: "Tracks historical changes for the raw projects (formerly lists) data."
     config:
       strategy: check
@@ -18,3 +9,14 @@ snapshots:
       check_cols:
         - id
       invalidate_hard_deletes: true
+  
+  - name: snp_tasks_raw
+    relation: source('gcs_snapshot','tasks')
+    description: "Tracks historical changes for the raw tasks data."
+    config:
+      strategy: check
+      unique_key: id
+      check_cols:
+        - id
+      invalidate_hard_deletes: true
+

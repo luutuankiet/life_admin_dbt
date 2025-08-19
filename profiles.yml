@@ -19,3 +19,13 @@ ticktick_dbt:
       dataset: ticktick_dbt_prod
       keyfile_json: "{{ env_var('DBT_BQ_KEYFILE_JSON') }}"
       threads: 16
+    snapshot:
+     type: duckdb
+     path: ':memory:'
+     extensions: ['httpfs']
+     secrets:
+       - type: s3
+         region: asia-southeast1
+         key_id: "{{ env_var('GCS_KEY') }}"
+         secret: "{{ env_var('GCS_SECRET') }}"
+         endpoint: "storage.googleapis.com"
