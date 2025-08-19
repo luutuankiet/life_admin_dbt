@@ -4,7 +4,7 @@ name: Run dbt Snapshot
 on:
   push:
     branches:
-      - feat/gha_dbt
+      - incremental_run_gha
   workflow_dispatch: # Allows manual runs
 
 jobs:
