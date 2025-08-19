@@ -2,9 +2,9 @@
 name: Run dbt Snapshot
 
 on:
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - feat/gha_dbt
   workflow_dispatch: # Allows manual runs
 
 jobs:
@@ -18,8 +18,9 @@ jobs:
         uses: luutuankiet/dbt-action@v1.1.1
         with:
           # This pulls a docker image pre-loaded with dbt and duckdb
-          dbt_command: "dbt build --target snapshot"
+          dbt_command: "dbt build"
         env:
           DBT_PROFILES_DIR: .
           GCS_KEY: ${{ secrets.GCS_KEY }}
           GCS_SECRET: ${{ secrets.GCS_SECRET }}
+          DBT_TARGET: "snapshot"
