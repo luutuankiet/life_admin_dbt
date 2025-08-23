@@ -29,7 +29,7 @@ class TickTickClient:
         response.raise_for_status()
         return response.json()
 
-    def get_projects(self) -> dict:
+    def get_projects(self) -> list[dict]:
         """
         Fetches all projects.
         """
@@ -50,11 +50,25 @@ class TickTickClient:
         tasks = []
         for index, project in enumerate(filtered_projects):
             if not project.get("closed"):
-                logging.info(f"Fetching tasks for project: {index} out of {len(filtered_projects) -1}")
+                logging.info(f"Fetching tasks for project: {index+1} out of {len(filtered_projects)}")
                 project_data = self.get_tasks_for_project(project['id'])
                 tasks.extend(project_data.get('tasks', []))
                 # if index == 5:
                 #     break
+        # add the inbox project here
+        # cause it's not included in /project endpoint
+        inbox = self.get_tasks_for_project('inbox')
+        inbox_meta = inbox.get('tasks')[0]
+        inbox_dict = {
+            "id": inbox_meta["projectId"],
+            "name": "inbox",
+            "sortOrder": -1,
+            "groupId": "0",
+            "kind": "TASK"
+        }
+        filtered_projects.append(inbox_dict)
+        # add inbox tasks to the list
+        tasks.extend(inbox.get('tasks', []))
         task_keys_to_drop = {"desc", "content", "items"}
         slim_tasks = [
             {key: value for key, value in item.items() if key not in task_keys_to_drop}
