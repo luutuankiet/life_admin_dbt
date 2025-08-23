@@ -1,0 +1,41 @@
+name: Serverless snapshot 
+on:
+  # Allows you to run this workflow manually from the Actions tab for testing
+  workflow_dispatch:
+
+  repository_dispatch:
+    types: [serverless_snapshot]
+
+concurrency: 
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  run-data-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: incremental_run_gha # <--- the actual code base branch
+          
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: install project deps 
+        run: uv sync
+
+      - name: trigger extraction
+        run: uv run ticktick_fetcher.py
+        env:
+          TICKTICK_API_KEY: ${{ secrets.TICKTICK_API_KEY }}
+          
+      - name: Snapshot & dump to GCS with DuckDB 🦆
+        uses: luutuankiet/dbt-action@v1.1.1
+        with:
+          dbt_command: "dbt build"
+        env:
+          DBT_PROFILES_DIR: .
+          GCS_KEY: ${{ secrets.GCS_KEY }}
+          GCS_SECRET: ${{ secrets.GCS_SECRET }}
+          DBT_TARGET: "snapshot"
