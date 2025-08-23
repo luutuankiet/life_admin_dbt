@@ -17,12 +17,29 @@ sources:
         #   dagster:
         #     asset_key : ["projects_raw"]
 
-
-      - name: tasks_raw
+  - name: stateless_raw
+    description: |
+      - the stateless raw data that python script fetches
+      full refresh on every run.
+      - this is the input table for snapshot
+    tables:
+      - name: tasks
         description: Raw tasks data from local JSON file
         config:
           external_location: "tasks_raw.json"
-      - name: projects_raw
+      - name: projects
         description: Raw projects data from local JSON file
         config:
           external_location: "projects_raw.json"
+  - name: stateful_raw
+    description: | 
+      - the stateful table on gcs with SCD-2.
+      - this is the output table for snaptshot
+    tables:
+     - name: tasks
+       config:
+        external_location: "s3://ticktick_raw/snp/tasks.csv"
+       
+     - name: projects
+       config:
+         external_location: "s3://ticktick_raw/snp/projects.csv"

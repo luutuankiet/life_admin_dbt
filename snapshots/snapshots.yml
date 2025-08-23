@@ -1,22 +1,24 @@
 snapshots:
 
-  - name: snp_projects_raw
-    relation: source('raw_data', 'projects_raw')
+  - name: snp_projects
+    relation: source('stateless_raw','projects')
     description: "Tracks historical changes for the raw projects (formerly lists) data."
     config:
+      enabled: "{{ target.name == 'dump_snapshot' }}"
       strategy: check
       unique_key: id
       check_cols:
         - id
       invalidate_hard_deletes: true
   
-  - name: snp_tasks_raw
-    relation: source('raw_data','tasks_raw')
+  - name: snp_tasks
+    relation: source('stateless_raw','tasks')
     description: "Tracks historical changes for the raw tasks data."
     config:
+      enabled: "{{ target.name == 'dump_snapshot' }}"
       strategy: check
       unique_key: id
       check_cols:
         - id
-      invalidate_hard_deletes: true
+      invalidate_hard_deletes: true    
 

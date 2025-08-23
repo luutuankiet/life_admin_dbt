@@ -9,6 +9,12 @@ on:
   
   # Allows you to run this workflow manually from the Actions tab for testing
   workflow_dispatch:
+    inputs:
+      full_refresh:
+        description: 'snapshot : Run a full refresh'
+        required: false
+        type: boolean
+        default: false
   # push: 
   #   branches: 
   #   - "incremental_run_gha"
@@ -25,6 +31,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: incremental_run_gha    # << this is where the 2 profiles are available     
 
       - name: Install uv
         uses: astral-sh/setup-uv@v6
@@ -38,7 +46,7 @@ jobs:
           TICKTICK_API_KEY: ${{ secrets.TICKTICK_API_KEY }}
           
 
-      - name: Snapshot & dump to GCS with DuckDB 🦆
+      - name: Load remote state to duckdb 🦆
         uses: luutuankiet/dbt-action@v1.1.1
         with:
           # This pulls a docker image pre-loaded with dbt and duckdb
@@ -47,4 +55,15 @@ jobs:
           DBT_PROFILES_DIR: .
           GCS_KEY: ${{ secrets.GCS_KEY }}
           GCS_SECRET: ${{ secrets.GCS_SECRET }}
-          DBT_TARGET: "snapshot"
+          DBT_TARGET: "load_snapshot"
+
+      - name: Snapshot and dump to GCS 🪣
+        uses: luutuankiet/dbt-action@v1.1.1
+        with:
+          # This pulls a docker image pre-loaded with dbt and duckdb
+          dbt_command: "dbt build ${{ github.event.inputs.full_refresh == 'true' && '--full-refresh' || '' }}"
+        env:
+          DBT_PROFILES_DIR: .
+          GCS_KEY: ${{ secrets.GCS_KEY }}
+          GCS_SECRET: ${{ secrets.GCS_SECRET }}
+          DBT_TARGET: "dump_snapshot"
