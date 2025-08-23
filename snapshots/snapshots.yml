@@ -1,7 +1,7 @@
 snapshots:
 
   - name: snp_projects_raw
-    relation: source('gcs_snapshot', 'projects')
+    relation: source('raw_data', 'projects_raw')
     description: "Tracks historical changes for the raw projects (formerly lists) data."
     config:
       strategy: check
@@ -11,7 +11,7 @@ snapshots:
       invalidate_hard_deletes: true
   
   - name: snp_tasks_raw
-    relation: source('gcs_snapshot','tasks')
+    relation: source('raw_data','tasks_raw')
     description: "Tracks historical changes for the raw tasks data."
     config:
       strategy: check

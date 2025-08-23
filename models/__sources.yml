@@ -18,12 +18,11 @@ sources:
         #     asset_key : ["projects_raw"]
 
 
-  - name: gcs_snapshot
-    tables:
-     - name: tasks
-       config:
-        external_location: "s3://ticktick_raw/dev/raw_tasks.csv"
-       
-     - name: projects
-       config:
-         external_location: "s3://ticktick_raw/dev/raw_projects.csv"
+      - name: tasks_raw
+        description: Raw tasks data from local JSON file
+        config:
+          external_location: "tasks_raw.json"
+      - name: projects_raw
+        description: Raw projects data from local JSON file
+        config:
+          external_location: "projects_raw.json"
