@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 from requests_ratelimiter import LimiterSession
 
 class TickTickClient:
@@ -49,7 +50,7 @@ class TickTickClient:
         tasks = []
         for index, project in enumerate(filtered_projects):
             if not project.get("closed"):
-                print(f"Fetching tasks for project: {index} out of {len(filtered_projects)}")
+                logging.info(f"Fetching tasks for project: {index} out of {len(filtered_projects) -1}")
                 project_data = self.get_tasks_for_project(project['id'])
                 tasks.extend(project_data.get('tasks', []))
                 # if index == 5:
@@ -62,6 +63,7 @@ class TickTickClient:
         return filtered_projects, slim_tasks
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     api_key = os.getenv("TICKTICK_API_KEY")
     if not api_key:
         raise Exception("Error: Please set the TICKTICK_API_KEY environment variable.")
@@ -75,4 +77,4 @@ if __name__ == "__main__":
         with open("projects_raw.json", "w") as f:
             json.dump(projects, f, indent=2)
             
-        print("\nData fetching complete")
+        logging.info("Data fetching complete")
