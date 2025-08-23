@@ -2,17 +2,11 @@ version: 2
 
 sources:
   - name: raw_data
-    schema: "ticktick_dev"
-    description: raw tasks data from ticktick api
+    schema: "raw"
+    description: raw data from ticktick api with dbt snapshot to indicate completion timestamps
     tables:
       - name: tasks
-        description: raw tasks data from tickpy
-        # meta:
-        #   dagster:
-        #     asset_key : ["tasks_raw"]
+        description: raw tasks data
 
       - name: projects
-        description: raw project data from ticktick api
-        # meta:
-        #   dagster:
-        #     asset_key : ["projects_raw"]
+        description: raw project data
