@@ -1,0 +1,12 @@
+[project]
+name = "ticktick-dbt"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "dbt-core==1.9.0",
+    "dbt-duckdb==1.9.0",
+    "requests-ratelimiter>=0.4.0",
+    "pyrate-limiter==2.10.0",
+]

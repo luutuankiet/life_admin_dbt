@@ -64,7 +64,7 @@ class TickTickClient:
 if __name__ == "__main__":
     api_key = os.getenv("TICKTICK_API_KEY")
     if not api_key:
-        print("Error: Please set the TICKTICK_API_KEY environment variable.")
+        raise Exception("Error: Please set the TICKTICK_API_KEY environment variable.")
     else:
         client = TickTickClient(api_key)
         projects, tasks = client.get_all_data()
@@ -75,4 +75,4 @@ if __name__ == "__main__":
         with open("projects_raw.json", "w") as f:
             json.dump(projects, f, indent=2)
             
-        print("\nData fetching complete. Saved to ticktick_data.json")
+        print("\nData fetching complete")
