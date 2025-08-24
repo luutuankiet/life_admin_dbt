@@ -1,0 +1,19 @@
+models:
+  - name: stg_projects
+    columns:
+      - name: project_id
+        data_tests:
+          - unique
+          - not_null
+  - name: stg_tasks
+    columns:
+      - name: surr_id
+        data_tests:
+          - unique
+          - not_null
+      - name: project_id
+        data_tests:
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref('stg_projects')
+                field: project_id

@@ -7,6 +7,10 @@ sources:
     tables:
       - name: tasks
         description: raw tasks data
+      - name: tasks_snapshot
+        description: automatically snapshot table (outside of this project) to infer ONLY completed tasks.
 
       - name: projects
         description: raw project data
+      - name: projects_snapshot
+        description: automatically snapshot table (outside of this project) to infer ONLY completed projects.

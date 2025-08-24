@@ -1,0 +1,127 @@
+version: 2
+
+models:
+  - name: base_projects
+    description: ""
+    columns:
+      - name: id
+        description: ""
+
+      - name: name
+        description: ""
+
+      - name: sortorder
+        data_type: INT64
+        description: ""
+
+      - name: groupid
+        description: ""
+
+      - name: kind
+        description: ""
+
+      - name: color
+        description: ""
+
+      - name: viewmode
+        description: ""
+
+      - name: permission
+        description: ""
+
+      - name: closed
+        description: ""
+
+      - name: dbt_scd_id
+        description: ""
+
+      - name: dbt_updated_at
+        data_type: timestamp
+        description: ""
+
+      - name: dbt_valid_from
+        data_type: timestamp
+        description: ""
+
+      - name: dbt_valid_to
+        data_type: timestamp
+        description: ""
+  - name: base_tasks
+    description: ""
+    columns:
+      - name: id
+        description: ""
+
+      - name: projectid
+        description: ""
+
+      - name: sortorder
+        data_type: numeric
+        description: ""
+
+      - name: title
+        description: ""
+
+      - name: timezone
+        description: ""
+
+      - name: isallday
+        data_type: boolean
+        description: ""
+
+      - name: priority
+        data_type: int64
+        description: ""
+
+      - name: status
+        data_type: int64
+        description: ""
+
+      - name: tags
+        data_type: array
+        description: ""
+
+      - name: columnid
+        description: ""
+
+      - name: etag
+        description: ""
+
+      - name: kind
+        description: ""
+
+      - name: repeatflag
+        description: ""
+
+      - name: startdate
+        description: ""
+
+      - name: duedate
+        description: ""
+
+      - name: reminders
+        description: ""
+
+      - name: completedtime
+        description: ""
+
+      - name: childids
+        description: ""
+
+      - name: parentid
+        description: ""
+
+      - name: dbt_scd_id
+        description: ""
+
+      - name: dbt_updated_at
+        data_type: timestamp
+        description: ""
+
+      - name: dbt_valid_from
+        data_type: timestamp
+        description: ""
+
+      - name: dbt_valid_to
+        data_type: timestamp
+        description: ""
