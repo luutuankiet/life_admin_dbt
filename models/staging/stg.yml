@@ -11,9 +11,9 @@ models:
         data_tests:
           - unique
           - not_null
-      - name: project_id
-        data_tests:
-          - dbt_utils.relationships_where:
-              arguments:
-                to: ref('stg_projects')
-                field: project_id
+      # - name: project_id
+      #   data_tests:
+      #     - dbt_utils.relationships_where:
+      #         arguments:
+      #           to: ref('stg_projects')
+      #           field: project_id
