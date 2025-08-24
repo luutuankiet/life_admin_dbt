@@ -44,6 +44,18 @@ add_completed_time as (
     select * from source
     UNION ALL
     select * from snap
+),
+
+flag_repeat as (
+
+    select 
+    *,
+      CASE
+        WHEN repeat_flag IS NOT NULL AND repeat_flag != '' THEN TRUE
+        ELSE FALSE
+      END AS is_recurring
+    from add_completed_time
+
 )
 
 
@@ -52,5 +64,5 @@ select
 {{ dbt_utils.generate_surrogate_key(['task_id','etag']) }} as surr_id,
 *
 
-from add_completed_time
+from flag_repeat
     

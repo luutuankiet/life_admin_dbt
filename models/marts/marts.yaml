@@ -39,12 +39,20 @@ models:
           meta:
             dimension:
               type: timestamp
+              time_intervals: ['RAW', 'DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'DAY_OF_WEEK_INDEX', 'DAY_OF_WEEK_NAME']
       - name: due_date
         description: Timestamp when the task is due (in UTC).
         config:
           meta:
             dimension:
               type: timestamp
+              time_intervals: ['RAW', 'DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'DAY_OF_WEEK_INDEX', 'DAY_OF_WEEK_NAME']
+      - name: is_recurring
+        description: Indicates if the task is recurring.
+        config:
+          meta:
+            dimension:
+              type: boolean
     config:
       meta:
         metrics:
@@ -69,6 +77,16 @@ models:
             sql: SAFE_DIVIDE(${completed_tasks}, ${total_tasks})
             format: percent
             description: The percentage of tasks that have been completed.
+          recurring_tasks:
+            label: Recurring Tasks
+            type: count_distinct
+            sql: CASE WHEN ${TABLE}.is_recurring THEN ${TABLE}.surr_id ELSE NULL END
+            description: The number of recurring tasks.
+          non_recurring_tasks:
+            label: Non-Recurring Tasks
+            type: count_distinct
+            sql: CASE WHEN NOT ${TABLE}.is_recurring THEN ${TABLE}.surr_id ELSE NULL END
+            description: The number of non-recurring tasks.
   - name: dim_projects
     description: Dimension table for projects.
     columns:
@@ -102,3 +120,12 @@ models:
           meta:
             dimension:
               type: timestamp
+              time_intervals: ['RAW', 'DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'DAY_OF_WEEK_INDEX', 'DAY_OF_WEEK_NAME']
+    config:
+      meta:
+        metrics:
+          total_projects:
+            label: Total Projects
+            type: count_distinct
+            sql: ${TABLE}.project_id
+            description: The total number of projects.
