@@ -36,10 +36,10 @@ sources:
       - the stateful table on gcs with SCD-2.
       - this is the output table for snaptshot
     tables:
-     - name: tasks
+     - name: tasks_snapshot
        config:
-        external_location: "s3://ticktick_raw/snp/tasks.csv"
+        external_location: "s3://ticktick_raw/snp/tasks_snapshot.csv"
        
-     - name: projects
+     - name: projects_snapshot
        config:
-         external_location: "s3://ticktick_raw/snp/projects.csv"
+         external_location: "s3://ticktick_raw/snp/projects_snapshot.csv"

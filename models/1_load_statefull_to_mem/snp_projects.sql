@@ -4,4 +4,4 @@
     materialized='table'
     )
 }}
-select * from {{ source('stateful_raw','projects') }}
+select * from {{ source('stateful_raw','projects_snapshot') }}
