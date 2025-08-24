@@ -4,4 +4,4 @@
     enabled=(target.name == 'dump_snapshot')
 ) }}
 
-select * from {{ref('snp_projects')}}
+select * from {{source('stateless_raw','projects')}}
