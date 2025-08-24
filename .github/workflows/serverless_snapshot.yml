@@ -2,12 +2,6 @@ name: Serverless snapshot
 on:
   # Allows you to run this workflow manually from the Actions tab for testing
   workflow_dispatch:
-    inputs:
-      full_refresh:
-        description: 'snapshot : Run a full refresh'
-        required: false
-        type: boolean
-        default: false
 
   repository_dispatch:
     types: [serverless_snapshot]
@@ -24,8 +18,12 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        # the source code is in this branch, but had to put GHA yaml
+        # in main because workflow dispatch endpoint onnly allows
+        # triggering workflows on default branch.
+        # https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_dispatch
         with:
-          ref: incremental_run_gha  # << 2 profiles are only available here.
+          ref: incremental_run_gha
 
       - name: Install uv
         uses: astral-sh/setup-uv@v6
@@ -40,21 +38,16 @@ jobs:
           
 
       - name: Load remote state to duckdb 🦆
-        uses: luutuankiet/dbt-action@v1.1.1
-        with:
-          # This pulls a docker image pre-loaded with dbt and duckdb
-          dbt_command: "dbt build"
+        run: uv run dbt build
         env:
           DBT_PROFILES_DIR: .
           GCS_KEY: ${{ secrets.GCS_KEY }}
           GCS_SECRET: ${{ secrets.GCS_SECRET }}
           DBT_TARGET: "load_snapshot"
 
+          
       - name: Snapshot and dump to GCS 🪣
-        uses: luutuankiet/dbt-action@v1.1.1
-        with:
-          # This pulls a docker image pre-loaded with dbt and duckdb
-          dbt_command: "dbt build ${{ github.event.inputs.full_refresh == 'true' && '--full-refresh' || '' }}"
+        run: uv run dbt build
         env:
           DBT_PROFILES_DIR: .
           GCS_KEY: ${{ secrets.GCS_KEY }}
