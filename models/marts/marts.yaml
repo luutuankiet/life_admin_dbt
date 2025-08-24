@@ -39,12 +39,14 @@ models:
           meta:
             dimension:
               type: timestamp
+              time_intervals: ['RAW', 'DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'DAY_OF_WEEK_INDEX', 'DAY_OF_WEEK_NAME']
       - name: due_date
         description: Timestamp when the task is due (in UTC).
         config:
           meta:
             dimension:
               type: timestamp
+              time_intervals: ['RAW', 'DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'DAY_OF_WEEK_INDEX', 'DAY_OF_WEEK_NAME']
       - name: is_recurring
         description: Indicates if the task is recurring.
         config:
@@ -118,6 +120,7 @@ models:
           meta:
             dimension:
               type: timestamp
+              time_intervals: ['RAW', 'DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'DAY_OF_WEEK_INDEX', 'DAY_OF_WEEK_NAME']
     config:
       meta:
         metrics:
