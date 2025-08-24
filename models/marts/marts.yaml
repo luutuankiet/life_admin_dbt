@@ -1,0 +1,104 @@
+version: 2
+models:
+  - name: fct_tasks
+    description: Core fact table for tasks. The grain is one row per task instance from the source.
+    columns:
+      - name: surr_id
+        description: Surrogate key for the task instance.
+        config:
+          meta:
+            dimension:
+              type: string
+      - name: task_id
+        description: The unique identifier for a task.
+        config:
+          meta:
+            dimension:
+              type: string
+      - name: project_id
+        description: The identifier for the project this task belongs to.
+        config:
+          meta:
+            dimension:
+              hidden: true
+      - name: title
+        description: The title of the task.
+        config:
+          meta:
+            dimension:
+              type: string
+      - name: status
+        description: The status of the task (2=completed, 0=incomplete).
+        config:
+          meta:
+            dimension:
+              type: number
+      - name: completed_time
+        description: Timestamp when the task was completed (in UTC).
+        config:
+          meta:
+            dimension:
+              type: timestamp
+      - name: due_date
+        description: Timestamp when the task is due (in UTC).
+        config:
+          meta:
+            dimension:
+              type: timestamp
+    config:
+      meta:
+        metrics:
+          total_tasks:
+            label: Total Tasks
+            type: count
+            sql: ${TABLE}.surr_id
+            description: The total number of tasks.
+          completed_tasks:
+            label: Completed Tasks
+            type: count_distinct
+            sql: CASE WHEN ${TABLE}.status = 2 THEN ${TABLE}.surr_id ELSE NULL END
+            description: The number of completed tasks.
+          overdue_tasks:
+            label: Overdue Tasks
+            type: count_distinct
+            sql: "CASE WHEN \n  ${TABLE}.due_date < current_timestamp()\n  AND ${TABLE}.status != 2 \nTHEN ${TABLE}.surr_id ELSE NULL END\n"
+            description: The number of tasks that are past their due date but not completed.
+          completion_rate:
+            label: Task Completion Rate
+            type: number
+            sql: SAFE_DIVIDE(${completed_tasks}, ${total_tasks})
+            format: percent
+            description: The percentage of tasks that have been completed.
+  - name: dim_projects
+    description: Dimension table for projects.
+    columns:
+      - name: project_key
+        description: Surrogate key for the project.
+        config:
+          meta:
+            dimension:
+              type: string
+      - name: project_id
+        description: The unique identifier for a project.
+        config:
+          meta:
+            dimension:
+              type: string
+      - name: project_name
+        description: The name of the project.
+        config:
+          meta:
+            dimension:
+              type: string
+      - name: is_closed
+        description: Indicates if the project is closed/archived.
+        config:
+          meta:
+            dimension:
+              type: boolean
+      - name: completed_time
+        description: Timestamp when the project was closed/archived.
+        config:
+          meta:
+            dimension:
+              type: timestamp

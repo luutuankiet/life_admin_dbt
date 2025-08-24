@@ -1,0 +1,49 @@
+version: 2
+models:
+  - name: int_tasks_habit_streaks
+    description: A detailed timeline of all habit tasks, including a row for every expected occurrence (completed or missed). Grain is one row per task per expected day.
+    columns:
+      - name: task_id
+        description: The unique identifier for the habit task.
+        config:
+          meta:
+            dimension:
+              type: string
+      - name: title
+        description: The title of the habit.
+        config:
+          meta:
+            dimension:
+              type: string
+      - name: expected_date
+        description: The local date the habit was expected to be completed.
+        config:
+          meta:
+            dimension:
+              type: date
+      - name: status
+        description: The status for the expected date (2=completed, -1=missed).
+        config:
+          meta:
+            dimension:
+              type: number
+      - name: completed_time
+        description: Timestamp when the habit was completed (in UTC).
+        config:
+          meta:
+            dimension:
+              type: timestamp
+      - name: habit_streak
+        description: The rolling streak count for consecutive completions.
+        config:
+          meta:
+            dimension:
+              type: number
+    config:
+      meta:
+        metrics:
+          max_streak:
+            label: Max Habit Streak
+            type: max
+            sql: ${TABLE}.habit_streak
+            description: The longest consecutive completion streak for a habit.
