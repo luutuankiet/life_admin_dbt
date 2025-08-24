@@ -1,0 +1,41 @@
+name: Run dbt
+
+on:
+#   push:
+#     branches:
+#       - main
+  workflow_dispatch:
+
+  schedule:
+    # runs at 6AM VNT daily
+    - cron: 0 23 * * *
+
+
+
+jobs:
+  run_dbt:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Install python deps
+        run: uv sync
+        
+      - name: Decode SA Key
+        # This is a more secure way to decode the secret, as it avoids exposing it in the logs.
+        run: echo "${{ secrets.DBT_BQ_KEYFILE_JSON }}" | base64 --decode > sa.json
+
+      - name: Run dbt
+        run: uv run dbt deps && uv run dbt run
+        env:
+            DBT_PROFILES_DIR: .
+            DBT_TARGET: "prod"
+            GCS_KEY: ${{ secrets.GCS_KEY }}
+            GCS_SECRET: ${{ secrets.GCS_SECRET }}
+            DBT_BQ_LOCATION: ${{ secrets.DBT_BQ_LOCATION }}
+            DBT_BQ_PROJECT: ${{ secrets.DBT_BQ_PROJECT }}
