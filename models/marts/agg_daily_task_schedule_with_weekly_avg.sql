@@ -18,7 +18,7 @@ WITH daily_schedule AS (
         project_name,
         planned_tasks_count,
         -- Calculate the start of the week for each schedule_date
-        DATE_TRUNC(schedule_date, WEEK) AS week_start_date
+        DATE_TRUNC(schedule_date, WEEK(MONDAY)) AS week_start_date
     FROM {{ ref('fct_task_schedule') }}
 ),
 
