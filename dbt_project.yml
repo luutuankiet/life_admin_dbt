@@ -5,8 +5,6 @@ profile: ticktick_dbt
 seed-paths: ["seeds"]
 model-paths: ["models"]
 macro-paths: ["macros"]
-
-target-path: "target"
 clean-targets:
   - "target"
   - "dbt_packages"
@@ -29,4 +27,6 @@ models:
     staging:
       +materialized: view
     marts:
-      +materialized: table
+      +materialized: view
+flags:
+  require_generic_test_arguments_property: true

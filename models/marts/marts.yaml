@@ -39,14 +39,16 @@ models:
           meta:
             dimension:
               type: timestamp
-              time_intervals: ['RAW', 'DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'DAY_OF_WEEK_INDEX', 'DAY_OF_WEEK_NAME']
+              time_intervals: ['RAW', 'DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'DAY_OF_WEEK_INDEX',
+                'DAY_OF_WEEK_NAME']
       - name: due_date
         description: Timestamp when the task is due (in UTC).
         config:
           meta:
             dimension:
               type: timestamp
-              time_intervals: ['RAW', 'DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'DAY_OF_WEEK_INDEX', 'DAY_OF_WEEK_NAME']
+              time_intervals: ['RAW', 'DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'DAY_OF_WEEK_INDEX',
+                'DAY_OF_WEEK_NAME']
       - name: is_recurring
         description: Indicates if the task is recurring.
         config:
@@ -69,8 +71,10 @@ models:
           overdue_tasks:
             label: Overdue Tasks
             type: count_distinct
-            sql: "CASE WHEN \n  ${TABLE}.due_date < current_timestamp()\n  AND ${TABLE}.status != 2 \nTHEN ${TABLE}.surr_id ELSE NULL END\n"
-            description: The number of tasks that are past their due date but not completed.
+            sql: "CASE WHEN \n  ${TABLE}.due_date < current_timestamp()\n  AND ${TABLE}.status
+              != 2 \nTHEN ${TABLE}.surr_id ELSE NULL END\n"
+            description: The number of tasks that are past their due date but not
+              completed.
           completion_rate:
             label: Task Completion Rate
             type: number
@@ -85,7 +89,8 @@ models:
           non_recurring_tasks:
             label: Non-Recurring Tasks
             type: count_distinct
-            sql: CASE WHEN NOT ${TABLE}.is_recurring THEN ${TABLE}.surr_id ELSE NULL END
+            sql: CASE WHEN NOT ${TABLE}.is_recurring THEN ${TABLE}.surr_id ELSE NULL
+              END
             description: The number of non-recurring tasks.
   - name: dim_projects
     description: Dimension table for projects.
@@ -120,7 +125,8 @@ models:
           meta:
             dimension:
               type: timestamp
-              time_intervals: ['RAW', 'DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'DAY_OF_WEEK_INDEX', 'DAY_OF_WEEK_NAME']
+              time_intervals: ['RAW', 'DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'DAY_OF_WEEK_INDEX',
+                'DAY_OF_WEEK_NAME']
     config:
       meta:
         metrics:
@@ -129,3 +135,110 @@ models:
             type: count_distinct
             sql: ${TABLE}.project_id
             description: The total number of projects.
+  - name: fct_task_schedule
+    description: A forward-looking view of scheduled tasks, built on a date spine to ensure all future days are represented. The grain is one row per project per day.
+    columns:
+      - name: schedule_date
+        description: The future date for which tasks are scheduled.
+        config:
+          meta:
+            dimension:
+              type: date
+              time_intervals: ['DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'DAY_OF_WEEK_NAME']
+      - name: project_id
+        description: The unique identifier for a project.
+        config:
+          meta:
+            dimension:
+              type: string
+              hidden: true
+      - name: project_name
+        description: The name of the project the tasks belong to.
+        config:
+          meta:
+            dimension:
+              type: string
+      - name: planned_tasks_count
+        description: The number of tasks planned for this project on this day.
+        config:
+          meta:
+            dimension:
+              type: number
+              hidden: true # Hide this as a dimension, we'll use it in a metric.
+    config:
+      meta:
+        metrics:
+          planned_tasks:
+            label: "Planned Tasks"
+            type: sum
+            sql: ${planned_tasks_count}
+            description: "Total number of tasks scheduled for a given period. Shows 0 for days without any scheduled tasks."
+  - name: agg_daily_task_schedule_with_weekly_avg
+    description: "Daily task schedule with calculated weekly averages, designed for a mixed chart visualization."
+    columns:
+      - name: schedule_date
+        description: "The date for which tasks are scheduled."
+        config:
+          meta:
+            dimension:
+              type: date
+              time_intervals: ['DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'DAY_OF_WEEK_NAME']
+      - name: project_id
+        description: "The unique identifier for a project."
+        config:
+          meta:
+            dimension:
+              type: string
+              hidden: true
+      - name: project_name
+        description: "The name of the project the tasks belong to."
+        config:
+          meta:
+            dimension:
+              type: string
+      - name: planned_tasks_count
+        description: "The number of tasks planned for this project on this day."
+        config:
+          meta:
+            dimension:
+              type: number
+              hidden: true
+      - name: week_start_date
+        description: "The start date of the week for the corresponding schedule_date."
+        config:
+          meta:
+            dimension:
+              type: date
+              time_intervals: ['WEEK']
+      - name: weekly_average_tasks_per_project
+        description: "The average number of tasks planned per day within that week for a specific project."
+        config:
+          meta:
+            dimension:
+              type: number
+              hidden: true
+      - name: overall_weekly_average_tasks
+        description: "The average number of daily tasks across all projects for that week."
+        config:
+          meta:
+            dimension:
+              type: number
+              hidden: true
+    config:
+      meta:
+        metrics:
+          daily_planned_tasks:
+            label: "Daily Planned Tasks"
+            type: sum
+            sql: ${planned_tasks_count}
+            description: "Total number of tasks scheduled for a given day. Shows 0 for days without any scheduled tasks."
+          weekly_average_tasks_per_project_metric:
+            label: "Weekly Average Tasks (per project)"
+            type: average
+            sql: ${weekly_average_tasks_per_project}
+            description: "The average number of daily tasks for a specific project within the week."
+          overall_weekly_average_tasks_metric:
+            label: "Overall Weekly Average Tasks"
+            type: average
+            sql: ${overall_weekly_average_tasks}
+            description: "The average number of daily tasks across all projects for the week. Use this as a single line on your chart."

@@ -253,18 +253,4 @@ models:
         data_type: string
         description: ""
 
-      - name: dbt_scd_id
-        data_type: string
-        description: ""
 
-      - name: dbt_updated_at
-        data_type: timestamp
-        description: ""
-
-      - name: dbt_valid_from
-        data_type: timestamp
-        description: ""
-
-      - name: dbt_valid_to
-        data_type: timestamp
-        description: ""
