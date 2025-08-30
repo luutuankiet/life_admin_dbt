@@ -39,14 +39,16 @@ models:
           meta:
             dimension:
               type: timestamp
-              time_intervals: ['RAW', 'DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'DAY_OF_WEEK_INDEX', 'DAY_OF_WEEK_NAME']
+              time_intervals: ['RAW', 'DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'DAY_OF_WEEK_INDEX',
+                'DAY_OF_WEEK_NAME']
       - name: due_date
         description: Timestamp when the task is due (in UTC).
         config:
           meta:
             dimension:
               type: timestamp
-              time_intervals: ['RAW', 'DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'DAY_OF_WEEK_INDEX', 'DAY_OF_WEEK_NAME']
+              time_intervals: ['RAW', 'DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'DAY_OF_WEEK_INDEX',
+                'DAY_OF_WEEK_NAME']
       - name: is_recurring
         description: Indicates if the task is recurring.
         config:
@@ -69,8 +71,10 @@ models:
           overdue_tasks:
             label: Overdue Tasks
             type: count_distinct
-            sql: "CASE WHEN \n  ${TABLE}.due_date < current_timestamp()\n  AND ${TABLE}.status != 2 \nTHEN ${TABLE}.surr_id ELSE NULL END\n"
-            description: The number of tasks that are past their due date but not completed.
+            sql: "CASE WHEN \n  ${TABLE}.due_date < current_timestamp()\n  AND ${TABLE}.status
+              != 2 \nTHEN ${TABLE}.surr_id ELSE NULL END\n"
+            description: The number of tasks that are past their due date but not
+              completed.
           completion_rate:
             label: Task Completion Rate
             type: number
@@ -85,7 +89,8 @@ models:
           non_recurring_tasks:
             label: Non-Recurring Tasks
             type: count_distinct
-            sql: CASE WHEN NOT ${TABLE}.is_recurring THEN ${TABLE}.surr_id ELSE NULL END
+            sql: CASE WHEN NOT ${TABLE}.is_recurring THEN ${TABLE}.surr_id ELSE NULL
+              END
             description: The number of non-recurring tasks.
   - name: dim_projects
     description: Dimension table for projects.
@@ -120,7 +125,8 @@ models:
           meta:
             dimension:
               type: timestamp
-              time_intervals: ['RAW', 'DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'DAY_OF_WEEK_INDEX', 'DAY_OF_WEEK_NAME']
+              time_intervals: ['RAW', 'DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'DAY_OF_WEEK_INDEX',
+                'DAY_OF_WEEK_NAME']
     config:
       meta:
         metrics:
