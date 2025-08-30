@@ -11,18 +11,9 @@ on:
       - 'seeds/**'
       - 'lightdash/**'
       - '.github/workflows/CD.yml'
-  pull_request:
-    types: [closed]
-    branches:
-      - main
-    paths:
-      - 'dbt_project.yml'
-      - 'models/**'
-      - 'macros/**'
-      - 'seeds/**'
-      - 'lightdash/**'
-      - '.github/workflows/CD.yml'
 
+permissions:
+  contents: write
 jobs:
   deploy:
     if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
