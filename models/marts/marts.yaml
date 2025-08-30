@@ -57,6 +57,12 @@ models:
               type: boolean
     config:
       meta:
+        primary_key: surr_id
+        joins:
+          - join: dim_projects
+            type: left
+            sql_on: ${fct_tasks.project_id} = ${dim_projects.project_id}
+            relationship: many-to-one
         metrics:
           total_tasks:
             label: Total Tasks
