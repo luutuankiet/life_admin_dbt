@@ -1,0 +1,65 @@
+name: what did you do?
+description: ""
+tableName: fct_tasks
+updatedAt: "2025-08-30T14:05:36.993Z"
+metricQuery:
+  exploreName: fct_tasks
+  dimensions:
+    - fct_tasks_completed_time_day
+    - fct_tasks_completed_time_day_of_week_name
+    - dim_projects_project_name
+    - fct_tasks_title
+  metrics: []
+  filters:
+    dimensions:
+      id: e6b57701-88a0-4566-8808-c06a25dfd225
+      and:
+        - id: 493c28aa-ecd1-4647-b6bf-054c7a4e1b3b
+          target:
+            fieldId: fct_tasks_completed_time_day
+          values:
+            - 2
+          operator: inThePast
+          required: false
+          settings:
+            completed: false
+            unitOfTime: days
+  sorts:
+    - fieldId: fct_tasks_completed_time_day
+      descending: true
+      nullsFirst: true
+  limit: 100
+  metricOverrides: {}
+  tableCalculations: []
+  additionalMetrics: []
+  customDimensions: []
+chartConfig:
+  type: table
+  config:
+    columns:
+      fct_tasks_title:
+        name: task
+      dim_projects_project_name:
+        name: project
+      fct_tasks_completed_time_day:
+        name: date
+      fct_tasks_completed_time_day_of_week_name:
+        name: day
+    metricsAsRows: false
+    showSubtotals: false
+    hideRowNumbers: true
+    showTableNames: false
+    showResultsTotal: false
+    showRowCalculation: false
+    showColumnCalculation: false
+    conditionalFormattings: []
+slug: what-did-you-do
+tableConfig:
+  columnOrder:
+    - fct_tasks_completed_time_day
+    - fct_tasks_completed_time_day_of_week_name
+    - dim_projects_project_name
+    - fct_tasks_title
+spaceSlug: shared
+version: 1
+downloadedAt: "2025-08-30T14:06:32.485Z"
