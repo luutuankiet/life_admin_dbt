@@ -1,0 +1,52 @@
+name: CD on main push
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Install python deps
+        run: uv sync
+        
+      - name: Decode SA Key
+        # This is a more secure way to decode the secret, as it avoids exposing it in the logs.
+        run: echo "${{ secrets.DBT_BQ_KEYFILE_JSON }}" | base64 --decode > sa.json
+
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+
+      - name: Get lightdash version 
+        uses: sergeysova/jq-action@v2
+        id: version 
+        env:
+          LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}   
+        with: 
+          cmd: curl -s "${LIGHTDASH_URL}/api/v1/health" | jq -r '.results.version'
+
+      - name: Install npm dependencies
+        run: bun install -g "@lightdash/cli@${{ steps.version.outputs.value }}" || bun install -g @lightdash/cli@latest
+
+      - name: Deploy to Lightdash
+        env:
+          LIGHTDASH_API_KEY: ${{ secrets.LIGHTDASH_API_KEY }}
+          LIGHTDASH_PROJECT_UUID: ${{ secrets.LIGHTDASH_PROJECT_UUID }}
+          LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}
+          DBT_PROFILES_DIR: .
+          DBT_TARGET: "prod"
+          GCS_KEY: ${{ secrets.GCS_KEY }}
+          GCS_SECRET: ${{ secrets.GCS_SECRET }}
+          DBT_BQ_LOCATION: ${{ secrets.DBT_BQ_LOCATION }}
+          DBT_BQ_PROJECT: ${{ secrets.DBT_BQ_PROJECT }}
+        run: source .venv/bin/activate && dbt deps && lightdash deploy --project-dir ./ --profiles-dir ./
