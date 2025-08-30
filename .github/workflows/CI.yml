@@ -37,6 +37,16 @@ jobs:
       - name: Install npm dependencies
         run: bun install -g "@lightdash/cli@${{ steps.version.outputs.value }}" || bun install -g @lightdash/cli@latest
 
+      - name: dbt tests
+        env:
+          DBT_PROFILES_DIR: .
+          DBT_TARGET: "prod"
+          GCS_KEY: ${{ secrets.GCS_KEY }}
+          GCS_SECRET: ${{ secrets.GCS_SECRET }}
+          DBT_BQ_LOCATION: ${{ secrets.DBT_BQ_LOCATION }}
+          DBT_BQ_PROJECT: ${{ secrets.DBT_BQ_PROJECT }}
+        run: source .venv/bin/activate && dbt deps && dbt test
+      
       - name: Validate Lightdash Project
         env:
           LIGHTDASH_API_KEY: ${{ secrets.LIGHTDASH_API_KEY }}
@@ -48,4 +58,4 @@ jobs:
           GCS_SECRET: ${{ secrets.GCS_SECRET }}
           DBT_BQ_LOCATION: ${{ secrets.DBT_BQ_LOCATION }}
           DBT_BQ_PROJECT: ${{ secrets.DBT_BQ_PROJECT }}
-        run: source .venv/bin/activate && dbt deps && lightdash validate
+        run: source .venv/bin/activate && lightdash validate

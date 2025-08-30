@@ -2,70 +2,67 @@ version: 2
 
 models:
   - name: base_projects
-    description: ""
+    description: "base table containing latest project state pulled from ticktick open API"
     columns:
-      - name: id
+      - name: project_id
+        data_type: string
         description: ""
 
       - name: name
+        data_type: string
         description: ""
 
-      - name: sortorder
-        data_type: INT64
+      - name: sort_order
+        data_type: int64
         description: ""
 
-      - name: groupid
+      - name: group_id
+        data_type: string
         description: ""
 
       - name: kind
+        data_type: string
         description: ""
 
       - name: color
+        data_type: string
         description: ""
 
-      - name: viewmode
+      - name: view_mode
+        data_type: string
         description: ""
 
       - name: permission
+        data_type: string
         description: ""
 
       - name: closed
-        description: ""
-
-      - name: dbt_scd_id
-        description: ""
-
-      - name: dbt_updated_at
-        data_type: timestamp
-        description: ""
-
-      - name: dbt_valid_from
-        data_type: timestamp
-        description: ""
-
-      - name: dbt_valid_to
-        data_type: timestamp
+        data_type: boolean
         description: ""
   - name: base_tasks
-    description: ""
+    description: "base table containing latest task state pulled from ticktick open API"
     columns:
-      - name: id
+      - name: task_id
+        data_type: string
         description: ""
 
-      - name: projectid
+      - name: project_id
+        data_type: string
         description: ""
 
-      - name: sortorder
-        data_type: numeric
+      - name: sort_order
+        data_type: int64
         description: ""
 
       - name: title
+        data_type: string
         description: ""
 
       - name: timezone
+        data_type: string
         description: ""
 
-      - name: isallday
+      - name: is_allday
         data_type: boolean
         description: ""
 
@@ -78,73 +75,92 @@ models:
         description: ""
 
       - name: tags
-        data_type: array
+        data_type: string
         description: ""
 
-      - name: columnid
+      - name: column_id
+        data_type: string
         description: ""
 
       - name: etag
+        data_type: string
         description: ""
 
       - name: kind
+        data_type: string
         description: ""
 
-      - name: repeatflag
+      - name: repeat_flag
+        data_type: string
         description: ""
 
-      - name: startdate
+      - name: start_date
+        data_type: timestamp
         description: ""
 
-      - name: duedate
+      - name: due_date
+        data_type: timestamp
         description: ""
 
       - name: reminders
+        data_type: string
         description: ""
 
-      - name: completedtime
+      - name: completed_time
+        data_type: timestamp
         description: ""
 
       - name: childids
+        data_type: string
         description: ""
 
-      - name: parentid
+      - name: parent_id
+        data_type: string
         description: ""
 
 
 
   - name: base_projects_snapshot
-    description: ""
+    description: "project snapshot that gets loaded on short interval to capture completed / deleted projects"
     columns:
-      - name: id
+      - name: project_id
+        data_type: string
         description: ""
 
       - name: name
+        data_type: string
         description: ""
 
-      - name: sortorder
-        data_type: INT64
+      - name: sort_order
+        data_type: int64
         description: ""
 
-      - name: groupid
+      - name: group_id
+        data_type: string
         description: ""
 
       - name: kind
+        data_type: string
         description: ""
 
       - name: color
+        data_type: string
         description: ""
 
-      - name: viewmode
+      - name: view_mode
+        data_type: string
         description: ""
 
       - name: permission
+        data_type: string
         description: ""
 
       - name: closed
+        data_type: boolean
         description: ""
 
       - name: dbt_scd_id
+        data_type: string
         description: ""
 
       - name: dbt_updated_at
@@ -158,27 +174,30 @@ models:
       - name: dbt_valid_to
         data_type: timestamp
         description: ""
-
   - name: base_tasks_snapshot
-    description: ""
+    description: "tasks snapshot that gets loaded on short interval to capture completed / deleted tasks"
     columns:
-      - name: id
+      - name: task_id
+        data_type: string
         description: ""
 
-      - name: projectid
+      - name: project_id
+        data_type: string
         description: ""
 
-      - name: sortorder
-        data_type: numeric
+      - name: sort_order
+        data_type: int64
         description: ""
 
       - name: title
+        data_type: string
         description: ""
 
       - name: timezone
+        data_type: string
         description: ""
 
-      - name: isallday
+      - name: is_allday
         data_type: boolean
         description: ""
 
@@ -191,40 +210,51 @@ models:
         description: ""
 
       - name: tags
-        data_type: array
+        data_type: string
         description: ""
 
-      - name: columnid
+      - name: column_id
+        data_type: string
         description: ""
 
       - name: etag
+        data_type: string
         description: ""
 
       - name: kind
+        data_type: string
         description: ""
 
-      - name: repeatflag
+      - name: repeat_flag
+        data_type: string
         description: ""
 
-      - name: startdate
+      - name: start_date
+        data_type: timestamp
         description: ""
 
-      - name: duedate
+      - name: due_date
+        data_type: timestamp
         description: ""
 
       - name: reminders
+        data_type: string
         description: ""
 
-      - name: completedtime
+      - name: completed_time
+        data_type: timestamp
         description: ""
 
       - name: childids
+        data_type: string
         description: ""
 
-      - name: parentid
+      - name: parent_id
+        data_type: string
         description: ""
 
       - name: dbt_scd_id
+        data_type: string
         description: ""
 
       - name: dbt_updated_at
