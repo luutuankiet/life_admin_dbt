@@ -4,13 +4,34 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'dbt_project.yml'
+      - 'models/**'
+      - 'macros/**'
+      - 'seeds/**'
+      - 'lightdash/**'
+      - '.github/workflows/CD.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'dbt_project.yml'
+      - 'models/**'
+      - 'macros/**'
+      - 'seeds/**'
+      - 'lightdash/**'
+      - '.github/workflows/CD.yml'
 
 jobs:
   deploy:
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # Required for git diff to work properly
+          token: ${{ secrets.GITHUB_TOKEN }} # Required for pushing changes
 
 
       - name: Install uv
@@ -61,3 +82,25 @@ jobs:
           DBT_BQ_LOCATION: ${{ secrets.DBT_BQ_LOCATION }}
           DBT_BQ_PROJECT: ${{ secrets.DBT_BQ_PROJECT }}
         run: source .venv/bin/activate && lightdash deploy
+
+      - name: Upload Lightdash Content
+        env:
+          LIGHTDASH_API_KEY: ${{ secrets.LIGHTDASH_API_KEY }}
+          LIGHTDASH_PROJECT: ${{ secrets.LIGHTDASH_PROJECT }}
+          LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}
+        run: lightdash upload --project ${{ secrets.LIGHTDASH_PROJECT }} --force
+
+      - name: Download Lightdash Content (Post-Upload for Sync)
+        env:
+          LIGHTDASH_API_KEY: ${{ secrets.LIGHTDASH_API_KEY }}
+          LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}
+          LIGHTDASH_PROJECT: ${{ secrets.LIGHTDASH_PROJECT }}
+        run: lightdash download --project ${{ secrets.LIGHTDASH_PROJECT }}
+
+      - name: Commit back Lightdash content changes
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add lightdash/
+          git diff --staged --quiet || git commit -m "chore: Sync Lightdash content from production [skip ci]"
+          git push
