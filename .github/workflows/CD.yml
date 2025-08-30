@@ -12,6 +12,7 @@ on:
       - 'lightdash/**'
       - '.github/workflows/CD.yml'
   pull_request:
+    types: [closed]
     branches:
       - main
     paths:
