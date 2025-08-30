@@ -40,7 +40,7 @@ jobs:
       - name: Validate Lightdash Project
         env:
           LIGHTDASH_API_KEY: ${{ secrets.LIGHTDASH_API_KEY }}
-          LIGHTDASH_PROJECT_UUID: ${{ secrets.LIGHTDASH_PROJECT_UUID }}
+          LIGHTDASH_PROJECT: ${{ secrets.LIGHTDASH_PROJECT }}
           LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}
           DBT_PROFILES_DIR: .
           DBT_TARGET: "prod"

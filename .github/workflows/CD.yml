@@ -41,7 +41,7 @@ jobs:
       - name: Deploy to Lightdash
         env:
           LIGHTDASH_API_KEY: ${{ secrets.LIGHTDASH_API_KEY }}
-          LIGHTDASH_PROJECT_UUID: ${{ secrets.LIGHTDASH_PROJECT_UUID }}
+          LIGHTDASH_PROJECT: ${{ secrets.LIGHTDASH_PROJECT }}
           LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}
           DBT_PROFILES_DIR: .
           DBT_TARGET: "prod"
@@ -49,4 +49,4 @@ jobs:
           GCS_SECRET: ${{ secrets.GCS_SECRET }}
           DBT_BQ_LOCATION: ${{ secrets.DBT_BQ_LOCATION }}
           DBT_BQ_PROJECT: ${{ secrets.DBT_BQ_PROJECT }}
-        run: source .venv/bin/activate && dbt deps && lightdash deploy --project-dir ./ --profiles-dir ./
+        run: source .venv/bin/activate && dbt deps && lightdash deploy
