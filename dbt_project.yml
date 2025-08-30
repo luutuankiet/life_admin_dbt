@@ -27,6 +27,6 @@ models:
     staging:
       +materialized: view
     marts:
-      +materialized: table
+      +materialized: view
 flags:
   require_generic_test_arguments_property: true
