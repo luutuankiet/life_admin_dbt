@@ -3,12 +3,6 @@ models:
   - name: fct_tasks
     description: Core fact table for tasks. The grain is one row per task instance from the source.
     columns:
-      - name: surr_id
-        description: Surrogate key for the task instance.
-        config:
-          meta:
-            dimension:
-              type: string
       - name: task_id
         description: The unique identifier for a task.
         config:
@@ -57,7 +51,7 @@ models:
               type: boolean
     config:
       meta:
-        primary_key: surr_id
+        primary_key: task_id
         joins:
           - join: dim_projects
             type: left
@@ -67,18 +61,18 @@ models:
           total_tasks:
             label: Total Tasks
             type: count
-            sql: ${TABLE}.surr_id
+            sql: ${TABLE}.task_id
             description: The total number of tasks.
           completed_tasks:
             label: Completed Tasks
             type: count_distinct
-            sql: CASE WHEN ${TABLE}.status = 2 THEN ${TABLE}.surr_id ELSE NULL END
+            sql: CASE WHEN ${TABLE}.status = 2 THEN ${TABLE}.task_id ELSE NULL END
             description: The number of completed tasks.
           overdue_tasks:
             label: Overdue Tasks
             type: count_distinct
             sql: "CASE WHEN \n  ${TABLE}.due_date < current_timestamp()\n  AND ${TABLE}.status
-              != 2 \nTHEN ${TABLE}.surr_id ELSE NULL END\n"
+              != 2 \nTHEN ${TABLE}.task_id ELSE NULL END\n"
             description: The number of tasks that are past their due date but not
               completed.
           completion_rate:
@@ -90,12 +84,12 @@ models:
           recurring_tasks:
             label: Recurring Tasks
             type: count_distinct
-            sql: CASE WHEN ${TABLE}.is_recurring THEN ${TABLE}.surr_id ELSE NULL END
+            sql: CASE WHEN ${TABLE}.is_recurring THEN ${TABLE}.task_id ELSE NULL END
             description: The number of recurring tasks.
           non_recurring_tasks:
             label: Non-Recurring Tasks
             type: count_distinct
-            sql: CASE WHEN NOT ${TABLE}.is_recurring THEN ${TABLE}.surr_id ELSE NULL
+            sql: CASE WHEN NOT ${TABLE}.is_recurring THEN ${TABLE}.task_id ELSE NULL
               END
             description: The number of non-recurring tasks.
   - name: dim_projects

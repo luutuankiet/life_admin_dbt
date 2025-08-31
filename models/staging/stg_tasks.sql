@@ -5,7 +5,9 @@ with source as (
         except=['completed_time', 'status']
         ) }},
     -- preserve the col order to join
-    completed_time,
+    -- also set to NULL for cases task re-add / project unarchived
+    -- in which we enforce source to always have "new" status.
+    cast(NULL as timestamp) as completed_time,
     0 as status
 
     from {{ref('base_tasks')}}
@@ -31,7 +33,7 @@ snap as (
         -- we retrieve task instance with dbt_valid_to is NULL
         {{ dbt_utils.deduplicate(
             relation=ref('base_tasks_snapshot'),
-            partition_by='task_id, etag',
+            partition_by='task_id',
             order_by="dbt_updated_at desc",
         )
         }}
@@ -61,7 +63,6 @@ flag_repeat as (
 
 
 select 
-{{ dbt_utils.generate_surrogate_key(['task_id','etag']) }} as surr_id,
 *
 
 from flag_repeat
