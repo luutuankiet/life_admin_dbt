@@ -5,6 +5,17 @@ on:
     branches:
       - main
 
+env:
+  LIGHTDASH_API_KEY: ${{ secrets.LIGHTDASH_API_KEY }}
+  LIGHTDASH_PROJECT: ${{ secrets.LIGHTDASH_PROJECT }}
+  LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}
+  DBT_PROFILES_DIR: .
+  DBT_TARGET: "CI"
+  GCS_KEY: ${{ secrets.GCS_KEY }}
+  GCS_SECRET: ${{ secrets.GCS_SECRET }}
+  DBT_BQ_LOCATION: ${{ secrets.DBT_BQ_LOCATION }}
+  DBT_BQ_PROJECT: ${{ secrets.DBT_BQ_PROJECT }}
+
 jobs:
   validate:
     if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
@@ -38,25 +49,25 @@ jobs:
       - name: Install npm dependencies
         run: bun install -g "@lightdash/cli@${{ steps.version.outputs.value }}" || bun install -g @lightdash/cli@latest
 
+      - name: Set var DBT_CI_SCHEMA
+        run: echo "DBT_CI_SCHEMA=PR_${{ github.event.number }}" >> $GITHUB_ENV
+
       - name: dbt tests
         env:
-          DBT_PROFILES_DIR: .
-          DBT_TARGET: "prod"
-          GCS_KEY: ${{ secrets.GCS_KEY }}
-          GCS_SECRET: ${{ secrets.GCS_SECRET }}
-          DBT_BQ_LOCATION: ${{ secrets.DBT_BQ_LOCATION }}
-          DBT_BQ_PROJECT: ${{ secrets.DBT_BQ_PROJECT }}
-        run: source .venv/bin/activate && dbt deps && dbt test
+          DBT_CI_SCHEMA: ${{ env.DBT_CI_SCHEMA }}
+        run: source .venv/bin/activate && dbt deps && dbt build
+      
+      - name: Start Lightdash preview
+        env:
+          DBT_CI_SCHEMA: ${{ env.DBT_CI_SCHEMA }}
+        run: source .venv/bin/activate && lightdash start-preview --name $DBT_CI_SCHEMA
       
       - name: Validate Lightdash Project
         env:
-          LIGHTDASH_API_KEY: ${{ secrets.LIGHTDASH_API_KEY }}
-          LIGHTDASH_PROJECT: ${{ secrets.LIGHTDASH_PROJECT }}
-          LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}
-          DBT_PROFILES_DIR: .
-          DBT_TARGET: "prod"
-          GCS_KEY: ${{ secrets.GCS_KEY }}
-          GCS_SECRET: ${{ secrets.GCS_SECRET }}
-          DBT_BQ_LOCATION: ${{ secrets.DBT_BQ_LOCATION }}
-          DBT_BQ_PROJECT: ${{ secrets.DBT_BQ_PROJECT }}
-        run: source .venv/bin/activate && lightdash validate
+          DBT_CI_SCHEMA: ${{ env.DBT_CI_SCHEMA }}
+        run: source .venv/bin/activate && lightdash validate --preview 
+
+      - name: Stop Lightdash preview
+        env:
+          DBT_CI_SCHEMA: ${{ env.DBT_CI_SCHEMA }}
+        run: source .venv/bin/activate && lightdash stop-preview --name $DBT_CI_SCHEMA

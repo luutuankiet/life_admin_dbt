@@ -19,3 +19,13 @@ ticktick_dbt:
       dataset: ticktick_dbt_prod
       keyfile: "./sa.json"
       threads: 16
+    CI:
+      type: bigquery
+      location: "{{ env_var('DBT_BQ_LOCATION') }}"
+      project: "{{ env_var('DBT_BQ_PROJECT') }}"
+      method: service-account
+      dataset: "{{ env_var('DBT_CI_SCHEMA','ticktick_dbt_ci')}}"
+      keyfile: "./sa.json"
+      threads: 16
+
+

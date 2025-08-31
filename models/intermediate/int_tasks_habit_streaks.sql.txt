@@ -12,6 +12,9 @@ Note: The following Jinja block is used to dynamically determine the date range
 for the dbt_utils.date_spine macro. This is necessary because the macro
 requires string literals for its start and end dates.
 #}
+{{config(
+    enabled=false
+    )}}
 {%- set timezone = 'Asia/Ho_Chi_Minh' -%}
 {%- set date_range_query %}
 SELECT
@@ -142,7 +145,7 @@ habit_log AS (
         e.task_id,
         e.expected_date,
         COALESCE(t.status, -1) AS status,
-        t.surr_id,
+        t.task_id,
         t.completed_time,
         t.title
     FROM expected_occurrences e
