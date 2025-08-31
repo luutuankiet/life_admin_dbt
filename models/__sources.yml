@@ -2,15 +2,342 @@ version: 2
 
 sources:
   - name: raw_data
-    schema: "raw"
+    schema: raw
     description: raw data from ticktick api with dbt snapshot to indicate completion timestamps
     tables:
       - name: tasks
         description: raw tasks data
+        columns:
+          - name: id
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: projectId
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: sortOrder
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: title
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: timeZone
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: isAllDay
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: priority
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: status
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: tags
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: columnId
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: etag
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: kind
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: repeatFlag
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: startDate
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: dueDate
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: reminders
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: completedTime
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: childIds
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: parentId
+            description: ''
+            config:
+              meta: {}
+              tags: []
       - name: tasks_snapshot
-        description: automatically snapshot table (outside of this project) to infer ONLY completed tasks.
+        description: >-
+          automatically snapshot table (outside of this project) to infer ONLY completed, non repeat tasks.
 
+
+        columns:
+          - name: id
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: projectId
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: sortOrder
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: title
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: timeZone
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: isAllDay
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: priority
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: status
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: tags
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: columnId
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: etag
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: kind
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: repeatFlag
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: startDate
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: dueDate
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: reminders
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: completedTime
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: childIds
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: parentId
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: dbt_scd_id
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: dbt_updated_at
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: dbt_valid_from
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: dbt_valid_to
+            description: ''
+            config:
+              meta: {}
+              tags: []
       - name: projects
         description: raw project data
+        columns:
+          - name: id
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: name
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: sortOrder
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: groupId
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: kind
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: color
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: viewMode
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: permission
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: closed
+            description: ''
+            config:
+              meta: {}
+              tags: []
       - name: projects_snapshot
-        description: automatically snapshot table (outside of this project) to infer ONLY completed projects.
+        description: >-
+          automatically snapshot table (outside of this project) to infer ONLY completed projects.
+        columns:
+          - name: id
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: name
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: sortOrder
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: groupId
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: kind
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: color
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: viewMode
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: permission
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: closed
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: dbt_scd_id
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: dbt_updated_at
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: dbt_valid_from
+            description: ''
+            config:
+              meta: {}
+              tags: []
+          - name: dbt_valid_to
+            description: ''
+            config:
+              meta: {}
+              tags: []

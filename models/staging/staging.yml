@@ -1,0 +1,162 @@
+version: 2
+models:
+  - name: stg_tasks
+    columns:
+      - name: task_id
+        data_tests:
+          - unique
+          - not_null
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: project_id
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: sort_order
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: title
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: timezone
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: is_allday
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: priority
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: tags
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: column_id
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: etag
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: kind
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: repeat_flag
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: start_date
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: due_date
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: reminders
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: childids
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: parent_id
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: completed_time
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: status
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: gtd_work_type
+        description: ''
+        config:
+          meta: {}
+          tags: []
+  - name: stg_projects
+    columns:
+      - name: project_id
+        data_tests:
+          - unique
+          - not_null
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: name
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: sort_order
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: group_id
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: kind
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: color
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: view_mode
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: permission
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: completed_time
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: closed
+        description: ''
+        config:
+          meta: {}
+          tags: []
