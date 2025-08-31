@@ -20,6 +20,5 @@ snapshots:
       unique_key: id
       check_cols:
         - id
-        - etag
       invalidate_hard_deletes: true    
 
