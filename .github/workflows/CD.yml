@@ -1,7 +1,12 @@
 name: CD on main push
 
 on:
-  push:
+
+  workflow_dispatch:
+
+  pull_request:
+    types:
+      - closed
     branches:
       - main
     paths:
@@ -12,13 +17,16 @@ on:
       - 'lightdash/**'
       - '.github/workflows/CD.yml'
 
-  workflow_dispatch:
-
-  pull_request:
-    types:
-      - closed
-    branches:
-      - main
+env:
+  DBT_PROFILES_DIR: .
+  DBT_TARGET: "prod"
+  GCS_KEY: ${{ secrets.GCS_KEY }}
+  GCS_SECRET: ${{ secrets.GCS_SECRET }}
+  DBT_BQ_LOCATION: ${{ secrets.DBT_BQ_LOCATION }}
+  DBT_BQ_PROJECT: ${{ secrets.DBT_BQ_PROJECT }}
+  LIGHTDASH_API_KEY: ${{ secrets.LIGHTDASH_API_KEY }}
+  LIGHTDASH_PROJECT: ${{ secrets.LIGHTDASH_PROJECT }}
+  LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}
 
 permissions:
   contents: write
@@ -60,13 +68,6 @@ jobs:
         run: bun install -g "@lightdash/cli@${{ steps.version.outputs.value }}" || bun install -g @lightdash/cli@latest
 
       - name: dbt deploy
-        env:
-          DBT_PROFILES_DIR: .
-          DBT_TARGET: "prod"
-          GCS_KEY: ${{ secrets.GCS_KEY }}
-          GCS_SECRET: ${{ secrets.GCS_SECRET }}
-          DBT_BQ_LOCATION: ${{ secrets.DBT_BQ_LOCATION }}
-          DBT_BQ_PROJECT: ${{ secrets.DBT_BQ_PROJECT }}
         run: source .venv/bin/activate && dbt deps && dbt build
 
       - name: Set var DBT_CI_SCHEMA
@@ -78,30 +79,12 @@ jobs:
         run: source .venv/bin/activate && dbt run-operation drop_ci_schema
         
       - name: lightdash deploy
-        env:
-          LIGHTDASH_API_KEY: ${{ secrets.LIGHTDASH_API_KEY }}
-          LIGHTDASH_PROJECT: ${{ secrets.LIGHTDASH_PROJECT }}
-          LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}
-          DBT_PROFILES_DIR: .
-          DBT_TARGET: "prod"
-          GCS_KEY: ${{ secrets.GCS_KEY }}
-          GCS_SECRET: ${{ secrets.GCS_SECRET }}
-          DBT_BQ_LOCATION: ${{ secrets.DBT_BQ_LOCATION }}
-          DBT_BQ_PROJECT: ${{ secrets.DBT_BQ_PROJECT }}
         run: source .venv/bin/activate && lightdash deploy
 
       - name: Upload Lightdash Content
-        env:
-          LIGHTDASH_API_KEY: ${{ secrets.LIGHTDASH_API_KEY }}
-          LIGHTDASH_PROJECT: ${{ secrets.LIGHTDASH_PROJECT }}
-          LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}
         run: lightdash upload --project ${{ secrets.LIGHTDASH_PROJECT }} --force
 
       - name: Download Lightdash Content (Post-Upload for Sync)
-        env:
-          LIGHTDASH_API_KEY: ${{ secrets.LIGHTDASH_API_KEY }}
-          LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}
-          LIGHTDASH_PROJECT: ${{ secrets.LIGHTDASH_PROJECT }}
         run: lightdash download --project ${{ secrets.LIGHTDASH_PROJECT }}
 
       - name: Commit back Lightdash content changes

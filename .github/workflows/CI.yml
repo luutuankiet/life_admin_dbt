@@ -4,6 +4,12 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - 'dbt_project.yml'
+      - 'models/**'
+      - 'macros/**'
+      - 'seeds/**'
+      - 'lightdash/**'
 
 env:
   LIGHTDASH_API_KEY: ${{ secrets.LIGHTDASH_API_KEY }}
