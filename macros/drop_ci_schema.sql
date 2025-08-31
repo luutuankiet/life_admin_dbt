@@ -4,7 +4,7 @@
 
 {%- macro default__drop_ci_schema() -%}
 {# defaults postgres syntax #}
-    {% set schema_to_drop = env_var('CI_SCHEMA', 'ci') %}
+    {% set schema_to_drop = env_var('DBT_CI_SCHEMA', 'ci') %}
     {% set sql %}
         DROP SCHEMA IF EXISTS "{{ schema_to_drop }}" CASCADE;
     {% endset %}
@@ -15,7 +15,7 @@
 {%- endmacro -%}
 
 {%- macro bigquery__drop_ci_schema() -%}
-    {% set schema_to_drop = env_var('CI_SCHEMA', 'ci') %}
+    {% set schema_to_drop = env_var('DBT_CI_SCHEMA', 'ci') %}
     {% set sql %}
         DROP SCHEMA IF EXISTS `{{ schema_to_drop }}` CASCADE;
     {% endset %}

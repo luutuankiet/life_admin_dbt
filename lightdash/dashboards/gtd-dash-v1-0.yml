@@ -1,0 +1,37 @@
+name: gtd dash v1.0
+description: ""
+updatedAt: "2025-08-31T22:33:25.417Z"
+tiles:
+  - x: 0
+    "y": 0
+    h: 9
+    w: 15
+    tabUuid: null
+    type: saved_chart
+    properties:
+      title: ""
+      hideTitle: false
+      chartSlug: tasks-lookahead
+      chartName: tasks lookahead
+    tileSlug: tasks-lookahead
+  - x: 15
+    "y": 1
+    h: 9
+    w: 15
+    tabUuid: null
+    type: saved_chart
+    properties:
+      title: ""
+      hideTitle: false
+      chartSlug: what-did-you-do
+      chartName: what did you do?
+    tileSlug: what-did-you-do
+filters:
+  metrics: []
+  dimensions: []
+  tableCalculations: []
+tabs: []
+slug: gtd-dash-v1-0
+spaceSlug: shared
+version: 1
+downloadedAt: "2025-08-31T15:39:33.181Z"

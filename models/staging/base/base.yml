@@ -1,0 +1,396 @@
+version: 2
+models:
+  - name: base_tasks
+    description: base table containing latest task state pulled from ticktick open API
+    columns:
+      - name: task_id
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: project_id
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: sort_order
+        data_type: int64
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: title
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: timezone
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: is_allday
+        data_type: boolean
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: priority
+        data_type: int64
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: status
+        data_type: int64
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: tags
+        data_type: array<string>
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: column_id
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: etag
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: kind
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: repeat_flag
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: start_date
+        data_type: timestamp
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: due_date
+        data_type: timestamp
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: reminders
+        data_type: array<string>
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: completed_time
+        data_type: timestamp
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: childids
+        data_type: array<string>
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: parent_id
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+  - name: base_tasks_snapshot
+    description: >-
+      tasks snapshot that gets loaded on short interval to capture completed / deleted tasks
+    columns:
+      - name: task_id
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: project_id
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: sort_order
+        data_type: int64
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: title
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: timezone
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: is_allday
+        data_type: boolean
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: priority
+        data_type: int64
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: status
+        data_type: int64
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: tags
+        data_type: array<string>
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: column_id
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: etag
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: kind
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: repeat_flag
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: start_date
+        data_type: timestamp
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: due_date
+        data_type: timestamp
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: reminders
+        data_type: array<string>
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: completed_time
+        data_type: timestamp
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: childids
+        data_type: array<string>
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: parent_id
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: dbt_scd_id
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: dbt_updated_at
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: dbt_valid_from
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: dbt_valid_to
+        description: ''
+        config:
+          meta: {}
+          tags: []
+  - name: base_projects
+    description: base table containing latest project state pulled from ticktick open API
+    columns:
+      - name: project_id
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: name
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: sort_order
+        data_type: int64
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: group_id
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: kind
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: color
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: view_mode
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: permission
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: closed
+        data_type: boolean
+        description: ''
+        config:
+          meta: {}
+          tags: []
+  - name: base_projects_snapshot
+    description: >-
+      project snapshot that gets loaded on short interval to capture completed / deleted projects
+    columns:
+      - name: project_id
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: name
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: sort_order
+        data_type: int64
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: group_id
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: kind
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: color
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: view_mode
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: permission
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: closed
+        data_type: boolean
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: dbt_scd_id
+        data_type: string
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: dbt_updated_at
+        data_type: timestamp
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: dbt_valid_from
+        data_type: timestamp
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: dbt_valid_to
+        data_type: timestamp
+        description: ''
+        config:
+          meta: {}
+          tags: []

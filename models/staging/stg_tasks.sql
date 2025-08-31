@@ -42,28 +42,60 @@ snap as (
     where dbt_valid_to is not null
 ),
 
-add_completed_time as (
+infer_completed_time as (
+    -- this cte will union the two above to
+    -- infer the completion time from snapshot model.
     select * from source
     UNION ALL
     select * from snap
 ),
 
-flag_repeat as (
+add_gtd_work_type as (
+{% set deep_tags = fromjson(var('gtd_deep_work_tags'))%}
+{%  set shallow_tags = fromjson(var('gtd_shallow_work_tags')) %}
 
-    select 
+
+select
     *,
-      CASE
-        WHEN repeat_flag IS NOT NULL AND repeat_flag != '' THEN TRUE
-        ELSE FALSE
-      END AS is_recurring
-    from add_completed_time
+    case
+        when
+    {% if var('enable_gtd_work_type_categorization') or (deep_tags | length == 0 and shallow_tags | length == 0)  %}
+        {% if deep_tags | length > 0 %}
+            ARRAY_LENGTH(
+                ARRAY(
+                    (SELECT tag FROM UNNEST({{ deep_tags }}) as tag)
+                    INTERSECT DISTINCT
+                    (SELECT tag FROM UNNEST(tags) as tag)
+                )
+            ) > 0
 
+        {% elif deep_tags | length == 0 %}
+            ARRAY_LENGTH(tags) is null 
+        {% endif %}
+            then '🥩'
+
+        when
+        {% if shallow_tags | length > 0 %}
+            ARRAY_LENGTH(
+                ARRAY(
+                    (SELECT tag FROM UNNEST({{ shallow_tags }}) as tag)
+                    INTERSECT DISTINCT
+                    (SELECT tag FROM UNNEST(tags) as tag)
+                )
+            ) > 0
+
+        {% elif shallow_tags | length == 0 %}
+            ARRAY_LENGTH(tags) is null -- length of an empty array is NULL
+        {% endif %}
+            then '🧃'
+
+    {% else %}
+        NULL THEN NULL
+    {% endif %}
+        else null
+    end as gtd_work_type
+from infer_completed_time
 )
-
-
-
-select 
-*
-
-from flag_repeat
-    
+select
+ *
+from add_gtd_work_type

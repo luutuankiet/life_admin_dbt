@@ -1,0 +1,47 @@
+version: 2
+exposures:
+  - name: ld_project_44a38ce8_d379_4565_a28e_c498ada59131
+    type: application
+    owner:
+      name: ken luu
+      email: luutuankiet.ftu2@gmail.com
+    label: Lightdash - main
+    description: Lightdash project
+    url: >-
+      https://ld-prod.kenluu.org/projects/44a38ce8-d379-4565-a28e-c498ada59131/home
+    tags:
+      - lightdash
+      - project
+    depends_on:
+      - ref('fct_tasks')
+      - ref('dim_projects')
+      - ref('agg_daily_task_schedule_with_weekly_avg')
+  - name: ld_chart_cf6105a1_963f_4af6_b924_f570501e918f
+    type: analysis
+    owner:
+      name: ken luu
+      email: ""
+    label: what did you do?
+    description: ""
+    url: >-
+      https://ld-prod.kenluu.org/projects/44a38ce8-d379-4565-a28e-c498ada59131/saved/cf6105a1-963f-4af6-b924-f570501e918f/view
+    tags:
+      - lightdash
+      - chart
+    depends_on:
+      - ref('fct_tasks')
+      - ref('dim_projects')
+  - name: ld_chart_ff81ba60_55d2_4627_a104_3c050368ce5d
+    type: analysis
+    owner:
+      name: ken luu
+      email: ""
+    label: tasks lookahead
+    description: ""
+    url: >-
+      https://ld-prod.kenluu.org/projects/44a38ce8-d379-4565-a28e-c498ada59131/saved/ff81ba60-55d2-4627-a104-3c050368ce5d/view
+    tags:
+      - lightdash
+      - chart
+    depends_on:
+      - ref('agg_daily_task_schedule_with_weekly_avg')

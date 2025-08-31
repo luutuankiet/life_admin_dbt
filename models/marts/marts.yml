@@ -1,0 +1,396 @@
+version: 2
+models:
+  - name: fct_tasks
+    description: Core fact table for tasks. The grain is one row per task instance from the source.
+    columns:
+      - name: task_id
+        description: The unique identifier for a task.
+        config:
+          meta:
+            dimension:
+              type: string
+          tags: []
+      - name: project_id
+        description: The identifier for the project this task belongs to.
+        config:
+          meta:
+            dimension:
+              hidden: true
+          tags: []
+      - name: sort_order
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: title
+        description: The title of the task.
+        config:
+          meta:
+            dimension:
+              type: string
+              urls:
+                - label: open in ticktick (mac)
+                  url: >-
+                    ticktick://ticktick.com/webapp/#p/${row.dim_projects.project_id.raw}/tasks/${row.fct_tasks.task_id.raw}
+                - label: open in ticktick (web)
+                  url: >-
+                    https://ticktick.com/webapp/#p/${row.dim_projects.project_id.raw}/tasks/${row.fct_tasks.task_id.raw}
+          tags: []
+      - name: timezone
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: is_allday
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: priority
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: tags
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: column_id
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: etag
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: kind
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: repeat_flag
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: start_date
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: due_date
+        description: Timestamp when the task is due (in UTC).
+        config:
+          meta:
+            dimension:
+              type: timestamp
+              time_intervals:
+                - RAW
+                - DAY
+                - WEEK
+                - MONTH
+                - QUARTER
+                - YEAR
+                - DAY_OF_WEEK_INDEX
+                - DAY_OF_WEEK_NAME
+          tags: []
+      - name: reminders
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: childids
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: parent_id
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: completed_time
+        description: Timestamp when the task was completed (in UTC).
+        config:
+          meta:
+            dimension:
+              type: timestamp
+              time_intervals:
+                - RAW
+                - DAY
+                - WEEK
+                - MONTH
+                - QUARTER
+                - YEAR
+                - DAY_OF_WEEK_INDEX
+                - DAY_OF_WEEK_NAME
+          tags: []
+      - name: status
+        description: The status of the task (2=completed, 0=incomplete).
+        config:
+          meta:
+            dimension:
+              type: number
+          tags: []
+      - name: gtd_work_type
+        description: >-
+          Categorizes tasks as 'Shallow Work' (🧃) or 'Deep Work' (🥩) based on GTD principles and user-defined
+          tags.
+        config:
+          meta:
+            dimension:
+              type: string
+          tags: []
+    config:
+      meta:
+        primary_key: task_id
+        joins:
+          - join: dim_projects
+            type: left
+            sql_on: ${fct_tasks.project_id} = ${dim_projects.project_id}
+            relationship: many-to-one
+        metrics:
+          total_task_instances:
+            label: Total Tasks
+            type: count
+            sql: ${TABLE}.task_id
+            description: The total number of tasks.
+          completed_tasks:
+            label: Completed Tasks
+            type: count_distinct
+            sql: CASE WHEN ${TABLE}.status = 2 THEN ${TABLE}.task_id ELSE NULL END
+            description: The number of completed tasks.
+          overdue_tasks:
+            label: Overdue Tasks
+            type: count_distinct
+            sql: |
+              CASE WHEN 
+                ${TABLE}.due_date < current_timestamp()
+                AND ${TABLE}.status != 2 
+              THEN ${TABLE}.task_id ELSE NULL END
+            description: The number of tasks that are past their due date but not completed.
+          completion_rate:
+            label: Task Completion Rate
+            type: number
+            sql: SAFE_DIVIDE(${completed_tasks}, ${total_task_instances})
+            format: percent
+            description: The percentage of tasks that have been completed.
+  - name: dim_projects
+    description: Dimension table for projects.
+    columns:
+      - name: project_key
+        description: Surrogate key for the project.
+        config:
+          meta:
+            dimension:
+              type: string
+          tags: []
+      - name: project_id
+        description: The unique identifier for a project.
+        config:
+          meta:
+            dimension:
+              type: string
+          tags: []
+      - name: project_name
+        description: The name of the project.
+        config:
+          meta:
+            dimension:
+              type: string
+          tags: []
+      - name: project_color
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: project_kind
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: view_mode
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: sort_order
+        description: ''
+        config:
+          meta: {}
+          tags: []
+      - name: is_closed
+        description: Indicates if the project is closed/archived.
+        config:
+          meta:
+            dimension:
+              type: boolean
+          tags: []
+      - name: completed_time
+        description: Timestamp when the project was closed/archived.
+        config:
+          meta:
+            dimension:
+              type: timestamp
+              time_intervals:
+                - RAW
+                - DAY
+                - WEEK
+                - MONTH
+                - QUARTER
+                - YEAR
+                - DAY_OF_WEEK_INDEX
+                - DAY_OF_WEEK_NAME
+          tags: []
+    config:
+      meta:
+        metrics:
+          total_projects:
+            label: Total Projects
+            type: count_distinct
+            sql: ${TABLE}.project_id
+            description: The total number of projects.
+  - name: fct_task_schedule
+    description: >-
+      A forward-looking view of scheduled tasks, built on a date spine to ensure all future days are represented.
+      The grain is one row per project per day.
+    columns:
+      - name: schedule_date
+        description: The future date for which tasks are scheduled.
+        config:
+          meta:
+            dimension:
+              type: date
+              time_intervals:
+                - DAY
+                - WEEK
+                - MONTH
+                - QUARTER
+                - YEAR
+                - DAY_OF_WEEK_NAME
+          tags: []
+      - name: project_id
+        description: The unique identifier for a project.
+        config:
+          meta:
+            dimension:
+              type: string
+              hidden: true
+          tags: []
+      - name: project_name
+        description: The name of the project the tasks belong to.
+        config:
+          meta:
+            dimension:
+              type: string
+          tags: []
+      - name: planned_tasks_count
+        description: The number of tasks planned for this project on this day.
+        config:
+          meta:
+            dimension:
+              type: number
+              hidden: true
+          tags: []
+    config:
+      meta:
+        metrics:
+          planned_tasks:
+            label: Planned Tasks
+            type: sum
+            sql: ${planned_tasks_count}
+            description: >-
+              Total number of tasks scheduled for a given period. Shows 0 for days without any scheduled
+              tasks.
+  - name: agg_daily_task_schedule_with_weekly_avg
+    description: >-
+      Daily task schedule with calculated weekly averages, designed for a mixed chart visualization.
+    columns:
+      - name: schedule_date
+        description: The date for which tasks are scheduled.
+        config:
+          meta:
+            dimension:
+              type: date
+              time_intervals:
+                - DAY
+                - WEEK
+                - MONTH
+                - QUARTER
+                - YEAR
+                - DAY_OF_WEEK_NAME
+          tags: []
+      - name: project_id
+        description: The unique identifier for a project.
+        config:
+          meta:
+            dimension:
+              type: string
+              hidden: true
+          tags: []
+      - name: project_name
+        description: The name of the project the tasks belong to.
+        config:
+          meta:
+            dimension:
+              type: string
+          tags: []
+      - name: planned_tasks_count
+        description: The number of tasks planned for this project on this day.
+        config:
+          meta:
+            dimension:
+              type: number
+              hidden: true
+          tags: []
+      - name: week_start_date
+        description: The start date of the week for the corresponding schedule_date.
+        config:
+          meta:
+            dimension:
+              type: date
+              time_intervals:
+                - WEEK
+          tags: []
+      - name: weekly_average_tasks_per_project
+        description: >-
+          The average number of tasks planned per day within that week for a specific project.
+        config:
+          meta:
+            dimension:
+              type: number
+              hidden: true
+          tags: []
+      - name: overall_weekly_average_tasks
+        description: The average number of daily tasks across all projects for that week.
+        config:
+          meta:
+            dimension:
+              type: number
+              hidden: true
+          tags: []
+    config:
+      meta:
+        metrics:
+          daily_planned_tasks:
+            label: Daily Planned Tasks
+            type: sum
+            sql: ${planned_tasks_count}
+            description: >-
+              Total number of tasks scheduled for a given day. Shows 0 for days without any scheduled
+              tasks.
+          weekly_average_tasks_per_project_metric:
+            label: Weekly Average Tasks (per project)
+            type: average
+            sql: ${weekly_average_tasks_per_project}
+            description: The average number of daily tasks for a specific project within the week.
+          overall_weekly_average_tasks_metric:
+            label: Overall Weekly Average Tasks
+            type: average
+            sql: ${overall_weekly_average_tasks}
+            description: >-
+              The average number of daily tasks across all projects for the week. Use this as a single
+              line on your chart.
