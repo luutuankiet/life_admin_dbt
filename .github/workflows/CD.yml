@@ -12,6 +12,14 @@ on:
       - 'lightdash/**'
       - '.github/workflows/CD.yml'
 
+  workflow_dispatch:
+
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
 permissions:
   contents: write
 jobs:
@@ -61,6 +69,13 @@ jobs:
           DBT_BQ_PROJECT: ${{ secrets.DBT_BQ_PROJECT }}
         run: source .venv/bin/activate && dbt deps && dbt build
 
+      - name: Set var DBT_CI_SCHEMA
+        run: echo "DBT_CI_SCHEMA=PR_${{ github.event.number }}" >> $GITHUB_ENV
+
+      - name: drop dbt CI schema
+        env: 
+          DBT_CI_SCHEMA: ${{ env.DBT_CI_SCHEMA }}
+        run: source .venv/bin/activate && dbt run-operation drop_ci_schema
         
       - name: lightdash deploy
         env:
