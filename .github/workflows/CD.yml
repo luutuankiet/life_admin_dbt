@@ -87,10 +87,16 @@ jobs:
       - name: Download Lightdash Content (Post-Upload for Sync)
         run: lightdash download --project ${{ secrets.LIGHTDASH_PROJECT }}
 
+      - name: Download Lightdash exposures
+        run: lightdash generate exposures
+
+      # use force-with-lease to prefer the CD runner's version, 
+      # while safely failing if remote has commits other than the runner's.
       - name: Commit back Lightdash content changes
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add lightdash/
-          git diff --staged --quiet || git commit -m "chore: Sync Lightdash content from production [skip ci]"
-          git push
+          git add models/lightdash_exposures.yml
+          git diff --staged --quiet || git commit -m "chore: Sync Lightdash content and exposures from prod [skip ci]"
+          git push --force-with-lease
