@@ -54,6 +54,12 @@ models:
           meta:
             dimension:
               type: boolean
+      - name: gtd_work_type
+        description: Categorizes tasks as 'Shallow Work' (🧃) or 'Deep Work' (🥩) based on GTD principles and user-defined tags.
+        config:
+          meta:
+            dimension:
+              type: string
     config:
       meta:
         primary_key: task_id
