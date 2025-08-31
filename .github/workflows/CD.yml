@@ -15,7 +15,6 @@ on:
       - 'macros/**'
       - 'seeds/**'
       - 'lightdash/**'
-      - '.github/workflows/CD.yml'
 
 env:
   DBT_PROFILES_DIR: .
@@ -91,7 +90,7 @@ jobs:
         run: lightdash download --project ${{ secrets.LIGHTDASH_PROJECT }}
 
       - name: Download Lightdash exposures
-        run: lightdash generate exposures
+        run: lightdash generate-exposures
 
       # use force-with-lease to prefer the CD runner's version, 
       # while safely failing if remote has commits other than the runner's.
