@@ -9,6 +9,13 @@ on:
       - closed
     branches:
       - main
+    paths:
+      - 'dbt_project.yml'
+      - 'models/**'
+      - 'macros/**'
+      - 'seeds/**'
+      - 'lightdash/**'
+      - '.github/workflows/CD.yml'
 
 env:
   DBT_PROFILES_DIR: .
