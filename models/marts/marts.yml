@@ -178,16 +178,6 @@ models:
             sql: SAFE_DIVIDE(${completed_tasks}, ${total_task_instances})
             format: percent
             description: The percentage of tasks that have been completed.
-          recurring_tasks:
-            label: Recurring Tasks
-            type: count_distinct
-            sql: CASE WHEN ${TABLE}.is_recurring THEN ${TABLE}.task_id ELSE NULL END
-            description: The number of recurring tasks.
-          non_recurring_tasks:
-            label: Non-Recurring Tasks
-            type: count_distinct
-            sql: CASE WHEN NOT ${TABLE}.is_recurring THEN ${TABLE}.task_id ELSE NULL END
-            description: The number of non-recurring tasks.
   - name: dim_projects
     description: Dimension table for projects.
     columns:

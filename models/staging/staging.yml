@@ -15,6 +15,10 @@ models:
         config:
           meta: {}
           tags: []
+        data_tests:
+          - relationships:
+              to: ref('stg_projects')
+              field: project_id
       - name: sort_order
         description: ''
         config:
