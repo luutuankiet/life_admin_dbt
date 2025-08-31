@@ -58,7 +58,7 @@ models:
             sql_on: ${fct_tasks.project_id} = ${dim_projects.project_id}
             relationship: many-to-one
         metrics:
-          total_tasks:
+          total_task_instances:
             label: Total Tasks
             type: count
             sql: ${TABLE}.task_id
@@ -78,7 +78,7 @@ models:
           completion_rate:
             label: Task Completion Rate
             type: number
-            sql: SAFE_DIVIDE(${completed_tasks}, ${total_tasks})
+            sql: SAFE_DIVIDE(${completed_tasks}, ${total_task_instances})
             format: percent
             description: The percentage of tasks that have been completed.
           recurring_tasks:
