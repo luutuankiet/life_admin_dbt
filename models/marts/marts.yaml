@@ -21,6 +21,11 @@ models:
           meta:
             dimension:
               type: string
+              urls:
+                - label: "open in ticktick (mac)"
+                  url: "ticktick://ticktick.com/webapp/#p/${row.dim_projects.project_id.raw}/tasks/${row.fct_tasks.task_id.raw}"
+                - label: "open in ticktick (web)"
+                  url: "https://ticktick.com/webapp/#p/${row.dim_projects.project_id.raw}/tasks/${row.fct_tasks.task_id.raw}"
       - name: status
         description: The status of the task (2=completed, 0=incomplete).
         config:
