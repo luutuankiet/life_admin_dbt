@@ -1,16 +1,6 @@
 name: CD on main push
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'dbt_project.yml'
-      - 'models/**'
-      - 'macros/**'
-      - 'seeds/**'
-      - 'lightdash/**'
-      - '.github/workflows/CD.yml'
 
   workflow_dispatch:
 
