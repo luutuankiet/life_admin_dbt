@@ -1,7 +1,7 @@
 name: what did you do?
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-08-31T09:34:59.014Z"
+updatedAt: "2025-08-31T22:31:34.785Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
@@ -11,6 +11,7 @@ metricQuery:
     - fct_tasks_title
     - fct_tasks_task_id
     - dim_projects_project_id
+    - fct_tasks_gtd_work_type
   metrics: []
   filters:
     dimensions:
@@ -45,6 +46,8 @@ chartConfig:
         visible: false
       dim_projects_project_id:
         visible: false
+      fct_tasks_gtd_work_type:
+        name: " "
       dim_projects_project_name:
         name: project
       fct_tasks_completed_time_day:
@@ -68,6 +71,7 @@ tableConfig:
     - fct_tasks_title
     - fct_tasks_task_id
     - dim_projects_project_id
+    - fct_tasks_gtd_work_type
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-08-31T09:35:27.464Z"
+downloadedAt: "2025-08-31T15:39:32.843Z"
