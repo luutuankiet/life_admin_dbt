@@ -283,7 +283,7 @@ models:
         config:
           meta: {}
           tags: []
-      - name: name
+      - name: project_name
         data_type: string
         description: Project name
         config:
@@ -341,7 +341,7 @@ models:
         config:
           meta: {}
           tags: []
-      - name: name
+      - name: project_name
         data_type: string
         description: Project name
         config:

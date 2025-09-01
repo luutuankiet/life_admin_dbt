@@ -19,6 +19,3 @@ source AS (
 SELECT *
 
 FROM source
-ORDER BY
-    task_id,
-    due_date

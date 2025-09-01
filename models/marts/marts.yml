@@ -195,13 +195,6 @@ models:
   - name: dim_projects
     description: Dimension table for projects.
     columns:
-      - name: project_key
-        description: Surrogate key for the project.
-        config:
-          meta:
-            dimension:
-              type: string
-          tags: []
       - name: project_id
         description: Project identifier
         config:
@@ -210,19 +203,29 @@ models:
               type: string
           tags: []
       - name: project_name
-        description: ''
+        description: Project name
         config:
           meta:
             dimension:
               type: string
           tags: []
-      - name: project_color
-        description: ''
+      - name: sort_order
+        description: Order value
         config:
           meta: {}
           tags: []
-      - name: project_kind
-        description: ''
+      - name: group_id
+        description: Project group identifier
+        config:
+          meta: {}
+          tags: []
+      - name: kind
+        description: "\"TASK\" or \"NOTE\"\n"
+        config:
+          meta: {}
+          tags: []
+      - name: color
+        description: Project color
         config:
           meta: {}
           tags: []
@@ -231,17 +234,10 @@ models:
         config:
           meta: {}
           tags: []
-      - name: sort_order
-        description: Order value
+      - name: permission
+        description: '"read", "write" or "comment"'
         config:
           meta: {}
-          tags: []
-      - name: is_closed
-        description: Indicates if the project is closed/archived.
-        config:
-          meta:
-            dimension:
-              type: boolean
           tags: []
       - name: completed_time
         description: |
@@ -261,6 +257,11 @@ models:
                 - YEAR
                 - DAY_OF_WEEK_INDEX
                 - DAY_OF_WEEK_NAME
+          tags: []
+      - name: closed
+        description: Project closed
+        config:
+          meta: {}
           tags: []
     config:
       meta:
@@ -298,7 +299,7 @@ models:
               hidden: true
           tags: []
       - name: project_name
-        description: ''
+        description: Project name
         config:
           meta:
             dimension:
@@ -349,7 +350,7 @@ models:
               hidden: true
           tags: []
       - name: project_name
-        description: ''
+        description: Project name
         config:
           meta:
             dimension:

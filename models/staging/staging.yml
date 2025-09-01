@@ -135,7 +135,7 @@ models:
         config:
           meta: {}
           tags: []
-      - name: name
+      - name: project_name
         description: Project name
         config:
           meta: {}
