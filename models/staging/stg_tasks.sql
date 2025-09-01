@@ -2,7 +2,7 @@ with source as (
     select 
     {{ dbt_utils.star(
         from=ref('base_tasks'),
-        except=['completed_time', 'status']
+        except=['_completed_time', 'status']
         ) }},
     -- preserve the col order to join
     -- also set to NULL for cases task re-add / project unarchived
@@ -20,7 +20,7 @@ snap as (
         from=ref('base_tasks_snapshot'),
         except=[
             'dbt_valid_to', 'dbt_valid_from', 'dbt_updated_at', 'dbt_scd_id', 
-            'completed_time', 'status'
+            '_completed_time', 'status'
             ]
         ) }},
     -- role play as inferred completed_time
