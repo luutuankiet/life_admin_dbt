@@ -13,7 +13,22 @@ exposures:
       - lightdash
       - project
     depends_on:
+      - ref('fct_tasks')
+      - ref('dim_projects')
       - ref('agg_daily_task_schedule_with_weekly_avg')
+  - name: ld_chart_e0e4dc36_d320_453f_9b8e_63cb904ea0ce
+    type: analysis
+    owner:
+      name: ken luu
+      email: ""
+    label: Data freshness
+    description: ""
+    url: >-
+      https://ld-prod.kenluu.org/projects/44a38ce8-d379-4565-a28e-c498ada59131/saved/e0e4dc36-d320-453f-9b8e-63cb904ea0ce/view
+    tags:
+      - lightdash
+      - chart
+    depends_on:
       - ref('fct_tasks')
       - ref('dim_projects')
   - name: ld_chart_ff81ba60_55d2_4627_a104_3c050368ce5d
