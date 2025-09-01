@@ -21,14 +21,14 @@ vars:
   gtd_shallow_work_tags: "{{ env_var('GTD_SHALLOW_WORK_TAGS', '[]') }}"
 
 seeds:
-  # Builds seeds into '<your_schema_name>_raw'
   ticktick_dbt:
     +schema: raw
 
 models:
   ticktick_dbt:
-    # Materialize staging models as views, and marts as tables
     +dbt-osmosis: "{parent}.yml"
+    +dbt-osmosis-options:
+      force-inherit-descriptions: true
     staging:
       +materialized: view
     marts:

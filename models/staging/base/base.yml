@@ -378,7 +378,7 @@ models:
           tags: []
       - name: dbt_updated_at
         data_type: timestamp
-        description: ''
+        description: dbt snapshot meta column for when the row was updated
         config:
           meta: {}
           tags: []

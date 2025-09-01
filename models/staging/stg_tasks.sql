@@ -8,6 +8,7 @@ with source as (
     -- also set to NULL for cases task re-add / project unarchived
     -- in which we enforce source to always have "new" status.
     cast(NULL as timestamp) as completed_time,
+    cast(NULL as timestamp) as updated_time,
     0 as status
 
     from {{ref('base_tasks')}}
@@ -24,6 +25,7 @@ snap as (
         ) }},
     -- role play as inferred completed_time
     dbt_valid_to as completed_time,
+    dbt_updated_at as updated_time,
     2 as status
 
     from (

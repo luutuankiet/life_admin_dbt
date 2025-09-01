@@ -95,7 +95,18 @@ models:
           meta: {}
           tags: []
       - name: completed_time
-        description: ''
+        description: |
+          Timestamp when the task was completed / wont do.
+          - Inferred from dbt snapshot.
+          - Ticktick API do not provide this field (at least not reliably cause it only retrieve new task).
+        config:
+          meta: {}
+          tags: []
+      - name: updated_time
+        description: |
+          inferred updated time; Only available for completed task
+          due to ticktick API limitation we had to workaround with
+          snapshots.
         config:
           meta: {}
           tags: []
@@ -105,7 +116,10 @@ models:
           meta: {}
           tags: []
       - name: gtd_work_type
-        description: ''
+        description: |
+          optional field indicating if a task was done under
+          - shallow work (during clarification) or 
+          - deep work (scheduled properly into next action)
         config:
           meta: {}
           tags: []
@@ -155,7 +169,10 @@ models:
           meta: {}
           tags: []
       - name: completed_time
-        description: ''
+        description: |
+          Timestamp when the project was closed/archived.
+          - Inferred from dbt snapshot.
+          - Ticktick API do not provide this field.
         config:
           meta: {}
           tags: []
