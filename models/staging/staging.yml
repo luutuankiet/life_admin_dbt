@@ -71,16 +71,6 @@ models:
         config:
           meta: {}
           tags: []
-      - name: start_date
-        description: Start date time in "yyyy-MM-dd'T'HH:mm:ssZ"
-        config:
-          meta: {}
-          tags: []
-      - name: due_date
-        description: Task due date time in "yyyy-MM-dd'T'HH:mm:ssZ"
-        config:
-          meta: {}
-          tags: []
       - name: reminders
         description: List of reminder triggers. Example [ "TRIGGER:P0DT9H0M0S", "TRIGGER:PT0S" ]
         config:
@@ -96,11 +86,26 @@ models:
         config:
           meta: {}
           tags: []
+      - name: start_date
+        description: |
+          - Start date time in "yyyy-MM-dd'T'HH:mm:ssZ". 
+          - Timezone conversion available with env var DBT_TIMEZONE
+        config:
+          meta: {}
+          tags: []
+      - name: due_date
+        description: |
+          - Task due date time in "yyyy-MM-dd'T'HH:mm:ssZ"
+          - Timezone conversion available with env var DBT_TIMEZONE
+        config:
+          meta: {}
+          tags: []
       - name: completed_time
         description: |
           Timestamp when the task was completed / wont do.
           - Inferred from dbt snapshot.
           - Ticktick API do not provide this field (at least not reliably cause it only retrieve new task).
+          - Timezone conversion available with env var DBT_TIMEZONE
         config:
           meta: {}
           tags: []
@@ -175,6 +180,7 @@ models:
           Timestamp when the project was closed/archived.
           - Inferred from dbt snapshot.
           - Ticktick API do not provide this field.
+          - Timezone conversion available with env var DBT_TIMEZONE
         config:
           meta: {}
           tags: []

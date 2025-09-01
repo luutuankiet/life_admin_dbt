@@ -28,9 +28,34 @@ renamed as (
       CAST(SPLIT(REGEXP_REPLACE(childids, r'^\[|\]$', ''), ',') as ARRAY<STRING>) as childids,
       CAST(parentid AS STRING) as parent_id
       from source
+),
+
+cast_tz as(
+    select
+        task_id,
+        project_id,
+        sort_order,
+        title,
+        timezone,
+        is_allday,
+        priority,
+        status,
+        tags,
+        column_id,
+        etag,
+        kind,
+        repeat_flag,
+        reminders,
+        childids,
+        parent_id,
+        {{ dbt_date.convert_timezone("start_date", target_tz=var('timezone')) }} as start_date,
+        {{ dbt_date.convert_timezone("due_date", target_tz=var('timezone')) }} as due_date,
+        {{ dbt_date.convert_timezone("_completed_time", target_tz=var('timezone')) }} as _completed_time
+      from renamed
+
 )
 
 SELECT
     *
 FROM
-    renamed
+    cast_tz
