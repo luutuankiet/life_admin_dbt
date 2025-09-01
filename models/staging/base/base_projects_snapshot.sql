@@ -7,7 +7,7 @@ WITH source AS (
 renamed as (
     select 
 cast(id as string) as project_id,
-cast(name as string) as name,
+cast(name as string) as project_name,
 cast(sortorder as INT64) as sort_order,
 cast(groupid as string) as group_id,
 cast(kind as string) as kind,

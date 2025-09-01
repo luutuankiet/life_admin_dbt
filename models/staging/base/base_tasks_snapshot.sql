@@ -24,7 +24,7 @@ renamed as (
       parse_timestamp("%F %T%z",startdate) as start_date,
       parse_timestamp("%F %T%z",duedate) as due_date,
       CAST(SPLIT(REGEXP_REPLACE(reminders, r"^\[|\]$|\'", ''), ',') as ARRAY<STRING>) as reminders,
-      parse_timestamp("%F %T%z",completedtime) as completed_time,
+      parse_timestamp("%F %T%z",completedtime) as _completed_time,
       CAST(SPLIT(REGEXP_REPLACE(childids, r'^\[|\]$', ''), ',') as ARRAY<STRING>) as childids,
       CAST(parentid AS STRING) as parent_id,
       CAST(dbt_scd_id AS STRING) as dbt_scd_id,

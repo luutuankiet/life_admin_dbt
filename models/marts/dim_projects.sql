@@ -14,13 +14,5 @@ stg_projects AS (
 )
 
 SELECT
-    {{ dbt_utils.generate_surrogate_key(['project_id']) }} AS project_key,
-    project_id,
-    name AS project_name,
-    color AS project_color,
-    kind AS project_kind,
-    view_mode,
-    sort_order,
-    closed AS is_closed,
-    completed_time
+*
 FROM stg_projects
