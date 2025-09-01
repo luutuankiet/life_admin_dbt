@@ -1,7 +1,7 @@
 name: tasks lookahead
 description: ""
 tableName: agg_daily_task_schedule_with_weekly_avg
-updatedAt: "2025-09-01T08:31:51.629Z"
+updatedAt: "2025-09-01T01:53:36.636Z"
 metricQuery:
   exploreName: agg_daily_task_schedule_with_weekly_avg
   dimensions:
@@ -256,4 +256,4 @@ tableConfig:
       agg_daily_task_schedule_with_weekly_avg_weekly_average_tasks_per_project_metric
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-09-01T01:33:30.812Z"
+downloadedAt: "2025-09-01T01:53:47.348Z"
