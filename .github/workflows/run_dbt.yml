@@ -1,4 +1,4 @@
-name: Run dbt
+name: Daily dbt job
 
 on:
 #   push:
@@ -33,12 +33,22 @@ jobs:
       - name: Run dbt
         run: uv run dbt deps && uv run dbt run
         env:
-            DBT_PROFILES_DIR: .
-            DBT_TARGET: "prod"
-            GCS_KEY: ${{ secrets.GCS_KEY }}
-            GCS_SECRET: ${{ secrets.GCS_SECRET }}
-            DBT_BQ_LOCATION: ${{ secrets.DBT_BQ_LOCATION }}
-            DBT_BQ_PROJECT: ${{ secrets.DBT_BQ_PROJECT }}
-            ENABLE_GTD_WORK_TYPE_CATEGORIZATION: ${{ vars.ENABLE_GTD_WORK_TYPE_CATEGORIZATION }}
-            GTD_DEEP_WORK_TAGS: ${{ vars.GTD_DEEP_WORK_TAGS }}
-            GTD_SHALLOW_WORK_TAGS: ${{ vars.GTD_SHALLOW_WORK_TAGS }}
+          # dbt Environment Variables
+          DBT_PROFILES_DIR: .
+          DBT_TARGET: "prod"
+          DBT_BQ_PROJECT: ${{ secrets.DBT_BQ_PROJECT }}
+          DBT_BQ_LOCATION: ${{ secrets.DBT_BQ_LOCATION }}
+          
+          # Google Cloud Storage Environment Variables
+          GCS_KEY: ${{ secrets.GCS_KEY }}
+          GCS_SECRET: ${{ secrets.GCS_SECRET }}
+
+          # Lightdash Environment Variables
+          LIGHTDASH_API_KEY: ${{ secrets.LIGHTDASH_API_KEY }}
+          LIGHTDASH_PROJECT: ${{ secrets.LIGHTDASH_PROJECT }}
+          LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}
+
+          # dbt project yaml env var
+          ENABLE_GTD_WORK_TYPE_CATEGORIZATION: ${{ vars.ENABLE_GTD_WORK_TYPE_CATEGORIZATION }}
+          GTD_DEEP_WORK_TAGS: ${{ vars.GTD_DEEP_WORK_TAGS }}
+          GTD_SHALLOW_WORK_TAGS: ${{ vars.GTD_SHALLOW_WORK_TAGS }}
