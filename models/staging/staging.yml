@@ -99,13 +99,21 @@ models:
         config:
           meta: {}
           tags: []
+      - name: updated_time
+        description: inferred updated time for task completed.
+        config:
+          meta: {}
+          tags: []
       - name: status
         description: ''
         config:
           meta: {}
           tags: []
       - name: gtd_work_type
-        description: ''
+        description: |
+          optional field indicating if a task was done under
+          - shallow work (during clarification) or 
+          - deep work (scheduled properly into next action)
         config:
           meta: {}
           tags: []

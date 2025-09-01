@@ -113,7 +113,7 @@ models:
           meta: {}
           tags: []
       - name: completed_time
-        description: Timestamp when the task was completed (in UTC).
+        description: inferred updated time for task completed.
         config:
           meta:
             dimension:
@@ -128,6 +128,11 @@ models:
                 - DAY_OF_WEEK_INDEX
                 - DAY_OF_WEEK_NAME
           tags: []
+      - name: updated_time
+        description: inferred updated time for task completed.
+        config:
+          meta: {}
+          tags: []
       - name: status
         description: The status of the task (2=completed, 0=incomplete).
         config:
@@ -136,9 +141,10 @@ models:
               type: number
           tags: []
       - name: gtd_work_type
-        description: >-
-          Categorizes tasks as 'Shallow Work' (🧃) or 'Deep Work' (🥩) based on GTD principles and user-defined
-          tags.
+        description: |
+          optional field indicating if a task was done under
+          - shallow work (during clarification) or 
+          - deep work (scheduled properly into next action)
         config:
           meta:
             dimension:
@@ -273,7 +279,7 @@ models:
                 - DAY_OF_WEEK_NAME
           tags: []
       - name: project_id
-        description: The unique identifier for a project.
+        description: The identifier for the project this task belongs to.
         config:
           meta:
             dimension:
@@ -281,7 +287,7 @@ models:
               hidden: true
           tags: []
       - name: project_name
-        description: The name of the project the tasks belong to.
+        description: The name of the project.
         config:
           meta:
             dimension:
@@ -310,7 +316,7 @@ models:
       Daily task schedule with calculated weekly averages, designed for a mixed chart visualization.
     columns:
       - name: schedule_date
-        description: The date for which tasks are scheduled.
+        description: The future date for which tasks are scheduled.
         config:
           meta:
             dimension:
@@ -324,7 +330,7 @@ models:
                 - DAY_OF_WEEK_NAME
           tags: []
       - name: project_id
-        description: The unique identifier for a project.
+        description: The identifier for the project this task belongs to.
         config:
           meta:
             dimension:
@@ -332,7 +338,7 @@ models:
               hidden: true
           tags: []
       - name: project_name
-        description: The name of the project the tasks belong to.
+        description: The name of the project.
         config:
           meta:
             dimension:
