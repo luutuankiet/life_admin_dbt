@@ -1,9 +1,21 @@
 name: gtd dash v1.0
 description: ""
-updatedAt: "2025-09-01T06:50:51.884Z"
+updatedAt: "2025-09-01T21:27:18.996Z"
 tiles:
   - x: 0
     "y": 0
+    h: 3
+    w: 12
+    tabUuid: null
+    type: saved_chart
+    properties:
+      title: ""
+      hideTitle: false
+      chartSlug: data-freshness
+      chartName: Data freshness
+    tileSlug: data-freshness
+  - x: 0
+    "y": 3
     h: 9
     w: 36
     tabUuid: null
@@ -15,7 +27,7 @@ tiles:
       chartName: tasks lookahead
     tileSlug: tasks-lookahead
   - x: 0
-    "y": 9
+    "y": 12
     h: 8
     w: 36
     tabUuid: null
@@ -34,4 +46,4 @@ tabs: []
 slug: gtd-dash-v1-0
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-09-01T06:59:07.467Z"
+downloadedAt: "2025-09-01T14:28:04.619Z"

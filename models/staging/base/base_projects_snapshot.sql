@@ -16,9 +16,9 @@ cast(viewmode as string) as view_mode,
 cast(permission as string) as permission,
 cast(closed as boolean) as closed,
 cast(dbt_scd_id as string) as dbt_scd_id,
-cast(dbt_updated_at as timestamp) as dbt_updated_at,
-cast(dbt_valid_from as timestamp) as dbt_valid_from,
-cast(dbt_valid_to as timestamp) as dbt_valid_to,
+{{ dbt_date.convert_timezone("dbt_updated_at", target_tz=var('timezone')) }} as dbt_updated_at,
+{{ dbt_date.convert_timezone("dbt_valid_from", target_tz=var('timezone')) }} as dbt_valid_from,
+{{ dbt_date.convert_timezone("dbt_valid_to", target_tz=var('timezone')) }} as dbt_valid_to
 
     from source
 )

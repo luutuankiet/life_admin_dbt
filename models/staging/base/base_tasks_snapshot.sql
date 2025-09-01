@@ -32,9 +32,38 @@ renamed as (
       CAST(dbt_valid_from AS TIMESTAMP) as dbt_valid_from,
       CAST(dbt_valid_to AS TIMESTAMP) as dbt_valid_to
       from source
+),
+
+cast_tz as (
+    select
+        task_id,
+        project_id,
+        sort_order,
+        title,
+        timezone,
+        is_allday,
+        priority,
+        status,
+        tags,
+        column_id,
+        etag,
+        kind,
+        repeat_flag,
+        reminders,
+        childids,
+        parent_id,
+        {{ dbt_date.convert_timezone("start_date", target_tz=var('timezone')) }} as start_date,
+        {{ dbt_date.convert_timezone("due_date", target_tz=var('timezone')) }} as due_date,
+        {{ dbt_date.convert_timezone("_completed_time", target_tz=var('timezone')) }} as _completed_time,
+        dbt_scd_id,
+        {{ dbt_date.convert_timezone("dbt_updated_at", target_tz=var('timezone')) }} as dbt_updated_at,
+        {{ dbt_date.convert_timezone("dbt_valid_from", target_tz=var('timezone')) }} as dbt_valid_from,
+        {{ dbt_date.convert_timezone("dbt_valid_to", target_tz=var('timezone')) }} as dbt_valid_to
+
+      from renamed
 )
 
 SELECT
     *
 FROM
-    renamed
+    cast_tz

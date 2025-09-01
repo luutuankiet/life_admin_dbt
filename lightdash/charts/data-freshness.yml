@@ -1,0 +1,43 @@
+name: Data freshness
+description: ""
+tableName: fct_tasks
+updatedAt: "2025-09-01T21:27:26.985Z"
+metricQuery:
+  exploreName: fct_tasks
+  dimensions: []
+  metrics:
+    - fct_tasks_completed_time_raw_fresh_as_of
+  filters: {}
+  sorts: []
+  limit: 500
+  metricOverrides: {}
+  tableCalculations: []
+  additionalMetrics:
+    - name: completed_time_raw_fresh_as_of
+      label: Fresh as of
+      description: "Max of Completed time raw on the table Fct tasks "
+      uuid: 00ca06df-c96b-489f-b0b2-ec514c00d20f
+      sql: ${TABLE}.completed_time
+      table: fct_tasks
+      type: max
+      baseDimensionName: completed_time_raw
+      formatOptions:
+        type: timestamp
+        timeInterval: RAW
+  customDimensions: []
+chartConfig:
+  type: big_number
+  config:
+    label: Data last refreshed at
+    flipColors: false
+    selectedField: fct_tasks_completed_time_raw_fresh_as_of
+    showComparison: false
+    comparisonFormat: raw
+    showBigNumberLabel: false
+slug: data-freshness
+tableConfig:
+  columnOrder:
+    - fct_tasks_completed_time_raw_fresh_as_of
+spaceSlug: shared
+version: 1
+downloadedAt: "2025-09-01T14:28:04.379Z"

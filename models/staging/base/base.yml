@@ -85,29 +85,9 @@ models:
         config:
           meta: {}
           tags: []
-      - name: start_date
-        data_type: timestamp
-        description: Start date time in "yyyy-MM-dd'T'HH:mm:ssZ"
-        config:
-          meta: {}
-          tags: []
-      - name: due_date
-        data_type: timestamp
-        description: Task due date time in "yyyy-MM-dd'T'HH:mm:ssZ"
-        config:
-          meta: {}
-          tags: []
       - name: reminders
         data_type: array<string>
         description: List of reminder triggers. Example [ "TRIGGER:P0DT9H0M0S", "TRIGGER:PT0S" ]
-        config:
-          meta: {}
-          tags: []
-      - name: _completed_time
-        data_type: timestamp
-        description: |
-          - Task completed time in "yyyy-MM-dd'T'HH:mm:ssZ"
-          - Is not useful so kept internally for reference only.
         config:
           meta: {}
           tags: []
@@ -120,6 +100,31 @@ models:
       - name: parent_id
         data_type: string
         description: Parent task id
+        config:
+          meta: {}
+          tags: []
+      - name: start_date
+        data_type: timestamp
+        description: |
+          - Start date time in "yyyy-MM-dd'T'HH:mm:ssZ". 
+          - Timezone conversion available with env var DBT_TIMEZONE
+        config:
+          meta: {}
+          tags: []
+      - name: due_date
+        data_type: timestamp
+        description: |
+          - Task due date time in "yyyy-MM-dd'T'HH:mm:ssZ"
+          - Timezone conversion available with env var DBT_TIMEZONE
+        config:
+          meta: {}
+          tags: []
+      - name: _completed_time
+        data_type: timestamp
+        description: |
+          - Task completed time in "yyyy-MM-dd'T'HH:mm:ssZ"
+          - Is not useful so kept internally for reference only.
+          - Timezone conversion available with env var DBT_TIMEZONE
         config:
           meta: {}
           tags: []
@@ -207,29 +212,9 @@ models:
         config:
           meta: {}
           tags: []
-      - name: start_date
-        data_type: timestamp
-        description: Start date time in "yyyy-MM-dd'T'HH:mm:ssZ"
-        config:
-          meta: {}
-          tags: []
-      - name: due_date
-        data_type: timestamp
-        description: Task due date time in "yyyy-MM-dd'T'HH:mm:ssZ"
-        config:
-          meta: {}
-          tags: []
       - name: reminders
         data_type: array<string>
         description: List of reminder triggers. Example [ "TRIGGER:P0DT9H0M0S", "TRIGGER:PT0S" ]
-        config:
-          meta: {}
-          tags: []
-      - name: _completed_time
-        data_type: timestamp
-        description: |
-          - Task completed time in "yyyy-MM-dd'T'HH:mm:ssZ"
-          - Is not useful so kept internally for reference only.
         config:
           meta: {}
           tags: []
@@ -245,22 +230,51 @@ models:
         config:
           meta: {}
           tags: []
+      - name: start_date
+        data_type: timestamp
+        description: |
+          - Start date time in "yyyy-MM-dd'T'HH:mm:ssZ". 
+          - Timezone conversion available with env var DBT_TIMEZONE
+        config:
+          meta: {}
+          tags: []
+      - name: due_date
+        data_type: timestamp
+        description: |
+          - Task due date time in "yyyy-MM-dd'T'HH:mm:ssZ"
+          - Timezone conversion available with env var DBT_TIMEZONE
+        config:
+          meta: {}
+          tags: []
+      - name: _completed_time
+        data_type: timestamp
+        description: |
+          - Task completed time in "yyyy-MM-dd'T'HH:mm:ssZ"
+          - Is not useful so kept internally for reference only.
+          - Timezone conversion available with env var DBT_TIMEZONE
+        config:
+          meta: {}
+          tags: []
       - name: dbt_scd_id
         data_type: string
-        description: A unique key generated for each snapshot row.
+        description: >-
+          A unique key generated for each snapshot row. Timezone conversion available with env var DBT_TIMEZONE
         config:
           meta: {}
           tags: []
       - name: dbt_updated_at
         data_type: timestamp
-        description: The updated_at timestamp of the source record when this snapshot row was 
-          inserted.
+        description: >-
+          The updated_at timestamp of the source record when this snapshot row was inserted. Timezone
+          conversion available with env var DBT_TIMEZONE
         config:
           meta: {}
           tags: []
       - name: dbt_valid_from
         data_type: timestamp
-        description: The timestamp when this snapshot row was first inserted and became valid.
+        description: >-
+          The timestamp when this snapshot row was first inserted and became valid. Timezone conversion
+          available with env var DBT_TIMEZONE
         config:
           meta: {}
           tags: []
@@ -268,7 +282,7 @@ models:
         data_type: timestamp
         description: >-
           The timestamp when this row became invalidated. For current records, this is NULL by default
-          or the value specified in dbt_valid_to_current.
+          or the value specified in dbt_valid_to_current. Timezone conversion available with env var DBT_TIMEZONE
         config:
           meta: {}
           tags: []
@@ -391,20 +405,24 @@ models:
           tags: []
       - name: dbt_scd_id
         data_type: string
-        description: A unique key generated for each snapshot row.
+        description: >-
+          A unique key generated for each snapshot row. Timezone conversion available with env var DBT_TIMEZONE
         config:
           meta: {}
           tags: []
       - name: dbt_updated_at
         data_type: timestamp
-        description: The updated_at timestamp of the source record when this snapshot row was 
-          inserted.
+        description: >-
+          The updated_at timestamp of the source record when this snapshot row was inserted. Timezone
+          conversion available with env var DBT_TIMEZONE
         config:
           meta: {}
           tags: []
       - name: dbt_valid_from
         data_type: timestamp
-        description: The timestamp when this snapshot row was first inserted and became valid.
+        description: >-
+          The timestamp when this snapshot row was first inserted and became valid. Timezone conversion
+          available with env var DBT_TIMEZONE
         config:
           meta: {}
           tags: []
@@ -412,7 +430,7 @@ models:
         data_type: timestamp
         description: >-
           The timestamp when this row became invalidated. For current records, this is NULL by default
-          or the value specified in dbt_valid_to_current.
+          or the value specified in dbt_valid_to_current. Timezone conversion available with env var DBT_TIMEZONE
         config:
           meta: {}
           tags: []

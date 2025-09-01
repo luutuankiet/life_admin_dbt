@@ -35,6 +35,7 @@ jobs:
       ENABLE_GTD_WORK_TYPE_CATEGORIZATION: ${{ vars.ENABLE_GTD_WORK_TYPE_CATEGORIZATION }}
       GTD_DEEP_WORK_TAGS: ${{ vars.GTD_DEEP_WORK_TAGS }}
       GTD_SHALLOW_WORK_TAGS: ${{ vars.GTD_SHALLOW_WORK_TAGS }}
+      DBT_TIMEZONE: ${{ vars.DBT_TIMEZONE }}
 
     steps:
       - name: Checkout repository
