@@ -1,7 +1,7 @@
 name: Data freshness
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-09-01T14:37:06.340Z"
+updatedAt: "2025-09-02T07:10:22.372Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions: []
@@ -16,7 +16,7 @@ metricQuery:
     - name: completed_time_raw_fresh_as_of
       label: Fresh as of
       description: "Max of Completed time raw on the table Fct tasks "
-      uuid: 8a83971d-d198-4873-92bc-2d1598cedcb3
+      uuid: 6dc240d7-a428-4e16-afbe-ee398918994d
       sql: ${TABLE}.completed_time
       table: fct_tasks
       type: max
@@ -40,4 +40,4 @@ tableConfig:
     - fct_tasks_completed_time_raw_fresh_as_of
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-09-01T14:37:32.081Z"
+downloadedAt: "2025-09-02T07:12:32.068Z"
