@@ -7,9 +7,7 @@ as a line chart.
 The grain of this table is one row per project per day.
 #}
 
-{{config(
-    materialized='table'
-)}}
+
 
 WITH daily_schedule AS (
     SELECT
