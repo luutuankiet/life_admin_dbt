@@ -48,9 +48,9 @@ cast_tz as(
         reminders,
         childids,
         parent_id,
-        {{ dbt_date.convert_timezone("start_date", target_tz=var('timezone')) }} as start_date,
-        {{ dbt_date.convert_timezone("due_date", target_tz=var('timezone')) }} as due_date,
-        {{ dbt_date.convert_timezone("_completed_time", target_tz=var('timezone')) }} as _completed_time
+        DATETIME(start_date, "{{var('timezone')}}") as start_date,
+        DATETIME(due_date, "{{var('timezone')}}") as due_date,
+        DATETIME(_completed_time, "{{var('timezone')}}") as _completed_time
       from renamed
 
 )

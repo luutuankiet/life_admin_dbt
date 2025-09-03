@@ -7,8 +7,8 @@ with source as (
     -- preserve the col order to join
     -- also set to NULL for cases task re-add / project unarchived
     -- in which we enforce source to always have "new" status.
-    cast(NULL as timestamp) as completed_time,
-    cast(NULL as timestamp) as updated_time,
+    cast(NULL as DATETIME) as completed_time,
+    cast(NULL as DATETIME) as updated_time,
     0 as status
 
     from {{ref('base_tasks')}}
@@ -44,12 +44,33 @@ snap as (
     where dbt_valid_to is not null
 ),
 
+inject_load_time as (
+    select 
+    {{ dbt_utils.star(
+        from=ref('base_tasks'),
+        except=['_completed_time', 'status']
+        ) }},
+    cast(NULL as DATETIME) as completed_time,
+    -- we injected a row id=1 in tasks_raw that has column _completed_time as the pipeline loaded time
+    cast(_completed_time as DATETIME) as updated_time,
+    0 as status
+
+    from {{ref('base_tasks')}}
+    where task_id = '0'
+),
+
+{# inject_next_load_time as (
+    
+) #}
+
 infer_completed_time as (
     -- this cte will union the two above to
     -- infer the completion time from snapshot model.
     select * from source
     UNION ALL
     select * from snap
+    UNION ALL
+    select * from inject_load_time
 ),
 
 add_gtd_work_type as (

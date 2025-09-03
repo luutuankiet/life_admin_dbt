@@ -1,26 +1,26 @@
 name: Data freshness
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-09-02T07:10:22.372Z"
+updatedAt: "2025-09-03T14:33:37.496Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions: []
   metrics:
-    - fct_tasks_completed_time_raw_fresh_as_of
+    - fct_tasks_updated_time_raw_max_of_updated_time_raw
   filters: {}
   sorts: []
   limit: 500
   metricOverrides: {}
   tableCalculations: []
   additionalMetrics:
-    - name: completed_time_raw_fresh_as_of
-      label: Fresh as of
-      description: "Max of Completed time raw on the table Fct tasks "
-      uuid: 6dc240d7-a428-4e16-afbe-ee398918994d
-      sql: ${TABLE}.completed_time
+    - name: updated_time_raw_max_of_updated_time_raw
+      label: Max of Updated time raw
+      description: "Max of Updated time raw on the table Fct tasks "
+      uuid: 575e458a-6c84-4131-b89c-eb1d7261611e
+      sql: ${TABLE}.updated_time
       table: fct_tasks
       type: max
-      baseDimensionName: completed_time_raw
+      baseDimensionName: updated_time_raw
       formatOptions:
         type: timestamp
         timeInterval: RAW
@@ -30,14 +30,14 @@ chartConfig:
   config:
     label: Data last refreshed at
     flipColors: false
-    selectedField: fct_tasks_completed_time_raw_fresh_as_of
+    selectedField: fct_tasks_updated_time_raw_max_of_updated_time_raw
     showComparison: false
     comparisonFormat: raw
     showBigNumberLabel: false
 slug: data-freshness
 tableConfig:
   columnOrder:
-    - fct_tasks_completed_time_raw_fresh_as_of
+    - fct_tasks_updated_time_raw_max_of_updated_time_raw
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-09-02T07:12:32.068Z"
+downloadedAt: "2025-09-03T14:35:42.286Z"
