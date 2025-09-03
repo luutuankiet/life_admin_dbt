@@ -107,7 +107,6 @@ models:
         config:
           meta:
             dimension:
-              type: timestamp
               time_intervals:
                 - RAW
                 - DAY
@@ -127,7 +126,6 @@ models:
         config:
           meta:
             dimension:
-              type: timestamp
               time_intervals:
                 - RAW
                 - DAY
@@ -253,7 +251,6 @@ models:
         config:
           meta:
             dimension:
-              type: timestamp
               time_intervals:
                 - RAW
                 - DAY

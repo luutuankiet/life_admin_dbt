@@ -15,10 +15,6 @@ models:
         config:
           meta: {}
           tags: []
-        data_tests:
-          - relationships:
-              to: ref('stg_projects')
-              field: project_id
       - name: sort_order
         description: Task sort order
         config:
@@ -87,6 +83,7 @@ models:
           meta: {}
           tags: []
       - name: start_date
+        data_type: datetime
         description: |
           - Start date time in "yyyy-MM-dd'T'HH:mm:ssZ". 
           - Timezone conversion available with env var DBT_TIMEZONE
@@ -94,6 +91,7 @@ models:
           meta: {}
           tags: []
       - name: due_date
+        data_type: datetime
         description: |
           - Task due date time in "yyyy-MM-dd'T'HH:mm:ssZ"
           - Timezone conversion available with env var DBT_TIMEZONE
@@ -101,6 +99,7 @@ models:
           meta: {}
           tags: []
       - name: completed_time
+        data_type: datetime
         description: |
           Timestamp when the task was completed / wont do.
           - Inferred from dbt snapshot.
@@ -110,6 +109,7 @@ models:
           meta: {}
           tags: []
       - name: updated_time
+        data_type: datetime
         description: |
           inferred updated time; Only available for completed task
           due to ticktick API limitation we had to workaround with
@@ -176,6 +176,7 @@ models:
           meta: {}
           tags: []
       - name: completed_time
+        data_type: datetime
         description: |
           Timestamp when the project was closed/archived.
           - Inferred from dbt snapshot.

@@ -12,6 +12,7 @@ with source as (
     0 as status
 
     from {{ref('base_tasks')}}
+    where task_id != '0' -- we'd inject this in the cte below
 ),
 
 snap as (
