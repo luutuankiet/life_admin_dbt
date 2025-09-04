@@ -58,21 +58,29 @@ inject_load_time as (
     -- in lightdash yaml 🤷
     {% if var('load_interval') %}
     CASE
-        when DATETIME_DIFF(CURRENT_DATETIME(
-            "{{var('timezone','UTC')}}"
-            ) 
-            ,cast(_completed_time as DATETIME)
-            ,MINUTE
-        ) < cast("{{ var('load_interval')}}" as int)
+        when DATETIME_DIFF(
+            -- get expected next load time
+            DATETIME_ADD(
+                _completed_time,
+                INTERVAL {{ var('load_interval') | as_number }} MINUTE
+            ),
+            -- substract it by current time
+            CURRENT_DATETIME("{{var('timezone','UTC')}}"),
+            MINUTE
+        ) > 0
         then CONCAT(
-            "🏗️ in "
-            ,DATETIME_DIFF(CURRENT_DATETIME(
-                        "{{var('timezone','UTC')}}"
-                        ) 
-                        ,cast(_completed_time as DATETIME)
-                        ,MINUTE
-                    )
-            ," minutes"
+            "🏗️ in ",
+            DATETIME_DIFF(
+                -- get expected next load time
+                DATETIME_ADD(
+                    _completed_time,
+                    INTERVAL {{ var('load_interval') | as_number }} MINUTE
+                ),
+                -- substract it by current time
+                CURRENT_DATETIME("{{var('timezone','UTC')}}"),
+                MINUTE
+            ),
+            " minutes"
         )
 
         else "🟢 now"

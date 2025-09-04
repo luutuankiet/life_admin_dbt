@@ -1,11 +1,11 @@
 name: Data freshness
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-09-04T03:36:09.719Z"
+updatedAt: "2025-09-04T04:29:18.662Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
-    - fct_tasks_updated_time_hour
+    - fct_tasks_updated_time_minute
   metrics: []
   filters:
     dimensions:
@@ -19,7 +19,7 @@ metricQuery:
           operator: equals
           required: false
   sorts:
-    - fieldId: fct_tasks_updated_time_hour
+    - fieldId: fct_tasks_updated_time_minute
       descending: true
   limit: 500
   metricOverrides: {}
@@ -28,7 +28,7 @@ metricQuery:
     - name: updated_time_minute_max_of_updated_time_minute
       label: Max of Updated time minute
       description: "Max of Updated time minute on the table Fct tasks "
-      uuid: 9b62cd7c-1311-4526-83ed-400ef94efe31
+      uuid: eb12a2dc-80f0-4909-bfb8-3867608a7047
       sql: DATE_TRUNC(${TABLE}.updated_time, MINUTE)
       table: fct_tasks
       type: max
@@ -42,14 +42,14 @@ chartConfig:
   config:
     label: Data last refreshed at
     flipColors: false
-    selectedField: fct_tasks_updated_time_hour
+    selectedField: fct_tasks_updated_time_minute
     showComparison: false
     comparisonFormat: raw
     showBigNumberLabel: false
 slug: data-freshness
 tableConfig:
   columnOrder:
-    - fct_tasks_updated_time_hour
+    - fct_tasks_updated_time_minute
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-09-04T03:37:43.175Z"
+downloadedAt: "2025-09-04T04:30:50.986Z"
