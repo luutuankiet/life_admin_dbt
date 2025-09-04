@@ -104,7 +104,7 @@ models:
           meta: {}
           tags: []
       - name: start_date
-        data_type: timestamp
+        data_type: datetime
         description: |
           - Start date time in "yyyy-MM-dd'T'HH:mm:ssZ". 
           - Timezone conversion available with env var DBT_TIMEZONE
@@ -112,7 +112,7 @@ models:
           meta: {}
           tags: []
       - name: due_date
-        data_type: timestamp
+        data_type: datetime
         description: |
           - Task due date time in "yyyy-MM-dd'T'HH:mm:ssZ"
           - Timezone conversion available with env var DBT_TIMEZONE
@@ -120,7 +120,7 @@ models:
           meta: {}
           tags: []
       - name: _completed_time
-        data_type: timestamp
+        data_type: datetime
         description: |
           - Task completed time in "yyyy-MM-dd'T'HH:mm:ssZ"
           - Is not useful so kept internally for reference only.
@@ -231,7 +231,7 @@ models:
           meta: {}
           tags: []
       - name: start_date
-        data_type: timestamp
+        data_type: datetime
         description: |
           - Start date time in "yyyy-MM-dd'T'HH:mm:ssZ". 
           - Timezone conversion available with env var DBT_TIMEZONE
@@ -239,7 +239,7 @@ models:
           meta: {}
           tags: []
       - name: due_date
-        data_type: timestamp
+        data_type: datetime
         description: |
           - Task due date time in "yyyy-MM-dd'T'HH:mm:ssZ"
           - Timezone conversion available with env var DBT_TIMEZONE
@@ -247,7 +247,7 @@ models:
           meta: {}
           tags: []
       - name: _completed_time
-        data_type: timestamp
+        data_type: datetime
         description: |
           - Task completed time in "yyyy-MM-dd'T'HH:mm:ssZ"
           - Is not useful so kept internally for reference only.
@@ -263,7 +263,7 @@ models:
           meta: {}
           tags: []
       - name: dbt_updated_at
-        data_type: timestamp
+        data_type: datetime
         description: >-
           The updated_at timestamp of the source record when this snapshot row was inserted. Timezone
           conversion available with env var DBT_TIMEZONE
@@ -271,7 +271,7 @@ models:
           meta: {}
           tags: []
       - name: dbt_valid_from
-        data_type: timestamp
+        data_type: datetime
         description: >-
           The timestamp when this snapshot row was first inserted and became valid. Timezone conversion
           available with env var DBT_TIMEZONE
@@ -279,7 +279,7 @@ models:
           meta: {}
           tags: []
       - name: dbt_valid_to
-        data_type: timestamp
+        data_type: datetime
         description: >-
           The timestamp when this row became invalidated. For current records, this is NULL by default
           or the value specified in dbt_valid_to_current. Timezone conversion available with env var DBT_TIMEZONE
@@ -411,7 +411,7 @@ models:
           meta: {}
           tags: []
       - name: dbt_updated_at
-        data_type: timestamp
+        data_type: datetime
         description: >-
           The updated_at timestamp of the source record when this snapshot row was inserted. Timezone
           conversion available with env var DBT_TIMEZONE
@@ -419,7 +419,7 @@ models:
           meta: {}
           tags: []
       - name: dbt_valid_from
-        data_type: timestamp
+        data_type: datetime
         description: >-
           The timestamp when this snapshot row was first inserted and became valid. Timezone conversion
           available with env var DBT_TIMEZONE
@@ -427,7 +427,7 @@ models:
           meta: {}
           tags: []
       - name: dbt_valid_to
-        data_type: timestamp
+        data_type: datetime
         description: >-
           The timestamp when this row became invalidated. For current records, this is NULL by default
           or the value specified in dbt_valid_to_current. Timezone conversion available with env var DBT_TIMEZONE

@@ -1,0 +1,44 @@
+name: next load time
+description: ""
+tableName: fct_tasks
+updatedAt: "2025-09-04T01:34:07.940Z"
+metricQuery:
+  exploreName: fct_tasks
+  dimensions:
+    - fct_tasks_title
+  metrics: []
+  filters:
+    dimensions:
+      id: e0b9321e-2204-4659-b4ba-3c8f16524d9b
+      and:
+        - id: c1a003cf-eee2-4ca7-bcc0-35559d37d2c8
+          target:
+            fieldId: fct_tasks_task_id
+          values:
+            - "0"
+          operator: equals
+          required: false
+  sorts:
+    - fieldId: fct_tasks_title
+      descending: false
+  limit: 500
+  metricOverrides: {}
+  tableCalculations: []
+  additionalMetrics: []
+  customDimensions: []
+chartConfig:
+  type: big_number
+  config:
+    label: ""
+    flipColors: false
+    selectedField: fct_tasks_title
+    showComparison: false
+    comparisonFormat: raw
+    showBigNumberLabel: false
+slug: next-load-time
+tableConfig:
+  columnOrder:
+    - fct_tasks_title
+spaceSlug: shared
+version: 1
+downloadedAt: "2025-09-04T01:36:46.948Z"

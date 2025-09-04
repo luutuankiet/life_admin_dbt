@@ -5,7 +5,7 @@ with source as (
         except=['closed']
         ) }},
     -- preserve the col order to join
-    cast(NULL as timestamp) as completed_time,
+    cast(NULL as DATETIME) as completed_time,
     false as closed
 
     from {{ref('base_projects')}}

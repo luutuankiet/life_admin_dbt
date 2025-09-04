@@ -1,43 +1,55 @@
 name: Data freshness
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-09-02T07:10:22.372Z"
+updatedAt: "2025-09-04T00:58:00.272Z"
 metricQuery:
   exploreName: fct_tasks
-  dimensions: []
-  metrics:
-    - fct_tasks_completed_time_raw_fresh_as_of
-  filters: {}
-  sorts: []
+  dimensions:
+    - fct_tasks_updated_time_hour
+  metrics: []
+  filters:
+    dimensions:
+      id: ab945b78-65fc-4d4d-986f-c9c4038f8fe6
+      and:
+        - id: 9c1fd4fa-062b-45f1-af1c-1a81b504d504
+          target:
+            fieldId: fct_tasks_task_id
+          values:
+            - "0"
+          operator: equals
+          required: false
+  sorts:
+    - fieldId: fct_tasks_updated_time_hour
+      descending: true
   limit: 500
   metricOverrides: {}
   tableCalculations: []
   additionalMetrics:
-    - name: completed_time_raw_fresh_as_of
-      label: Fresh as of
-      description: "Max of Completed time raw on the table Fct tasks "
-      uuid: 6dc240d7-a428-4e16-afbe-ee398918994d
-      sql: ${TABLE}.completed_time
+    - name: updated_time_minute_max_of_updated_time_minute
+      label: Max of Updated time minute
+      description: "Max of Updated time minute on the table Fct tasks "
+      uuid: 9ad64523-6c25-4925-b775-072e699a5cf9
+      sql: DATE_TRUNC(${TABLE}.updated_time, MINUTE)
       table: fct_tasks
       type: max
-      baseDimensionName: completed_time_raw
+      baseDimensionName: updated_time_minute
       formatOptions:
         type: timestamp
-        timeInterval: RAW
+        timeInterval: MINUTE
   customDimensions: []
 chartConfig:
   type: big_number
   config:
     label: Data last refreshed at
     flipColors: false
-    selectedField: fct_tasks_completed_time_raw_fresh_as_of
+    selectedField: fct_tasks_updated_time_hour
     showComparison: false
     comparisonFormat: raw
     showBigNumberLabel: false
 slug: data-freshness
 tableConfig:
   columnOrder:
-    - fct_tasks_completed_time_raw_fresh_as_of
+    - fct_tasks_updated_time_hour
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-09-02T07:12:32.068Z"
+downloadedAt: "2025-09-04T01:36:46.947Z"
