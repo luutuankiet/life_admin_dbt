@@ -23,6 +23,7 @@ ticktick_dbt:
      type: duckdb
      path: './duckdb.dbt'
      extensions: ['httpfs']
+     threads: 16
      secrets:
        - type: s3
          region: asia-southeast1
@@ -33,6 +34,7 @@ ticktick_dbt:
      type: duckdb
      path: './duckdb.dbt'
      extensions: ['httpfs']
+     threads: 16
      secrets:
        - type: s3
          region: asia-southeast1
