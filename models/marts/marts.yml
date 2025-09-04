@@ -98,7 +98,20 @@ models:
           - Start date time in "yyyy-MM-dd'T'HH:mm:ssZ". 
           - Timezone conversion available with env var DBT_TIMEZONE
         config:
-          meta: {}
+          meta:
+            dimension:
+              type: date
+              time_intervals:
+                - RAW
+                - DAY
+                - HOUR
+                - MINUTE
+                - WEEK
+                - MONTH
+                - QUARTER
+                - YEAR
+                - DAY_OF_WEEK_INDEX
+                - DAY_OF_WEEK_NAME
           tags: []
       - name: due_date
         description: |
@@ -107,9 +120,12 @@ models:
         config:
           meta:
             dimension:
+              type: date
               time_intervals:
                 - RAW
                 - DAY
+                - HOUR
+                - MINUTE
                 - WEEK
                 - MONTH
                 - QUARTER
@@ -126,9 +142,12 @@ models:
         config:
           meta:
             dimension:
+              type: date
               time_intervals:
                 - RAW
                 - DAY
+                - HOUR
+                - MINUTE
                 - WEEK
                 - MONTH
                 - QUARTER
@@ -142,7 +161,20 @@ models:
           due to ticktick API limitation we had to workaround with
           snapshots.
         config:
-          meta: {}
+          meta:
+            dimension:
+              type: date
+              time_intervals:
+                - RAW
+                - DAY
+                - HOUR
+                - MINUTE
+                - WEEK
+                - MONTH
+                - QUARTER
+                - YEAR
+                - DAY_OF_WEEK_INDEX
+                - DAY_OF_WEEK_NAME
           tags: []
       - name: status
         description: 'Task completion status. Value : Normal: 0, Completed: 2'
@@ -251,9 +283,12 @@ models:
         config:
           meta:
             dimension:
+              type: date
               time_intervals:
                 - RAW
                 - DAY
+                - HOUR
+                - MINUTE
                 - WEEK
                 - MONTH
                 - QUARTER

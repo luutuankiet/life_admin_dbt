@@ -20,6 +20,8 @@ vars:
   gtd_deep_work_tags: "{{ env_var('GTD_DEEP_WORK_TAGS', '[]') }}"
   gtd_shallow_work_tags: "{{ env_var('GTD_SHALLOW_WORK_TAGS', '[]') }}"
   timezone: "{{ env_var('DBT_TIMEZONE', 'UTC') }}"
+  # the pipeline load interval in minutes 
+  load_interval: "{{ env_var('DBT_LOAD_INTERVAL') }}"
 
 seeds:
   ticktick_dbt:

@@ -20,11 +20,6 @@ models:
         config:
           meta: {}
           tags: []
-      - name: title
-        description: Task title
-        config:
-          meta: {}
-          tags: []
       - name: timezone
         description: Task timezone
         config:
@@ -95,6 +90,11 @@ models:
         description: |
           - Task due date time in "yyyy-MM-dd'T'HH:mm:ssZ"
           - Timezone conversion available with env var DBT_TIMEZONE
+        config:
+          meta: {}
+          tags: []
+      - name: title
+        description: Task title
         config:
           meta: {}
           tags: []

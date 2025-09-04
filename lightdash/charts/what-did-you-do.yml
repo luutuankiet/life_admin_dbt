@@ -1,17 +1,17 @@
 name: what did you do?
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-09-02T07:10:23.031Z"
+updatedAt: "2025-09-04T01:35:36.282Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
     - fct_tasks_completed_time_day
     - fct_tasks_completed_time_day_of_week_name
+    - fct_tasks_gtd_work_type
     - dim_projects_project_name
     - fct_tasks_title
     - fct_tasks_task_id
     - dim_projects_project_id
-    - fct_tasks_gtd_work_type
     - fct_tasks_updated_time_raw
   metrics: []
   filters:
@@ -29,9 +29,6 @@ metricQuery:
             completed: false
             unitOfTime: days
   sorts:
-    - fieldId: fct_tasks_completed_time_day
-      descending: true
-      nullsFirst: true
     - fieldId: fct_tasks_updated_time_raw
       descending: true
   limit: 100
@@ -72,12 +69,12 @@ tableConfig:
   columnOrder:
     - fct_tasks_completed_time_day
     - fct_tasks_completed_time_day_of_week_name
+    - fct_tasks_gtd_work_type
     - dim_projects_project_name
     - fct_tasks_title
     - fct_tasks_task_id
     - dim_projects_project_id
-    - fct_tasks_gtd_work_type
     - fct_tasks_updated_time_raw
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-09-03T14:35:42.286Z"
+downloadedAt: "2025-09-04T01:36:46.948Z"

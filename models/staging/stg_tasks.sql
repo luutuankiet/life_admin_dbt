@@ -2,11 +2,12 @@ with source as (
     select 
     {{ dbt_utils.star(
         from=ref('base_tasks'),
-        except=['_completed_time', 'status']
+        except=['_completed_time', 'status', 'title']
         ) }},
     -- preserve the col order to join
     -- also set to NULL for cases task re-add / project unarchived
     -- in which we enforce source to always have "new" status.
+    title,
     cast(NULL as DATETIME) as completed_time,
     cast(NULL as DATETIME) as updated_time,
     0 as status
@@ -21,9 +22,10 @@ snap as (
         from=ref('base_tasks_snapshot'),
         except=[
             'dbt_valid_to', 'dbt_valid_from', 'dbt_updated_at', 'dbt_scd_id', 
-            '_completed_time', 'status'
+            '_completed_time', 'status', 'title'
             ]
         ) }},
+    title,
     -- role play as inferred completed_time
     dbt_valid_to as completed_time,
     dbt_updated_at as updated_time,
@@ -49,8 +51,36 @@ inject_load_time as (
     select 
     {{ dbt_utils.star(
         from=ref('base_tasks'),
-        except=['_completed_time', 'status']
+        except=['_completed_time', 'status', 'title']
         ) }},
+    -- calculate the next load time
+    -- its an eyesore but i'd hate putting this
+    -- in lightdash yaml 🤷
+    {% if var('load_interval') %}
+    CASE
+        when DATETIME_DIFF(CURRENT_DATETIME(
+            "{{var('timezone','UTC')}}"
+            ) 
+            ,cast(_completed_time as DATETIME)
+            ,MINUTE
+        ) < cast("{{ var('load_interval')}}" as int)
+        then CONCAT(
+            "🏗️ in "
+            ,DATETIME_DIFF(CURRENT_DATETIME(
+                        "{{var('timezone','UTC')}}"
+                        ) 
+                        ,cast(_completed_time as DATETIME)
+                        ,MINUTE
+                    )
+            ," minutes"
+        )
+
+        else "🟢 now"
+    end as title,
+
+    {% else %}
+    title,
+    {% endif %}
     cast(NULL as DATETIME) as completed_time,
     -- we injected a row id=1 in tasks_raw that has column _completed_time as the pipeline loaded time
     cast(_completed_time as DATETIME) as updated_time,
@@ -59,10 +89,6 @@ inject_load_time as (
     from {{ref('base_tasks')}}
     where task_id = '0'
 ),
-
-{# inject_next_load_time as (
-    
-) #}
 
 infer_completed_time as (
     -- this cte will union the two above to
