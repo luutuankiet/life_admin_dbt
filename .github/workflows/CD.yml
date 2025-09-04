@@ -37,6 +37,7 @@ env:
   GTD_DEEP_WORK_TAGS: ${{ vars.GTD_DEEP_WORK_TAGS }}
   GTD_SHALLOW_WORK_TAGS: ${{ vars.GTD_SHALLOW_WORK_TAGS }}
   DBT_TIMEZONE: ${{ vars.DBT_TIMEZONE }}
+  DBT_LOAD_INTERVAL: ${{ vars.DBT_LOAD_INTERVAL }}
 
 permissions:
   contents: write
