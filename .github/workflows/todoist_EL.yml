@@ -30,7 +30,7 @@ jobs:
           TODOIST_API_KEY: ${{ secrets.TODOIST_API_KEY }}
           
       - name: Dump extracted data to GCS 🪣
-        run: uv run dbt run
+        run: uv run dbt deps && uv run dbt run
         env:
           DBT_PROFILES_DIR: .
           GCS_KEY: ${{ secrets.GCS_KEY }}
