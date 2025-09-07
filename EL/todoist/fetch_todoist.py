@@ -39,7 +39,7 @@ class TodoistClient:
             logging.error(f"API request to {url} failed: {e}")
             raise
 
-    def _paginated_request(self, endpoint: str, resource_name: str, params: Dict = None) -> List[Dict]:
+    def _paginated_request(self, endpoint: str, resource_name: str, params: Dict = {}) -> List[Dict]:
         """
         Handles cursor-based pagination for a given endpoint.
         """
@@ -79,13 +79,26 @@ class TodoistClient:
         logging.info("Fetching all projects...")
         projects = self._request("GET", "projects")['results']
         logging.info(f"Successfully fetched {len(projects)} projects.")
+        # TODO: handle bq load this struct cause it'll crash the
+        # external table if we included empty config: {} struct.
+        projects = [
+            {k:v for k, v in project.items() if k != 'access'}
+            for project in projects
+        ]
         return projects
 
     def get_archived_projects(self) -> List[Dict]:
         """
         Fetches archived projects.
         """
-        return self._paginated_request("projects/archived", "archived projects")
+        projects = self._paginated_request("projects/archived", "archived projects")
+        # TODO: handle bq load this struct cause it'll crash the
+        # external table if we included empty config: {} struct.
+        projects = [
+            {k:v for k, v in project.items() if k != 'access'}
+            for project in projects
+        ]
+        return projects
 
     def get_active_tasks(self) -> List[Dict]:
         """
@@ -139,16 +152,18 @@ if __name__ == "__main__":
 
     logging.info("dumping files...")
     datasets = {
-        "active_projects.json": active_projects,
-        "archived_projects.json": archived_projects,
-        "active_tasks.json": active_tasks,
-        "completed_tasks.json": completed_tasks,
+        "active_projects.jsonl": active_projects,
+        "archived_projects.jsonl": archived_projects,
+        "active_tasks.jsonl": active_tasks,
+        "completed_tasks.jsonl": completed_tasks,
     }
     raw_dir = Path(__file__).parent / "raw"
+    
 
     for filename, data in datasets.items():
+        jsonl_content = "\n".join([json.dumps(record, ensure_ascii=False) for record in data])
         (raw_dir / filename).write_text(
-            json.dumps(data, indent=2, ensure_ascii=False),
+            jsonl_content,
             encoding="utf-8"
         )
     logging.info("Data fetching complete.")
