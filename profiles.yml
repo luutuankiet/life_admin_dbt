@@ -1,4 +1,4 @@
-ticktick_dbt:
+life_admin_dbt:
   target: "{{ env_var('DBT_TARGET','dev') }}"
   outputs:
     dev:

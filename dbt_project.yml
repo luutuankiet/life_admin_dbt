@@ -1,6 +1,6 @@
-name: ticktick_dbt
+name: life_admin_dbt
 
-profile: ticktick_dbt
+profile: life_admin_dbt
 
 seed-paths: ["seeds"]
 model-paths: ["models"]
