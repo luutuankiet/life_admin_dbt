@@ -21,7 +21,7 @@ vars:
   gtd_shallow_work_tags: "{{ env_var('GTD_SHALLOW_WORK_TAGS', '[]') }}"
   timezone: "{{ env_var('DBT_TIMEZONE', 'UTC') }}"
   # the pipeline load interval in minutes 
-  load_interval: "{{ env_var('DBT_LOAD_INTERVAL') }}"
+  load_interval: "{{ env_var('DBT_LOAD_INTERVAL', '15') | as_number }}"
 
 
 exposures: 

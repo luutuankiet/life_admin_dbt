@@ -32,8 +32,13 @@ jobs:
       - name: Dump extracted data to GCS 🪣
         run: uv run dbt deps && uv run dbt run
         env:
+          # dbt Environment Variables
           DBT_PROFILES_DIR: .
+          DBT_TARGET: "load_raw"
+          
+          # Google Cloud Storage Environment Variables
           GCS_KEY: ${{ secrets.GCS_KEY }}
           GCS_SECRET: ${{ secrets.GCS_SECRET }}
-          DBT_TARGET: "load_raw"
+
+          # dbt project yaml env var
           GCS_RAW_BUCKET: ${{ secrets.GCS_RAW_BUCKET }}
