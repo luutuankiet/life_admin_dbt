@@ -3,6 +3,10 @@
 
 This dbt project contains various dbt models for personal life admin. The transformed data is designed to be consumed by [Lightdash](https://www.lightdash.com/) to serve as a Business Intelligence backend.
 
+## News
+
+*   **2025-09-07:** Added a new data source: **Todoist**! This integration fetches raw data from the Todoist API, loads it into a local DuckDB instance, and then stages it as external tables in BigQuery.
+
 ## Data Sources
 
 This project aims to integrate data from the following sources:
@@ -12,6 +16,19 @@ This project aims to integrate data from the following sources:
 *   **YNAB:** (Roadmap) Models for financial data.
 
 ## Data Ingestion
+
+Data is ingested into the data warehouse using custom Python scripts.
+
+### Todoist
+
+The Todoist data ingestion process involves a few steps:
+
+1.  **Fetch Raw Data**: A Python script (`EL/todoist/fetch_todoist.py`) fetches raw data from the Todoist API.
+2.  **Load to DuckDB**: The script then loads this data into a local DuckDB database.
+3.  **Dump to GCS**: The data is dumped from DuckDB to Google Cloud Storage (GCS) in JSONL format.
+4.  **Stage as BQ Views**: An ad-hoc dbt run (`dbt run-operation stage_external_sources --target dev`) creates external tables in BigQuery that point to the GCS data.
+
+### TickTick
 
 Data is ingested into the data warehouse using a custom Python script that makes HTTP requests directly to the TickTick Open API. The script can be found here: [ticktick_fetcher.py](https://github.com/luutuankiet/life_admin_dbt/blob/incremental_run_gha/ticktick_fetcher.py).
 

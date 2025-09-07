@@ -5,3 +5,6 @@ target/
 
 .env
 .vscode
+
+/EL/**/raw/**
+!/EL/**/raw/**/.gitkeep
