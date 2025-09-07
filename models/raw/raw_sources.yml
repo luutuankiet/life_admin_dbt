@@ -28,8 +28,6 @@ sources:
         columns: []
 
   - name: todoist_raw_dump
-    config:
-      enabled: "{{ target.name != 'load_raw'}}"
     description: |
       - source that leverages the dbt util https://github.com/dbt-labs/dbt-external-tables
       to load the local jsonl dumps into BQ.
