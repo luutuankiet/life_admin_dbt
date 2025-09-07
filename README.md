@@ -1,13 +1,21 @@
 [![serverless_snapshot](https://github.com/luutuankiet/ticktick_dbt/actions/workflows/serverless_snapshot.yml/badge.svg)](https://github.com/luutuankiet/ticktick_dbt/actions/workflows/serverless_snapshot.yml)
-# TickTick dbt Project
+# Personal Life Admin dbt Project
 
-This dbt project is designed for transforming data sourced from the TickTick official Open API. It currently supports two primary data streams: `projects` and `tasks`.
+This dbt project contains various dbt models for personal life admin. The transformed data is designed to be consumed by [Lightdash](https://www.lightdash.com/) to serve as a Business Intelligence backend.
+
+## Data Sources
+
+This project aims to integrate data from the following sources:
+
+*   **TickTick:** (Active Development) Models for tasks and projects from the TickTick Open API.
+*   **Todoist:** (Active Development) Models for recurring and habit-based tasks.
+*   **YNAB:** (Roadmap) Models for financial data.
 
 ## Data Ingestion
 
-Data is ingested into the data warehouse using a purpose-built Airbyte connector for TickTick. You can find more details about the connector here: [https://docs.airbyte.com/integrations/sources/ticktick](https://docs.airbyte.com/integrations/sources/ticktick).
+Data is ingested into the data warehouse using a custom Python script that makes HTTP requests directly to the TickTick Open API. The script can be found here: [ticktick_fetcher.py](https://github.com/luutuankiet/life_admin_dbt/blob/incremental_run_gha/ticktick_fetcher.py).
 
-Airbyte loads the raw data into the data warehouse, which then serves as the source for dbt transformations.
+The script loads the raw data into the data warehouse, which then serves as the source for dbt transformations.
 
 ## Data Transformation with dbt Snapshots
 
@@ -16,9 +24,11 @@ This project leverages dbt snapshots to capture historical changes in the `proje
 *   **`created_time`**: Inferred as the minimum `dbt_valid_from` timestamp from the snapshot metadata.
 *   **`done_time`**: Inferred as the `dbt_valid_to` date for hard-deleted records in the snapshot.
 
-## Configuration: GTD "Shallow vs. Deep Work" Feature
+## Configuration
 
-This guide explains how to set up the "Shallow vs. Deep Work" categorization feature.
+### TickTick: GTD "Shallow vs. Deep Work" Feature
+
+This guide explains how to set up the "Shallow vs. Deep Work" categorization feature for TickTick data.
 
 ### The "Why": Business Use Case
 
@@ -67,6 +77,8 @@ By using a `.env` file, you can easily customize the feature for your specific w
     *   To run snapshots: `dbtf snapshot`
     *   To build models: `dbt build`
 
-## Notes on Previous Iteration
+## Source Specific Notes
 
-This project is an evolution of a previous effort, which can be found at [https://github.com/luutuankiet/ticktick-py-dbt](https://github.com/luutuankiet/ticktick-py-dbt). The key distinction in this iteration is the direct utilization of the TickTick official Open API for data extraction.
+### TickTick
+
+This project is an evolution of a previous effort, which can be found at [https://github.com/luutuankiet/ticktick-py-dbt](https://github.com/luutuankiet/ticktick-py-dbt). The key distinction in this iteration is the direct utilization of the TickTick official Open API for data extraction, moving away from a dependency on Airbyte.
