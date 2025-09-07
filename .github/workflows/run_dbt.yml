@@ -54,3 +54,4 @@ jobs:
           GTD_SHALLOW_WORK_TAGS: ${{ vars.GTD_SHALLOW_WORK_TAGS }}
           DBT_TIMEZONE: ${{ vars.DBT_TIMEZONE }}
           DBT_LOAD_INTERVAL: ${{ vars.DBT_LOAD_INTERVAL }}
+          GCS_RAW_BUCKET: ${{ secrets.GCS_RAW_BUCKET }}

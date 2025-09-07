@@ -4,7 +4,8 @@ import logging
 from requests_ratelimiter import LimiterSession
 from typing import List, Dict
 from dotenv import load_dotenv
-from pathlib import Path; root_dir = (Path(__file__).parent / '..' / '..').resolve()
+from pathlib import Path
+root_dir = (Path(__file__).parent / '..' / '..').resolve()
 env_path = root_dir / ".env"
 
 load_dotenv(env_path)
@@ -23,7 +24,7 @@ class TodoistClient:
         # Create a rate-limited session
         # The Todoist Sync API has a limit of 450 requests per 15 minutes.
         # We'll be more conservative to be safe.
-        self.session = LimiterSession(per_minute=60)
+        self.session = LimiterSession(per_minute=25)
         self.session.headers.update({"Authorization": f"Bearer {self.api_key}"})
 
     def _request(self, method: str, endpoint: str, **kwargs) -> Dict:
@@ -39,7 +40,7 @@ class TodoistClient:
             logging.error(f"API request to {url} failed: {e}")
             raise
 
-    def _paginated_request(self, endpoint: str, resource_name: str, params: Dict = {}) -> List[Dict]:
+    def _paginated_request(self, endpoint: str, resource_name: str, params: Dict = None) -> List[Dict]:
         """
         Handles cursor-based pagination for a given endpoint.
         """
