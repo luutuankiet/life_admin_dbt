@@ -1,5 +1,5 @@
 {{ config(
-    location='s3://ticktick_raw/todoist/completed_tasks.jsonl',
+    location = 's3://' ~ env_var('GCS_RAW_BUCKET') ~ '/todoist/completed_tasks.jsonl'
 ) }}
 
 with source as (

@@ -266,11 +266,6 @@ models:
         config:
           meta: {}
           tags: []
-      - name: access
-        description: ''
-        config:
-          meta: {}
-          tags: []
       - name: role
         description: ''
         config:
@@ -298,11 +293,6 @@ models:
           tags: []
   - name: archived_projects
     columns:
-      - name: access
-        description: ''
-        config:
-          meta: {}
-          tags: []
       - name: can_assign_tasks
         description: ''
         config:

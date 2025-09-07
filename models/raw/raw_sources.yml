@@ -30,7 +30,7 @@ sources:
   - name: todoist_raw_dump
     config:
       enabled: "{{ target.name != 'load_raw'}}"
-    description: | 
+    description: |
       - source that leverages the dbt util https://github.com/dbt-labs/dbt-external-tables
       to load the local jsonl dumps into BQ.
       - should be run ad hoc. 
@@ -38,28 +38,28 @@ sources:
       - name: active_tasks
         description: Raw todoist tasks data from local JSON file
         external:
-          location: gs://ticktick_raw/todoist/active_tasks.jsonl
+          location: "{{'gs://' ~  env_var('GCS_RAW_BUCKET') ~ '/todoist/active_tasks.jsonl' }}"
           options:
             format: NEWLINE_DELIMITED_JSON
         columns: []
       - name: completed_tasks
         description: Raw todoist tasks data from local JSON file
         external:
-          location: gs://ticktick_raw/todoist/completed_tasks.jsonl
+          location: "{{'gs://' ~  env_var('GCS_RAW_BUCKET') ~ '/todoist/completed_tasks.jsonl' }}"
           options:
             format: NEWLINE_DELIMITED_JSON
         columns: []
       - name: active_projects
         description: Raw todoist projects data from local JSON file
         external:
-          location: gs://ticktick_raw/todoist/active_projects.jsonl
+          location: "{{'gs://' ~  env_var('GCS_RAW_BUCKET') ~ '/todoist/active_projects.jsonl' }}"
           options:
             format: NEWLINE_DELIMITED_JSON
         columns: []
       - name: archived_projects
         description: Raw todoist projects data from local JSON file
         external:
-          location: gs://ticktick_raw/todoist/archived_projects.jsonl
+          location: "{{'gs://' ~  env_var('GCS_RAW_BUCKET') ~ '/todoist/archived_projects.jsonl' }}"
           options:
             format: NEWLINE_DELIMITED_JSON
         columns: []
