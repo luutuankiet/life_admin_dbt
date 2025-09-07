@@ -1,6 +1,6 @@
-name: ticktick_dbt
+name: life_admin_dbt
 
-profile: ticktick_dbt
+profile: life_admin_dbt
 
 seed-paths: ["seeds"]
 model-paths: ["models"]
@@ -23,12 +23,20 @@ vars:
   # the pipeline load interval in minutes 
   load_interval: "{{ env_var('DBT_LOAD_INTERVAL') }}"
 
-seeds:
-  ticktick_dbt:
-    +schema: raw
+
+exposures: 
+  +enabled: "{{ target.name != 'load_raw' }}"
+
+
+sources: 
+  life_admin_dbt:
+    raw:
+      +enabled: "{{ target.name == 'load_raw' }}"
+    +enabled: "{{ target.name != 'load_raw' }}"
 
 models:
-  ticktick_dbt:
+  life_admin_dbt:
+    +enabled: "{{ target.name != 'load_raw' }}"
     +dbt-osmosis: "{parent}.yml"
     +dbt-osmosis-options:
       force-inherit-descriptions: true
@@ -36,5 +44,11 @@ models:
       +materialized: view
     marts:
       +materialized: view
+    raw:
+      +enabled: "{{ target.name == 'load_raw' }}"
+      todoist:
+        +tags: "todoist"
+        +materialized: external
+        +format: json
 flags:
   require_generic_test_arguments_property: true

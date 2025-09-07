@@ -1,4 +1,4 @@
-ticktick_dbt:
+life_admin_dbt:
   target: "{{ env_var('DBT_TARGET','dev') }}"
   outputs:
     dev:
@@ -28,4 +28,41 @@ ticktick_dbt:
       keyfile: "./sa.json"
       threads: 16
 
+# EL profile to load from data in fetched at runtime
+    load_raw:
+     type: duckdb
+     path: './duckdb.dbt'
+     extensions: ['httpfs']
+     threads: 16
+     secrets:
+       - type: s3
+         region: asia-southeast1
+         key_id: "{{ env_var('GCS_KEY') }}"
+         secret: "{{ env_var('GCS_SECRET') }}"
+         endpoint: "storage.googleapis.com"
 
+
+
+# ticktick EL profile 
+    load_snapshot:
+     type: duckdb
+     path: './duckdb.dbt'
+     extensions: ['httpfs']
+     threads: 16
+     secrets:
+       - type: s3
+         region: asia-southeast1
+         key_id: "{{ env_var('GCS_KEY') }}"
+         secret: "{{ env_var('GCS_SECRET') }}"
+         endpoint: "storage.googleapis.com"
+    dump_snapshot:
+     type: duckdb
+     path: './duckdb.dbt'
+     extensions: ['httpfs']
+     threads: 16
+     secrets:
+       - type: s3
+         region: asia-southeast1
+         key_id: "{{ env_var('GCS_KEY') }}"
+         secret: "{{ env_var('GCS_SECRET') }}"
+         endpoint: "storage.googleapis.com"
