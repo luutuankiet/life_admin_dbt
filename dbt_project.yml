@@ -30,9 +30,11 @@ exposures:
 
 sources: 
   life_admin_dbt:
+    +enabled: "{{ target.name != 'load_raw' }}"
     raw:
       +enabled: "{{ target.name == 'load_raw' }}"
-    +enabled: "{{ target.name != 'load_raw' }}"
+      todoist_raw_dump:
+        +enabled: "{{ target.name == 'stage_raw' }}"
 
 models:
   life_admin_dbt:

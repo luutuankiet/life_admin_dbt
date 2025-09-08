@@ -40,6 +40,16 @@ life_admin_dbt:
          key_id: "{{ env_var('GCS_KEY') }}"
          secret: "{{ env_var('GCS_SECRET') }}"
          endpoint: "storage.googleapis.com"
+    stage_raw:
+      type: bigquery
+      location: "{{ env_var('DBT_BQ_LOCATION') }}"
+      project: "{{ env_var('DBT_BQ_PROJECT') }}"
+      method: service-account
+      # this is just arbitrary value won't get picked up by 
+      # the actual dbt macro external table
+      dataset: raw 
+      keyfile: "./sa.json"
+      threads: 16
 
 
 
