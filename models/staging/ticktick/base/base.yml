@@ -1,6 +1,6 @@
 version: 2
 models:
-  - name: base_tasks
+  - name: base__ticktick__tasks
     description: |
       - base table containing latest task state pulled from ticktick open API
       - source : https://developer.ticktick.com/api#/openapi?id=task-1
@@ -53,12 +53,6 @@ models:
         config:
           meta: {}
           tags: []
-      - name: tags
-        data_type: array<string>
-        description: Array of tags assigned to the task
-        config:
-          meta: {}
-          tags: []
       - name: column_id
         data_type: string
         description: ''
@@ -86,13 +80,13 @@ models:
           meta: {}
           tags: []
       - name: reminders
-        data_type: array<string>
+        data_type: string
         description: List of reminder triggers. Example [ "TRIGGER:P0DT9H0M0S", "TRIGGER:PT0S" ]
         config:
           meta: {}
           tags: []
       - name: childids
-        data_type: array<string>
+        data_type: string
         description: list of subtasks
         config:
           meta: {}
@@ -128,7 +122,7 @@ models:
         config:
           meta: {}
           tags: []
-  - name: base_tasks_snapshot
+  - name: base__ticktick__tasks_snapshot
     description: >-
       tasks snapshot that gets loaded on short interval to capture completed / deleted tasks
     columns:
@@ -180,12 +174,6 @@ models:
         config:
           meta: {}
           tags: []
-      - name: tags
-        data_type: array<string>
-        description: Array of tags assigned to the task
-        config:
-          meta: {}
-          tags: []
       - name: column_id
         data_type: string
         description: ''
@@ -213,13 +201,13 @@ models:
           meta: {}
           tags: []
       - name: reminders
-        data_type: array<string>
+        data_type: string
         description: List of reminder triggers. Example [ "TRIGGER:P0DT9H0M0S", "TRIGGER:PT0S" ]
         config:
           meta: {}
           tags: []
       - name: childids
-        data_type: array<string>
+        data_type: string
         description: list of subtasks
         config:
           meta: {}
@@ -286,7 +274,7 @@ models:
         config:
           meta: {}
           tags: []
-  - name: base_projects
+  - name: base__ticktick__projects
     description: |
       - Base table containing latest project state pulled from ticktick open API
       - Source : https://developer.ticktick.com/api#/openapi?id=project-1
@@ -345,7 +333,7 @@ models:
         config:
           meta: {}
           tags: []
-  - name: base_projects_snapshot
+  - name: base__ticktick__projects_snapshot
     description: >-
       project snapshot that gets loaded on short interval to capture completed / deleted projects
     columns:
@@ -431,6 +419,21 @@ models:
         description: >-
           The timestamp when this row became invalidated. For current records, this is NULL by default
           or the value specified in dbt_valid_to_current. Timezone conversion available with env var DBT_TIMEZONE
+        config:
+          meta: {}
+          tags: []
+  - name: base__ticktick__task_tags
+    description: Table with one row per task and tag combination.
+    columns:
+      - name: task_id
+        data_type: string
+        description: Task identifier
+        config:
+          meta: {}
+          tags: []
+      - name: tag
+        data_type: string
+        description: Tag assigned to the task
         config:
           meta: {}
           tags: []

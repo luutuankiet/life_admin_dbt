@@ -1,7 +1,15 @@
-with source as (
-    select 
+with task_tags as (
+    select
+        task_id,
+        array_agg(tag) as tags
+    from {{ ref('base__ticktick__task_tags') }}
+    group by 1
+),
+
+source as (
+    select
     {{ dbt_utils.star(
-        from=ref('base_tasks'),
+        from=ref('base__ticktick__tasks'),
         except=['_completed_time', 'status', 'title']
         ) }},
     -- preserve the col order to join
@@ -10,18 +18,20 @@ with source as (
     title,
     cast(NULL as DATETIME) as completed_time,
     cast(NULL as DATETIME) as updated_time,
-    0 as status
+    0 as status,
+    tags
 
-    from {{ref('base_tasks')}}
+    from {{ref('base__ticktick__tasks')}}
+    left join task_tags using (task_id)
     where task_id != '0' -- we'd inject this in the cte below
 ),
 
 snap as (
-    select 
+    select
     {{ dbt_utils.star(
-        from=ref('base_tasks_snapshot'),
+        from=ref('base__ticktick__tasks_snapshot'),
         except=[
-            'dbt_valid_to', 'dbt_valid_from', 'dbt_updated_at', 'dbt_scd_id', 
+            'dbt_valid_to', 'dbt_valid_from', 'dbt_updated_at', 'dbt_scd_id',
             '_completed_time', 'status', 'title'
             ]
         ) }},
@@ -29,20 +39,22 @@ snap as (
     -- role play as inferred completed_time
     dbt_valid_to as completed_time,
     dbt_updated_at as updated_time,
-    2 as status
+    2 as status,
+    tags
 
     from (
         -- dedupe get latest instance in case of
         -- task removed due to project archived (competed),
-        -- then project gets un-archived. in such case 
+        -- then project gets un-archived. in such case
         -- we retrieve task instance with dbt_valid_to is NULL
         {{ dbt_utils.deduplicate(
-            relation=ref('base_tasks_snapshot'),
+            relation=ref('base__ticktick__tasks_snapshot'),
             partition_by='task_id',
             order_by="dbt_updated_at desc",
         )
         }}
     )
+    left join task_tags using (task_id)
 
     where dbt_valid_to is not null
 ),
@@ -50,7 +62,7 @@ snap as (
 inject_load_time as (
     select 
     {{ dbt_utils.star(
-        from=ref('base_tasks'),
+        from=ref('base__ticktick__tasks'),
         except=['_completed_time', 'status', 'title']
         ) }},
     -- calculate the next load time
@@ -92,9 +104,10 @@ inject_load_time as (
     cast(NULL as DATETIME) as completed_time,
     -- we injected a row id=1 in tasks_raw that has column _completed_time as the pipeline loaded time
     cast(_completed_time as DATETIME) as updated_time,
-    0 as status
+    0 as status,
+    [''] as tags
 
-    from {{ref('base_tasks')}}
+    from {{ref('base__ticktick__tasks')}}
     where task_id = '0'
 ),
 

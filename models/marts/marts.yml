@@ -37,11 +37,6 @@ models:
         config:
           meta: {}
           tags: []
-      - name: tags
-        description: Array of tags assigned to the task
-        config:
-          meta: {}
-          tags: []
       - name: column_id
         description: ''
         config:
@@ -182,6 +177,11 @@ models:
           meta:
             dimension:
               type: number
+          tags: []
+      - name: tags
+        description: Array of tags assigned to the task
+        config:
+          meta: {}
           tags: []
       - name: gtd_work_type
         description: |

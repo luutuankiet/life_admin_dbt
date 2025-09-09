@@ -10,7 +10,7 @@ WITH
 stg_projects AS (
     {# Source: Staging model for all projects. #}
     SELECT *
-    FROM {{ ref('stg_projects') }}
+    FROM {{ ref('stg__ticktick__projects') }}
 )
 
 SELECT
