@@ -2,7 +2,7 @@ WITH source AS (
     SELECT
         *
     FROM 
-    {{source('raw_data', 'projects')}}
+    {{source('ticktick_raw', 'projects')}}
 ), 
 renamed as (
     select 

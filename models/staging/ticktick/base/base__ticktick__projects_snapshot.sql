@@ -2,7 +2,7 @@ WITH source AS (
     SELECT
         *
     FROM 
-    {{source('raw_data', 'projects_snapshot')}}
+    {{source('ticktick_raw', 'projects_snapshot')}}
 ), 
 renamed as (
     select 
@@ -16,9 +16,9 @@ cast(viewmode as string) as view_mode,
 cast(permission as string) as permission,
 cast(closed as boolean) as closed,
 cast(dbt_scd_id as string) as dbt_scd_id,
-DATETIME(dbt_updated_at, "{{var('timezone')}}") as dbt_updated_at,
-DATETIME(dbt_valid_from, "{{var('timezone')}}") as dbt_valid_from,
-DATETIME(dbt_valid_to, "{{var('timezone')}}") as dbt_valid_to
+DATETIME(cast(dbt_updated_at as timestamp), "{{var('timezone')}}") as dbt_updated_at,
+DATETIME(cast(dbt_valid_from as timestamp), "{{var('timezone')}}") as dbt_valid_from,
+DATETIME(cast(dbt_valid_to as timestamp), "{{var('timezone')}}") as dbt_valid_to
 
     from source
 )

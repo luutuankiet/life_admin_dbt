@@ -1,8 +1,8 @@
 version: 2
 
 sources:
-  - name: raw_data
-    schema: raw
+  - name: ticktick_raw
+    schema: ticktick_raw
     description: raw data from ticktick api with dbt snapshot to indicate completion timestamps
     tables:
       - name: tasks

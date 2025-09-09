@@ -22,7 +22,7 @@ SELECT
     MIN(LEAST(DATE(due_date, '{{ timezone }}'), DATE(start_date, '{{ timezone }}'))) as start_date,
     {# Get the current date in the specified timezone to end the timeline #}
     {{ dbt_date.today(timezone) }} as end_date
-FROM {{ ref('stg_tasks') }}
+FROM {{ ref('stg__ticktick__tasks') }}
 {# Correctly filter for habits, ignoring leading/trailing whitespace in tags #}
 WHERE EXISTS (SELECT 1 FROM UNNEST(tags) AS tag WHERE TRIM(tag) = 'habit')
 AND repeat_flag IS NOT NULL AND repeat_flag != ''
@@ -45,7 +45,7 @@ WITH
 stg_tasks AS (
     {# Source: Staging model for tasks. #}
     SELECT *
-    FROM {{ ref('stg_tasks') }}
+    FROM {{ ref('stg__ticktick__tasks') }}
 ),
 
 habit_tasks AS (

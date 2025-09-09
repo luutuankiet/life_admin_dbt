@@ -33,7 +33,7 @@ sources:
     +enabled: "{{ target.name != 'load_raw' }}"
     raw:
       +enabled: "{{ target.name == 'load_raw' }}"
-      todoist_raw_dump:
+      external_table_stage:
         +enabled: "{{ target.name == 'stage_raw' }}"
 
 models:

@@ -1,20 +1,20 @@
 with source as (
     select 
     {{ dbt_utils.star(
-        from=ref('base_projects'),
+        from=ref('base__ticktick__projects'),
         except=['closed']
         ) }},
     -- preserve the col order to join
     cast(NULL as DATETIME) as completed_time,
     false as closed
 
-    from {{ref('base_projects')}}
+    from {{ref('base__ticktick__projects')}}
 ),
 
 snap as (
     select 
     {{ dbt_utils.star(
-        from=ref('base_projects_snapshot'),
+        from=ref('base__ticktick__projects_snapshot'),
         except=['dbt_valid_to', 'dbt_valid_from', 'dbt_updated_at', 'dbt_scd_id', 'closed']
         ) }},
     -- role play as inferred completed_time
@@ -25,7 +25,7 @@ snap as (
         -- dedupe get latest instance in case of
         -- then project gets un-archived
         {{ dbt_utils.deduplicate(
-            relation=ref('base_projects_snapshot'),
+            relation=ref('base__ticktick__projects_snapshot'),
             partition_by='project_id',
             order_by="dbt_updated_at desc",
         )

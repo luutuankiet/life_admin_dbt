@@ -13,7 +13,7 @@ WITH
 source AS (
     {# Source: Staging model for all tasks. #}
     SELECT *
-    FROM {{ ref('stg_tasks') }}
+    FROM {{ ref('stg__ticktick__tasks') }}
 )
 
 SELECT *

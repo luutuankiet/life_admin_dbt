@@ -1,7 +1,7 @@
 with source as (
     select 
     {{ dbt_utils.star(
-        from=ref('base_tasks'),
+        from=ref('base__ticktick__tasks'),
         except=['_completed_time', 'status', 'title']
         ) }},
     -- preserve the col order to join
@@ -12,14 +12,14 @@ with source as (
     cast(NULL as DATETIME) as updated_time,
     0 as status
 
-    from {{ref('base_tasks')}}
+    from {{ref('base__ticktick__tasks')}}
     where task_id != '0' -- we'd inject this in the cte below
 ),
 
 snap as (
     select 
     {{ dbt_utils.star(
-        from=ref('base_tasks_snapshot'),
+        from=ref('base__ticktick__tasks_snapshot'),
         except=[
             'dbt_valid_to', 'dbt_valid_from', 'dbt_updated_at', 'dbt_scd_id', 
             '_completed_time', 'status', 'title'
@@ -37,7 +37,7 @@ snap as (
         -- then project gets un-archived. in such case 
         -- we retrieve task instance with dbt_valid_to is NULL
         {{ dbt_utils.deduplicate(
-            relation=ref('base_tasks_snapshot'),
+            relation=ref('base__ticktick__tasks_snapshot'),
             partition_by='task_id',
             order_by="dbt_updated_at desc",
         )
@@ -50,7 +50,7 @@ snap as (
 inject_load_time as (
     select 
     {{ dbt_utils.star(
-        from=ref('base_tasks'),
+        from=ref('base__ticktick__tasks'),
         except=['_completed_time', 'status', 'title']
         ) }},
     -- calculate the next load time
@@ -94,7 +94,7 @@ inject_load_time as (
     cast(_completed_time as DATETIME) as updated_time,
     0 as status
 
-    from {{ref('base_tasks')}}
+    from {{ref('base__ticktick__tasks')}}
     where task_id = '0'
 ),
 
