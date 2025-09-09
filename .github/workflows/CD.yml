@@ -4,17 +4,11 @@ on:
 
   workflow_dispatch:
 
-  pull_request:
-    types:
-      - closed
+  push:
     branches:
       - main
-    paths:
-      - 'dbt_project.yml'
-      - 'models/**'
-      - 'macros/**'
-      - 'seeds/**'
-      - 'lightdash/**'
+    paths-ignore:
+      - '.github/**'
 
 env:
   # dbt Environment Variables
@@ -44,8 +38,7 @@ permissions:
   contents: write
 jobs:
   deploy:
-    # Only run this job if the PR was actually merged. i.e. ignore if PR is dropped
-    if: github.event.pull_request.merged == true && !contains(github.event.head_commit.message, '[skip ci]')
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
