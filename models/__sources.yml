@@ -38,8 +38,8 @@ sources:
     tables:
      - name: tasks_snapshot
        config:
-        external_location: "s3://ticktick_raw/snp/tasks_snapshot.csv"
+        external_location: "{{'s3://' ~  env_var('GCS_RAW_BUCKET') ~  '/ticktick/tasks_snapshot.jsonl'}}"
        
      - name: projects_snapshot
        config:
-         external_location: "s3://ticktick_raw/snp/projects_snapshot.csv"
+         external_location: "{{'s3://' ~  env_var('GCS_RAW_BUCKET') ~  '/ticktick/projects_snapshot.jsonl'}}"

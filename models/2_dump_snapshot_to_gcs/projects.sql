@@ -1,6 +1,6 @@
 {{ config(
     materialized='external',
-    location='s3://ticktick_raw/snp/projects.csv',
+    location='s3://' ~ env_var('GCS_RAW_BUCKET') ~ '/ticktick/projects.jsonl',
     enabled=(target.name == 'dump_snapshot')
 ) }}
 
