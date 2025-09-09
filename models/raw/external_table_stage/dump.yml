@@ -1,0 +1,72 @@
+sources:
+  - name: todoist_raw_dump
+    schema: todoist_raw
+    description: |
+      - source that leverages the dbt util https://github.com/dbt-labs/dbt-external-tables
+      to load the local jsonl dumps into BQ.
+      - should be run ad hoc. 
+    tables:
+      - name: active_tasks
+        description: Raw todoist tasks data from local JSON file
+        external:
+          location: "{{'gs://' ~  env_var('GCS_RAW_BUCKET') ~ '/todoist/active_tasks.jsonl' }}"
+          options:
+            format: NEWLINE_DELIMITED_JSON
+        columns: []
+      - name: completed_tasks
+        description: Raw todoist tasks data from local JSON file
+        external:
+          location: "{{'gs://' ~  env_var('GCS_RAW_BUCKET') ~ '/todoist/completed_tasks.jsonl' }}"
+          options:
+            format: NEWLINE_DELIMITED_JSON
+        columns: []
+      - name: active_projects
+        description: Raw todoist projects data from local JSON file
+        external:
+          location: "{{'gs://' ~  env_var('GCS_RAW_BUCKET') ~ '/todoist/active_projects.jsonl' }}"
+          options:
+            format: NEWLINE_DELIMITED_JSON
+        columns: []
+      - name: archived_projects
+        description: Raw todoist projects data from local JSON file
+        external:
+          location: "{{'gs://' ~  env_var('GCS_RAW_BUCKET') ~ '/todoist/archived_projects.jsonl' }}"
+          options:
+            format: NEWLINE_DELIMITED_JSON
+        columns: []
+
+  - name: ticktick_raw_dump
+    schema: ticktick_raw
+    description: |
+      - source that leverages the dbt util https://github.com/dbt-labs/dbt-external-tables
+      to load the local jsonl dumps into BQ.
+      - should be run ad hoc. 
+    tables:
+      - name: tasks
+        description: Raw ticktick tasks data from local JSON file
+        external:
+          location: "{{'gs://' ~  env_var('GCS_RAW_BUCKET') ~ '/ticktick/tasks.jsonl' }}"
+          options:
+            format: NEWLINE_DELIMITED_JSON
+        columns: []
+      - name: tasks_snapshot
+        description: Ticktick snapshot data to infer completed time
+        external:
+          location: "{{'gs://' ~  env_var('GCS_RAW_BUCKET') ~ '/ticktick/tasks_snapshot.jsonl' }}"
+          options:
+            format: NEWLINE_DELIMITED_JSON
+        columns: []
+      - name: projects
+        description: Raw ticktick projects data from local JSON file
+        external:
+          location: "{{'gs://' ~  env_var('GCS_RAW_BUCKET') ~ '/ticktick/projects.jsonl' }}"
+          options:
+            format: NEWLINE_DELIMITED_JSON
+        columns: []
+      - name: projects_snapshot
+        description: Snapshot projects data to infer completed time
+        external:
+          location: "{{'gs://' ~  env_var('GCS_RAW_BUCKET') ~ '/ticktick/projects_snapshot.jsonl' }}"
+          options:
+            format: NEWLINE_DELIMITED_JSON
+        columns: []

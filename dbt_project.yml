@@ -22,6 +22,11 @@ vars:
   timezone: "{{ env_var('DBT_TIMEZONE', 'UTC') }}"
   # the pipeline load interval in minutes 
   load_interval: "{{ env_var('DBT_LOAD_INTERVAL', '15') | as_number }}"
+  dbt-osmosis:
+    sources:
+      ticktick_raw:
+        path: staging/ticktick/source_{node.source_name}.yml
+        schema: ticktick_raw
 
 
 exposures: 
@@ -39,13 +44,14 @@ sources:
 models:
   life_admin_dbt:
     +enabled: "{{ target.name != 'load_raw' }}"
-    +dbt-osmosis: "{parent}.yml"
     +dbt-osmosis-options:
       force-inherit-descriptions: true
     staging:
       +materialized: view
+      +dbt-osmosis: "{parent}.yml"
     marts:
       +materialized: view
+      +dbt-osmosis: "{parent}.yml"
     raw:
       +enabled: "{{ target.name == 'load_raw' }}"
       todoist:
