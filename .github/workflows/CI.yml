@@ -1,7 +1,9 @@
 name: CI on PR
 
 on:
-  pull_request:
+  # Use pull_request_target to allow access to secrets for PRs from forks
+  pull_request_target:
+    types: [opened, synchronize, reopened] # Explicitly define when the workflow runs
     branches:
       - main
     paths:
@@ -40,9 +42,12 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout PR code
         uses: actions/checkout@v5
-
+        with:
+          # This is the crucial part for pull_request_target:
+          # It safely checks out the head of the pull request branch.
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Install uv
         uses: astral-sh/setup-uv@v6
