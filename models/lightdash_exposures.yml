@@ -15,6 +15,21 @@ exposures:
       - ref('fct_tasks')
       - ref('dim_projects')
       - ref('agg_daily_task_schedule_with_weekly_avg')
+  - name: ld_chart_856bcfd4_5da2_407f_a0ad_4516c6ff2244
+    type: analysis
+    owner:
+      name: ken luu
+      email: ""
+    label: Data freshness
+    description: ""
+    url: >-
+      https://ld.kenluu.org/projects/4d879b0c-6772-4839-aba4-1f18c3e1e243/saved/856bcfd4-5da2-407f-a0ad-4516c6ff2244/view
+    tags:
+      - lightdash
+      - chart
+    depends_on:
+      - ref('fct_tasks')
+      - ref('dim_projects')
   - name: ld_chart_4b994323_4070_4073_852b_24d9d44a9d09
     type: analysis
     owner:
@@ -53,21 +68,6 @@ exposures:
     description: ""
     url: >-
       https://ld.kenluu.org/projects/4d879b0c-6772-4839-aba4-1f18c3e1e243/saved/5010d770-8665-4926-9008-cd99badf03fb/view
-    tags:
-      - lightdash
-      - chart
-    depends_on:
-      - ref('fct_tasks')
-      - ref('dim_projects')
-  - name: ld_chart_856bcfd4_5da2_407f_a0ad_4516c6ff2244
-    type: analysis
-    owner:
-      name: ken luu
-      email: ""
-    label: Data freshness
-    description: ""
-    url: >-
-      https://ld.kenluu.org/projects/4d879b0c-6772-4839-aba4-1f18c3e1e243/saved/856bcfd4-5da2-407f-a0ad-4516c6ff2244/view
     tags:
       - lightdash
       - chart
