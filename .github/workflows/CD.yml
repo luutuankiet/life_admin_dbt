@@ -44,7 +44,8 @@ permissions:
   contents: write
 jobs:
   deploy:
-    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    # Only run this job if the PR was actually merged. i.e. ignore if PR is dropped
+    if: github.event.pull_request.merged == true && !contains(github.event.head_commit.message, '[skip ci]')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
