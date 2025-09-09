@@ -44,6 +44,7 @@ jobs:
           GCS_KEY: ${{ secrets.GCS_KEY }}
           GCS_SECRET: ${{ secrets.GCS_SECRET }}
           DBT_TARGET: "load_snapshot"
+          GCS_RAW_BUCKET: ${{ secrets.GCS_RAW_BUCKET }}
 
           
       - name: Snapshot and dump to GCS 🪣
@@ -53,3 +54,4 @@ jobs:
           GCS_KEY: ${{ secrets.GCS_KEY }}
           GCS_SECRET: ${{ secrets.GCS_SECRET }}
           DBT_TARGET: "dump_snapshot"
+          GCS_RAW_BUCKET: ${{ secrets.GCS_RAW_BUCKET }}
