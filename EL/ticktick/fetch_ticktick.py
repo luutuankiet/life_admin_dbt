@@ -54,8 +54,8 @@ class TickTickClient:
                 logging.info(f"Fetching tasks for project: {index+1} out of {len(filtered_projects)}")
                 project_data = self.get_tasks_for_project(project['id'])
                 tasks.extend(project_data.get('tasks', []))
-                if index == 5:
-                    break
+                # if index == 5:
+                #     break
         # add the inbox project here
         # cause it's not included in /project endpoint
         inbox = self.get_tasks_for_project('inbox')
