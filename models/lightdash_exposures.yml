@@ -15,21 +15,6 @@ exposures:
       - ref('fct_tasks')
       - ref('dim_projects')
       - ref('agg_daily_task_schedule_with_weekly_avg')
-  - name: ld_chart_5010d770_8665_4926_9008_cd99badf03fb
-    type: analysis
-    owner:
-      name: ken luu
-      email: ""
-    label: what did you do?
-    description: ""
-    url: >-
-      https://ld.kenluu.org/projects/4d879b0c-6772-4839-aba4-1f18c3e1e243/saved/5010d770-8665-4926-9008-cd99badf03fb/view
-    tags:
-      - lightdash
-      - chart
-    depends_on:
-      - ref('fct_tasks')
-      - ref('dim_projects')
   - name: ld_chart_856bcfd4_5da2_407f_a0ad_4516c6ff2244
     type: analysis
     owner:
@@ -74,6 +59,21 @@ exposures:
       - chart
     depends_on:
       - ref('agg_daily_task_schedule_with_weekly_avg')
+  - name: ld_chart_5010d770_8665_4926_9008_cd99badf03fb
+    type: analysis
+    owner:
+      name: ken luu
+      email: ""
+    label: what did you do?
+    description: ""
+    url: >-
+      https://ld.kenluu.org/projects/4d879b0c-6772-4839-aba4-1f18c3e1e243/saved/5010d770-8665-4926-9008-cd99badf03fb/view
+    tags:
+      - lightdash
+      - chart
+    depends_on:
+      - ref('fct_tasks')
+      - ref('dim_projects')
   - name: ld_dashboard_af1ef877_12a4_49fe_a995_85d172238436
     type: dashboard
     owner:
