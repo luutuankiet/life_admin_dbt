@@ -76,3 +76,16 @@ life_admin_dbt:
          key_id: "{{ env_var('GCS_KEY') }}"
          secret: "{{ env_var('GCS_SECRET') }}"
          endpoint: "storage.googleapis.com"
+
+
+elementary:
+  tgarget: default
+  outputs:
+    default:
+      type: bigquery
+      location: "{{ env_var('DBT_BQ_LOCATION') }}"
+      project: "{{ env_var('DBT_BQ_PROJECT') }}"
+      method: service-account
+      dataset: "{{ target.schema ~ '_elementary' }}"
+      keyfile: "/tmp/sa.json"
+      threads: 16
