@@ -86,6 +86,6 @@ elementary:
       location: "{{ env_var('DBT_BQ_LOCATION') }}"
       project: "{{ env_var('DBT_BQ_PROJECT') }}"
       method: service-account
-      dataset: "{{target.schema ~ '_elementary'}}"
+      dataset: ticktick_dbt_prod_elementary
       keyfile: "/tmp/sa.json"
       threads: 16
