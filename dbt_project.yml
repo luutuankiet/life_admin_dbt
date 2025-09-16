@@ -58,5 +58,9 @@ models:
         +tags: "todoist"
         +materialized: external
         +format: json
+  elementary:
+    +schema: elementary
+    enabled: "{{ target.name == 'prod' }}"
 flags:
   require_generic_test_arguments_property: true
+  require_explicit_package_overrides_for_builtin_materializations: false

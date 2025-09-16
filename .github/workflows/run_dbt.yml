@@ -10,6 +10,29 @@ on:
     # runs at 6AM VNT daily
     - cron: 0 23 * * *
 
+env:
+  # dbt Environment Variables
+  DBT_PROFILES_DIR: .
+  DBT_TARGET: "prod"
+  DBT_BQ_PROJECT: ${{ secrets.DBT_BQ_PROJECT }}
+  DBT_BQ_LOCATION: ${{ secrets.DBT_BQ_LOCATION }}
+  
+  # Google Cloud Storage Environment Variables
+  GCS_KEY: ${{ secrets.GCS_KEY }}
+  GCS_SECRET: ${{ secrets.GCS_SECRET }}
+
+  # Lightdash Environment Variables
+  LIGHTDASH_API_KEY: ${{ secrets.LIGHTDASH_API_KEY }}
+  LIGHTDASH_PROJECT: ${{ secrets.LIGHTDASH_PROJECT }}
+  LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}
+
+  # dbt project yaml env var
+  ENABLE_GTD_WORK_TYPE_CATEGORIZATION: ${{ vars.ENABLE_GTD_WORK_TYPE_CATEGORIZATION }}
+  GTD_DEEP_WORK_TAGS: ${{ vars.GTD_DEEP_WORK_TAGS }}
+  GTD_SHALLOW_WORK_TAGS: ${{ vars.GTD_SHALLOW_WORK_TAGS }}
+  DBT_TIMEZONE: ${{ vars.DBT_TIMEZONE }}
+  DBT_LOAD_INTERVAL: ${{ vars.DBT_LOAD_INTERVAL }}
+  GCS_RAW_BUCKET: ${{ secrets.GCS_RAW_BUCKET }}
 
 
 jobs:
@@ -28,30 +51,22 @@ jobs:
         
       - name: Decode SA Key
         # This is a more secure way to decode the secret, as it avoids exposing it in the logs.
-        run: echo "${{ secrets.DBT_BQ_KEYFILE_JSON }}" | base64 --decode > sa.json
+        run: |
+          echo "${{ secrets.DBT_BQ_KEYFILE_JSON }}" | base64 --decode > sa.json && \
+          cp sa.json /tmp
+
 
       - name: Run dbt
-        run: uv run dbt deps && uv run dbt run
-        env:
-          # dbt Environment Variables
-          DBT_PROFILES_DIR: .
-          DBT_TARGET: "prod"
-          DBT_BQ_PROJECT: ${{ secrets.DBT_BQ_PROJECT }}
-          DBT_BQ_LOCATION: ${{ secrets.DBT_BQ_LOCATION }}
-          
-          # Google Cloud Storage Environment Variables
-          GCS_KEY: ${{ secrets.GCS_KEY }}
-          GCS_SECRET: ${{ secrets.GCS_SECRET }}
+        run: uv run dbt deps && uv run dbt build
 
-          # Lightdash Environment Variables
-          LIGHTDASH_API_KEY: ${{ secrets.LIGHTDASH_API_KEY }}
-          LIGHTDASH_PROJECT: ${{ secrets.LIGHTDASH_PROJECT }}
-          LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}
-
-          # dbt project yaml env var
-          ENABLE_GTD_WORK_TYPE_CATEGORIZATION: ${{ vars.ENABLE_GTD_WORK_TYPE_CATEGORIZATION }}
-          GTD_DEEP_WORK_TAGS: ${{ vars.GTD_DEEP_WORK_TAGS }}
-          GTD_SHALLOW_WORK_TAGS: ${{ vars.GTD_SHALLOW_WORK_TAGS }}
-          DBT_TIMEZONE: ${{ vars.DBT_TIMEZONE }}
-          DBT_LOAD_INTERVAL: ${{ vars.DBT_LOAD_INTERVAL }}
-          GCS_RAW_BUCKET: ${{ secrets.GCS_RAW_BUCKET }}
+      - name: elementary upload report
+        run: |
+          edr monitor send-report \
+              --project-dir . \
+              --profiles-dir . \
+              --profile-target default \
+              --gcs-bucket-name="${{ secrets.GCS_EDR_BUCKET }}" \
+              --google-service-account-path="/tmp/sa.json"\
+              --google-project-name="$DBT_BQ_PROJECT" \
+              --bucket-file-path="report/index.html" \
+              --update-bucket-website=true
