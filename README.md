@@ -1,4 +1,4 @@
-[![serverless_snapshot](https://github.com/luutuankiet/ticktick_dbt/actions/workflows/serverless_snapshot.yml/badge.svg)](https://github.com/luutuankiet/ticktick_dbt/actions/workflows/serverless_snapshot.yml)
+[![Elementary_Observability_Report](https://img.shields.io/badge/Elementary_Observability_Report-online-green)](https://storage.googleapis.com/life_admin_edr/index.html#/report/dashboard)
 # Personal Life Admin dbt Project
 
 This dbt project contains various dbt models for personal life admin. The transformed data is designed to be consumed by [Lightdash](https://www.lightdash.com/) to serve as a Business Intelligence backend.
