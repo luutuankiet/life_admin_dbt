@@ -74,7 +74,7 @@ jobs:
         run: bun install -g "@lightdash/cli@${{ steps.version.outputs.value }}" || bun install -g @lightdash/cli@latest
 
       - name: dbt deploy
-        run: source .venv/bin/activate && dbt deps && dbt build
+        run: source .venv/bin/activate && dbt deps && dbt build -s "life_admin_dbt"
 
       - name: Set var DBT_CI_SCHEMA
         run: echo "DBT_CI_SCHEMA=PR_${{ github.event.number }}" >> $GITHUB_ENV
@@ -85,7 +85,7 @@ jobs:
         run: source .venv/bin/activate && dbt run-operation drop_ci_schema
         
       - name: lightdash deploy
-        run: source .venv/bin/activate && lightdash deploy
+        run: source .venv/bin/activate && lightdash deploy -s "life_admin_dbt"
 
       - name: Upload Lightdash Content
         run: lightdash upload --project ${{ secrets.LIGHTDASH_PROJECT }} --force

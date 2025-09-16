@@ -57,7 +57,7 @@ jobs:
 
 
       - name: Run dbt
-        run: uv run dbt deps && uv run dbt build
+        run: uv run dbt deps && uv run dbt build -s "life_admin_dbt"
 
       - name: elementary upload report
         run: |
