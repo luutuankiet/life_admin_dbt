@@ -35,11 +35,6 @@ models:
         config:
           meta: {}
           tags: []
-      - name: tags
-        description: Array of tags assigned to the task
-        config:
-          meta: {}
-          tags: []
       - name: column_id
         description: ''
         config:
@@ -119,6 +114,11 @@ models:
           tags: []
       - name: status
         description: 'Task completion status. Value : Normal: 0, Completed: 2'
+        config:
+          meta: {}
+          tags: []
+      - name: tags
+        description: Array of tags assigned to the task
         config:
           meta: {}
           tags: []
