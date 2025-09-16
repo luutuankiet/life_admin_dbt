@@ -68,5 +68,6 @@ jobs:
               --gcs-bucket-name="${{ secrets.GCS_EDR_BUCKET }}" \
               --google-service-account-path="/tmp/sa.json"\
               --google-project-name="$DBT_BQ_PROJECT" \
-              --bucket-file-path="report/index.html" \
-              --update-bucket-website=true
+              --bucket-file-path="index.html" \
+              --update-bucket-website=true \
+              --env prod
