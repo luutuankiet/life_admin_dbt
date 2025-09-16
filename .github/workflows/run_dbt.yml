@@ -61,7 +61,7 @@ jobs:
 
       - name: elementary upload report
         run: |
-          edr monitor send-report \
+          uv run edr monitor send-report \
               --project-dir . \
               --profiles-dir . \
               --profile-target default \
