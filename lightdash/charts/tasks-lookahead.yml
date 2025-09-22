@@ -1,13 +1,12 @@
 name: tasks lookahead
 description: ""
 tableName: agg_daily_task_schedule_with_weekly_avg
-updatedAt: "2025-09-16T13:00:17.937Z"
+updatedAt: "2025-09-22T13:17:14.933Z"
 metricQuery:
   exploreName: agg_daily_task_schedule_with_weekly_avg
   dimensions:
     - agg_daily_task_schedule_with_weekly_avg_schedule_date_day
     - agg_daily_task_schedule_with_weekly_avg_week_start_date_week
-    - agg_daily_task_schedule_with_weekly_avg_project_name
     - agg_daily_task_schedule_with_weekly_avg_schedule_date_day_of_week_name
   metrics:
     - agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
@@ -44,13 +43,10 @@ chartConfig:
       xField: agg_daily_task_schedule_with_weekly_avg_schedule_date_day
       yField:
         - agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
-        - >-
-          agg_daily_task_schedule_with_weekly_avg_overall_weekly_average_tasks_metric
         - agg_daily_task_schedule_with_weekly_avg_schedule_date_day_of_week_name
     eChartsConfig:
       yAxis:
-        - max: "5"
-          min: "0"
+        - {}
         - {}
       legend:
         show: false
@@ -66,89 +62,6 @@ chartConfig:
               field: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
               pivotValues:
                 - field: agg_daily_task_schedule_with_weekly_avg_week_start_date_week
-                  value: "2025-09-14T00:00:00Z"
-          smooth: true
-          areaStyle: {}
-          showSymbol: true
-          yAxisIndex: 0
-          isFilteredOut: false
-        - type: line
-          stack: >-
-            agg_daily_task_schedule_with_weekly_avg_overall_weekly_average_tasks_metric
-          encode:
-            xRef:
-              field: agg_daily_task_schedule_with_weekly_avg_schedule_date_day
-            yRef:
-              field: >-
-                agg_daily_task_schedule_with_weekly_avg_overall_weekly_average_tasks_metric
-              pivotValues:
-                - field: agg_daily_task_schedule_with_weekly_avg_week_start_date_week
-                  value: "2025-09-14T00:00:00Z"
-          smooth: false
-          showSymbol: false
-          yAxisIndex: 0
-          isFilteredOut: false
-        - type: line
-          label:
-            show: false
-          stack: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
-          encode:
-            xRef:
-              field: agg_daily_task_schedule_with_weekly_avg_schedule_date_day
-            yRef:
-              field: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
-              pivotValues:
-                - field: agg_daily_task_schedule_with_weekly_avg_week_start_date_week
-                  value: "2025-09-07T00:00:00Z"
-          smooth: true
-          areaStyle: {}
-          showSymbol: true
-          yAxisIndex: 0
-          isFilteredOut: false
-        - type: line
-          stack: >-
-            agg_daily_task_schedule_with_weekly_avg_overall_weekly_average_tasks_metric
-          encode:
-            xRef:
-              field: agg_daily_task_schedule_with_weekly_avg_schedule_date_day
-            yRef:
-              field: >-
-                agg_daily_task_schedule_with_weekly_avg_overall_weekly_average_tasks_metric
-              pivotValues:
-                - field: agg_daily_task_schedule_with_weekly_avg_week_start_date_week
-                  value: "2025-09-07T00:00:00Z"
-          smooth: false
-          showSymbol: false
-          yAxisIndex: 0
-          isFilteredOut: false
-        - type: line
-          label:
-            show: false
-          stack: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
-          encode:
-            xRef:
-              field: agg_daily_task_schedule_with_weekly_avg_schedule_date_day
-            yRef:
-              field: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
-              pivotValues:
-                - field: agg_daily_task_schedule_with_weekly_avg_week_start_date_week
-                  value: "2025-08-31T00:00:00Z"
-          smooth: true
-          areaStyle: {}
-          showSymbol: true
-          yAxisIndex: 0
-          isFilteredOut: false
-        - type: line
-          label:
-            show: false
-          stack: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
-          encode:
-            xRef:
-              field: agg_daily_task_schedule_with_weekly_avg_schedule_date_day
-            yRef:
-              field: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
-              pivotValues:
-                - field: agg_daily_task_schedule_with_weekly_avg_week_start_date_week
                   value: "2025-09-21T00:00:00Z"
           smooth: true
           areaStyle: {}
@@ -166,61 +79,60 @@ chartConfig:
               field: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
               pivotValues:
                 - field: agg_daily_task_schedule_with_weekly_avg_week_start_date_week
-                  value: "2025-08-24T00:00:00Z"
+                  value: "2025-10-19T00:00:00Z"
           smooth: true
           areaStyle: {}
           showSymbol: true
           yAxisIndex: 0
           isFilteredOut: false
         - type: line
-          stack: >-
-            agg_daily_task_schedule_with_weekly_avg_overall_weekly_average_tasks_metric
-          encode:
-            xRef:
-              field: agg_daily_task_schedule_with_weekly_avg_schedule_date_day
-            yRef:
-              field: >-
-                agg_daily_task_schedule_with_weekly_avg_overall_weekly_average_tasks_metric
-              pivotValues:
-                - field: agg_daily_task_schedule_with_weekly_avg_week_start_date_week
-                  value: "2025-08-31T00:00:00Z"
-          smooth: false
-          showSymbol: false
-          yAxisIndex: 0
-          isFilteredOut: false
-        - type: line
           label:
             show: false
-          stack: >-
-            agg_daily_task_schedule_with_weekly_avg_overall_weekly_average_tasks_metric
+          stack: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
           encode:
             xRef:
               field: agg_daily_task_schedule_with_weekly_avg_schedule_date_day
             yRef:
-              field: >-
-                agg_daily_task_schedule_with_weekly_avg_overall_weekly_average_tasks_metric
+              field: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
               pivotValues:
                 - field: agg_daily_task_schedule_with_weekly_avg_week_start_date_week
-                  value: "2025-09-21T00:00:00Z"
+                  value: "2025-10-12T00:00:00Z"
           smooth: true
+          areaStyle: {}
           showSymbol: true
           yAxisIndex: 0
           isFilteredOut: false
         - type: line
           label:
             show: false
-          stack: >-
-            agg_daily_task_schedule_with_weekly_avg_overall_weekly_average_tasks_metric
+          stack: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
           encode:
             xRef:
               field: agg_daily_task_schedule_with_weekly_avg_schedule_date_day
             yRef:
-              field: >-
-                agg_daily_task_schedule_with_weekly_avg_overall_weekly_average_tasks_metric
+              field: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
               pivotValues:
                 - field: agg_daily_task_schedule_with_weekly_avg_week_start_date_week
-                  value: "2025-08-24T00:00:00Z"
+                  value: "2025-10-05T00:00:00Z"
           smooth: true
+          areaStyle: {}
+          showSymbol: true
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: line
+          label:
+            show: false
+          stack: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
+          encode:
+            xRef:
+              field: agg_daily_task_schedule_with_weekly_avg_schedule_date_day
+            yRef:
+              field: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
+              pivotValues:
+                - field: agg_daily_task_schedule_with_weekly_avg_week_start_date_week
+                  value: "2025-09-28T00:00:00Z"
+          smooth: true
+          areaStyle: {}
           showSymbol: true
           yAxisIndex: 0
           isFilteredOut: false
@@ -247,7 +159,6 @@ tableConfig:
   columnOrder:
     - agg_daily_task_schedule_with_weekly_avg_schedule_date_day
     - agg_daily_task_schedule_with_weekly_avg_week_start_date_week
-    - agg_daily_task_schedule_with_weekly_avg_project_name
     - agg_daily_task_schedule_with_weekly_avg_schedule_date_day_of_week_name
     - agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
     - >-
@@ -256,4 +167,4 @@ tableConfig:
       agg_daily_task_schedule_with_weekly_avg_weekly_average_tasks_per_project_metric
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-09-16T13:00:21.554Z"
+downloadedAt: "2025-09-22T13:18:09.219Z"
