@@ -28,13 +28,11 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
 
-      - name: Get lightdash version 
-        uses: sergeysova/jq-action@v2
-        id: version 
-        env:
-          LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}   
-        with: 
-          cmd: curl -s "${LIGHTDASH_URL}/api/v1/health" | jq -r '.results.version'
+      - name: Get lightdash version
+        id: version
+        run: |
+          echo "version=$(curl -s "${{ secrets.LIGHTDASH_URL }}/api/v1/health" | jq -r '.results.version')" >> $GITHUB_OUTPUT
+
 
       - name: Install npm dependencies
         run: bun install -g "@lightdash/cli@${{ steps.version.outputs.value }}" || bun install -g @lightdash/cli@latest
