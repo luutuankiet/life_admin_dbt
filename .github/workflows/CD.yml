@@ -65,7 +65,7 @@ jobs:
       - name: Get lightdash version
         id: version
         run: |
-          echo "version=$(curl -s "${{ secrets.LIGHTDASH_URL }}/api/v1/health" | jq -r '.results.version')" >> $GITHUB_OUTPUT
+          echo "value=$(curl -s "${{ secrets.LIGHTDASH_URL }}/api/v1/health" | jq -r '.results.version')" >> $GITHUB_OUTPUT
 
 
       - name: Install npm dependencies
