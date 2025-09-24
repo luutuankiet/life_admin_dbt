@@ -1,7 +1,7 @@
 name: what did you do?
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-09-23T12:22:07.370Z"
+updatedAt: "2025-09-24T22:45:38.122Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
@@ -86,4 +86,4 @@ tableConfig:
     - fct_tasks_updated_time_raw
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-09-23T12:23:17.295Z"
+downloadedAt: "2025-09-24T23:16:20.099Z"
