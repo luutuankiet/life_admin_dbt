@@ -59,18 +59,24 @@ models:
         config:
           meta: {}
           tags: []
-      - name: reminders
-        description: List of reminder triggers. Example [ "TRIGGER:P0DT9H0M0S", "TRIGGER:PT0S" ]
+      - name: parent_id
+        description: Parent task id
         config:
           meta: {}
+          tags: []
+      - name: tags
+        description: Array of tags assigned to the task.
+        config:
+          meta:
+            hidden: true
           tags: []
       - name: childids
         description: list of subtasks
         config:
           meta: {}
           tags: []
-      - name: parent_id
-        description: Parent task id
+      - name: reminders
+        description: List of reminder triggers. Example [ "TRIGGER:P0DT9H0M0S", "TRIGGER:PT0S" ]
         config:
           meta: {}
           tags: []
@@ -178,11 +184,6 @@ models:
             dimension:
               type: number
           tags: []
-      - name: tags
-        description: Array of tags assigned to the task
-        config:
-          meta: {}
-          tags: []
       - name: gtd_work_type
         description: |
           optional field indicating if a task was done under
@@ -200,6 +201,14 @@ models:
           - join: dim_projects
             type: left
             sql_on: ${fct_tasks.project_id} = ${dim_projects.project_id}
+            relationship: many-to-one
+          - join: fct_task_tags_bridge
+            type: left
+            sql_on: ${fct_tasks.task_id} = ${fct_task_tags_bridge.task_id}
+            relationship: one-to-many
+          - join: dim_tags
+            type: left
+            sql_on: ${fct_task_tags_bridge.tag_id} = ${dim_tags.tag_id}
             relationship: many-to-one
         metrics:
           total_task_instances:
@@ -450,3 +459,41 @@ models:
             description: >-
               The average number of daily tasks across all projects for the week. Use this as a single
               line on your chart.
+  - name: dim_tags
+    description: Dimension table for tags. The grain is one row per unique tag.
+    columns:
+      - name: tag_id
+        description: Surrogate key for the tag.
+        tests:
+          - unique
+          - not_null
+        config:
+          meta: {}
+          tags: []
+      - name: tag
+        description: A single tag assigned to the task.
+        config:
+          meta: {}
+          tags: []
+  - name: fct_task_tags_bridge
+    description: >-
+      Bridge table connecting tasks to their tags. The grain is one row per task-tag relationship.
+    columns:
+      - name: task_id
+        description: Task identifier
+        tests:
+          - relationships:
+              to: ref('fct_tasks')
+              field: task_id
+        config:
+          meta: {}
+          tags: []
+      - name: tag_id
+        description: Surrogate key for the tag.
+        tests:
+          - relationships:
+              to: ref('dim_tags')
+              field: tag_id
+        config:
+          meta: {}
+          tags: []

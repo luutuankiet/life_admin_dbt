@@ -2,13 +2,12 @@ WITH source AS (
     SELECT
     *
     FROM
-    {{ source('ticktick_raw','tasks') }}
-
+    {{ ref('stg__ticktick__tasks') }}
 ),
 
 renamed as (
     select
-      CAST(id AS STRING) as task_id,
+      task_id,
       tags
       from source
 ),

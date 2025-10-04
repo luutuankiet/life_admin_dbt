@@ -6,50 +6,51 @@ WITH source AS (
 
 ),
 
-renamed as (
+renamed_and_typed as (
     select
-      CAST(id AS STRING) as task_id,
-      CAST(projectid AS STRING) as project_id,
+      NULLIF(CAST(id AS STRING),'') as task_id,
+      NULLIF(CAST(projectid AS STRING),'') as project_id,
       CAST(sortorder AS INT) as sort_order,
-      CAST(title AS STRING) as title,
-      CAST(timezone AS STRING) as timezone,
+      NULLIF(CAST(title AS STRING),'') as title,
+      NULLIF(CAST(timezone AS STRING),'') as timezone,
       CAST(isallday AS BOOLEAN) as is_allday,
       CAST(priority AS INT) as priority,
       CAST(status AS INT) as status,
-      CAST(columnid AS STRING) as column_id,
-      CAST(etag AS STRING) as etag,
-      CAST(kind AS STRING) as kind,
-      CAST(repeatflag AS STRING) as repeat_flag,
+      NULLIF(CAST(columnid AS STRING),'') as column_id,
+      NULLIF(CAST(etag AS STRING),'') as etag,
+      NULLIF(CAST(kind AS STRING),'') as kind,
+      NULLIF(CAST(repeatflag AS STRING),'') as repeat_flag,
       startdate as start_date,
       duedate as due_date,
-      ARRAY_TO_STRING(reminders, ',') as reminders,
       completedtime as _completed_time,
-      ARRAY_TO_STRING(childids, ',') as childids,
-      CAST(parentid AS STRING) as parent_id
+      NULLIF(CAST(parentid AS STRING),'') as parent_id,
+
+      -- NULLIF for typed array
+      ARRAY(
+        SELECT item
+        FROM UNNEST(tags) as item
+        WHERE trim(item) != ''
+        ) as tags,
+      ARRAY(
+        SELECT item
+        FROM UNNEST(childids) as item
+        WHERE trim(item) != ''
+        ) as childids,
+      ARRAY(
+        SELECT item
+        FROM UNNEST(reminders) as item
+        WHERE trim(item) != ''
+        ) as reminders
       from source
 ),
 
 cast_tz as(
     select
-        task_id,
-        project_id,
-        sort_order,
-        title,
-        timezone,
-        is_allday,
-        priority,
-        status,
-        column_id,
-        etag,
-        kind,
-        repeat_flag,
-        reminders,
-        childids,
-        parent_id,
+        * except (start_date, due_date, _completed_time),
         DATETIME(start_date, "{{var('timezone')}}") as start_date,
         DATETIME(due_date, "{{var('timezone')}}") as due_date,
         DATETIME(_completed_time, "{{var('timezone')}}") as _completed_time
-      from renamed
+      from renamed_and_typed
 
 )
 

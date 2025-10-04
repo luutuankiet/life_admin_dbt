@@ -57,8 +57,13 @@ models:
         config:
           meta: {}
           tags: []
-      - name: reminders
-        description: List of reminder triggers. Example [ "TRIGGER:P0DT9H0M0S", "TRIGGER:PT0S" ]
+      - name: parent_id
+        description: Parent task id
+        config:
+          meta: {}
+          tags: []
+      - name: tags
+        description: Array of tags assigned to the task.
         config:
           meta: {}
           tags: []
@@ -67,8 +72,8 @@ models:
         config:
           meta: {}
           tags: []
-      - name: parent_id
-        description: Parent task id
+      - name: reminders
+        description: List of reminder triggers. Example [ "TRIGGER:P0DT9H0M0S", "TRIGGER:PT0S" ]
         config:
           meta: {}
           tags: []
@@ -114,11 +119,6 @@ models:
           tags: []
       - name: status
         description: 'Task completion status. Value : Normal: 0, Completed: 2'
-        config:
-          meta: {}
-          tags: []
-      - name: tags
-        description: Array of tags assigned to the task
         config:
           meta: {}
           tags: []
@@ -187,6 +187,21 @@ models:
           tags: []
       - name: closed
         description: Project closed
+        config:
+          meta: {}
+          tags: []
+  - name: stg__ticktick__task_tags
+    description: |
+      - Bridge table to break down tags <> task relation.
+      - This is due to our design fact_tasks grain is the task and not the tags.
+    columns:
+      - name: task_id
+        description: Task identifier
+        config:
+          meta: {}
+          tags: []
+      - name: tag
+        description: A single tag assigned to the task.
         config:
           meta: {}
           tags: []

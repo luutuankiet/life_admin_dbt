@@ -1,46 +1,38 @@
-with task_tags as (
-    select
-        task_id,
-        array_agg(tag) as tags
-    from {{ ref('base__ticktick__task_tags') }}
-    group by 1
-),
+{# exclude cols we'll transform in this model #}
+{% set except_cols = [
+    'title',
+    '_completed_time',
+    'status'
+    ]
+%}
+{# then create a set of shared column to keep the orders intact & UNION ALL happy #}
+{%- set shared_columns = dbt_utils.star(from=ref('base__ticktick__tasks'),except=except_cols) -%}
 
-source as (
+
+
+with source as (
     select
-    {{ dbt_utils.star(
-        from=ref('base__ticktick__tasks'),
-        except=['_completed_time', 'status', 'title']
-        ) }},
+    {{ shared_columns }},
     -- preserve the col order to join
     -- also set to NULL for cases task re-add / project unarchived
     -- in which we enforce source to always have "new" status.
     title,
     cast(NULL as DATETIME) as completed_time,
     cast(NULL as DATETIME) as updated_time,
-    0 as status,
-    tags
+    0 as status
 
     from {{ref('base__ticktick__tasks')}}
-    left join task_tags using (task_id)
     where task_id != '0' -- we'd inject this in the cte below
 ),
 
 snap as (
     select
-    {{ dbt_utils.star(
-        from=ref('base__ticktick__tasks_snapshot'),
-        except=[
-            'dbt_valid_to', 'dbt_valid_from', 'dbt_updated_at', 'dbt_scd_id',
-            '_completed_time', 'status', 'title'
-            ]
-        ) }},
+    {{ shared_columns }},
     title,
     -- role play as inferred completed_time
     dbt_valid_to as completed_time,
     dbt_updated_at as updated_time,
-    2 as status,
-    tags
+    2 as status
 
     from (
         -- dedupe get latest instance in case of
@@ -54,17 +46,13 @@ snap as (
         )
         }}
     )
-    left join task_tags using (task_id)
 
     where dbt_valid_to is not null
 ),
 
 inject_load_time as (
     select 
-    {{ dbt_utils.star(
-        from=ref('base__ticktick__tasks'),
-        except=['_completed_time', 'status', 'title']
-        ) }},
+    {{ shared_columns }},
     -- calculate the next load time
     -- its an eyesore but i'd hate putting this
     -- in lightdash yaml 🤷
@@ -105,7 +93,6 @@ inject_load_time as (
     -- we injected a row id=1 in tasks_raw that has column _completed_time as the pipeline loaded time
     cast(_completed_time as DATETIME) as updated_time,
     0 as status,
-    [''] as tags
 
     from {{ref('base__ticktick__tasks')}}
     where task_id = '0'
@@ -141,7 +128,9 @@ select
             ) > 0
 
         {% elif deep_tags | length == 0 %}
-            ARRAY_LENGTH(tags) is null 
+            -- empty arrays have 0 length, 
+            -- but NULL arrays will return NULL
+            COALESCE(ARRAY_LENGTH(tags),0) = 0
         {% endif %}
             then '🥩'
 
@@ -156,7 +145,7 @@ select
             ) > 0
 
         {% elif shallow_tags | length == 0 %}
-            ARRAY_LENGTH(tags) is null -- length of an empty array is NULL
+            COALESCE(ARRAY_LENGTH(tags),0) = 0
         {% endif %}
             then '🧃'
 
