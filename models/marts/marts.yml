@@ -478,6 +478,9 @@ models:
   - name: fct_task_tags_bridge
     description: >-
       Bridge table connecting tasks to their tags. The grain is one row per task-tag relationship.
+    config: 
+      meta:
+        hidden: true
     columns:
       - name: task_id
         description: Task identifier

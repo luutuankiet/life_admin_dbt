@@ -27,10 +27,11 @@ renamed_and_typed as (
       startdate as start_date,
       duedate as due_date,
       -- reminders value are wrapped in single quotes
-      -- so simply replace would work. 
+      -- i.e. malformed json array : ['val1','val2']
+      -- so needs to replace them too
       ARRAY(
           SELECT item 
-          FROM UNNEST(SPLIT(REPLACE(reminders,"'",''))) as item
+          FROM UNNEST(SPLIT(REGEXP_REPLACE(reminders, r"^\[|\]$|\'", ''))) as item
           WHERE trim(item) != ''
       ) as reminders,
       completedtime as _completed_time,
