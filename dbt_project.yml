@@ -46,6 +46,7 @@ models:
     +enabled: "{{ target.name != 'load_raw' }}"
     +dbt-osmosis-options:
       force-inherit-descriptions: true
+      sort-by: "alphabetical"
     staging:
       +materialized: view
       +dbt-osmosis: "{parent}.yml"
