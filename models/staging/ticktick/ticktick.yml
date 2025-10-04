@@ -201,7 +201,7 @@ models:
           meta: {}
           tags: []
       - name: tag
-        description: Array of tags assigned to the task.
+        description: A single tag assigned to the task.
         config:
           meta: {}
           tags: []

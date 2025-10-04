@@ -432,18 +432,3 @@ models:
         config:
           meta: {}
           tags: []
-  - name: base__ticktick__task_tags
-    description: Table with one row per task and tag combination.
-    columns:
-      - name: task_id
-        data_type: string
-        description: Task identifier
-        config:
-          meta: {}
-          tags: []
-      - name: tag
-        data_type: string
-        description: Tag assigned to the task
-        config:
-          meta: {}
-          tags: []
