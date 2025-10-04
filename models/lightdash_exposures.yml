@@ -1,21 +1,23 @@
 version: 2
 exposures:
-  - name: ld_project_4d879b0c_6772_4839_aba4_1f18c3e1e243
+  - name: ld_project_2f8e376d_3353_4304_acfc_1bfde52e2c1d
     type: application
     owner:
       name: ken luu
       email: luutuankiet.ftu2@gmail.com
-    label: Lightdash - main
+    label: Lightdash - ken
     description: Lightdash project
-    url: https://ld.kenluu.org/projects/4d879b0c-6772-4839-aba4-1f18c3e1e243/home
+    url: https://ld.kenluu.org/projects/2f8e376d-3353-4304-acfc-1bfde52e2c1d/home
     tags:
       - lightdash
       - project
     depends_on:
+      - ref('dim_tags')
       - ref('fct_tasks')
       - ref('dim_projects')
+      - ref('fct_task_tags_bridge')
       - ref('agg_daily_task_schedule_with_weekly_avg')
-  - name: ld_chart_856bcfd4_5da2_407f_a0ad_4516c6ff2244
+  - name: ld_chart_f12e500d_7bb2_491a_9769_e8d74f69df46
     type: analysis
     owner:
       name: ken luu
@@ -23,14 +25,16 @@ exposures:
     label: Data freshness
     description: ""
     url: >-
-      https://ld.kenluu.org/projects/4d879b0c-6772-4839-aba4-1f18c3e1e243/saved/856bcfd4-5da2-407f-a0ad-4516c6ff2244/view
+      https://ld.kenluu.org/projects/2f8e376d-3353-4304-acfc-1bfde52e2c1d/saved/f12e500d-7bb2-491a-9769-e8d74f69df46/view
     tags:
       - lightdash
       - chart
     depends_on:
+      - ref('dim_tags')
       - ref('fct_tasks')
       - ref('dim_projects')
-  - name: ld_chart_4b994323_4070_4073_852b_24d9d44a9d09
+      - ref('fct_task_tags_bridge')
+  - name: ld_chart_466d9992_dc80_49b3_ba47_ae8436433ce1
     type: analysis
     owner:
       name: ken luu
@@ -38,14 +42,16 @@ exposures:
     label: next load time
     description: ""
     url: >-
-      https://ld.kenluu.org/projects/4d879b0c-6772-4839-aba4-1f18c3e1e243/saved/4b994323-4070-4073-852b-24d9d44a9d09/view
+      https://ld.kenluu.org/projects/2f8e376d-3353-4304-acfc-1bfde52e2c1d/saved/466d9992-dc80-49b3-ba47-ae8436433ce1/view
     tags:
       - lightdash
       - chart
     depends_on:
+      - ref('dim_tags')
       - ref('fct_tasks')
       - ref('dim_projects')
-  - name: ld_chart_ced20f86_6067_47c1_81de_f70daeae23f6
+      - ref('fct_task_tags_bridge')
+  - name: ld_chart_5b5998f8_452e_4929_935d_b8b7e2b284c1
     type: analysis
     owner:
       name: ken luu
@@ -53,13 +59,13 @@ exposures:
     label: tasks lookahead
     description: ""
     url: >-
-      https://ld.kenluu.org/projects/4d879b0c-6772-4839-aba4-1f18c3e1e243/saved/ced20f86-6067-47c1-81de-f70daeae23f6/view
+      https://ld.kenluu.org/projects/2f8e376d-3353-4304-acfc-1bfde52e2c1d/saved/5b5998f8-452e-4929-935d-b8b7e2b284c1/view
     tags:
       - lightdash
       - chart
     depends_on:
       - ref('agg_daily_task_schedule_with_weekly_avg')
-  - name: ld_chart_5010d770_8665_4926_9008_cd99badf03fb
+  - name: ld_chart_3cd15611_0ef9_4cc7_a2d9_139bce5c2957
     type: analysis
     owner:
       name: ken luu
@@ -67,14 +73,16 @@ exposures:
     label: what did you do?
     description: ""
     url: >-
-      https://ld.kenluu.org/projects/4d879b0c-6772-4839-aba4-1f18c3e1e243/saved/5010d770-8665-4926-9008-cd99badf03fb/view
+      https://ld.kenluu.org/projects/2f8e376d-3353-4304-acfc-1bfde52e2c1d/saved/3cd15611-0ef9-4cc7-a2d9-139bce5c2957/view
     tags:
       - lightdash
       - chart
     depends_on:
+      - ref('dim_tags')
       - ref('fct_tasks')
       - ref('dim_projects')
-  - name: ld_dashboard_af1ef877_12a4_49fe_a995_85d172238436
+      - ref('fct_task_tags_bridge')
+  - name: ld_dashboard_ecbc6ef0_7fb1_491d_9885_d761504f895b
     type: dashboard
     owner:
       name: ken luu
@@ -82,11 +90,13 @@ exposures:
     label: gtd dash v1.0
     description: ""
     url: >-
-      https://ld.kenluu.org/projects/4d879b0c-6772-4839-aba4-1f18c3e1e243/dashboards/af1ef877-12a4-49fe-a995-85d172238436/view
+      https://ld.kenluu.org/projects/2f8e376d-3353-4304-acfc-1bfde52e2c1d/dashboards/ecbc6ef0-7fb1-491d-9885-d761504f895b/view
     tags:
       - lightdash
       - dashboard
     depends_on:
+      - ref('dim_tags')
       - ref('fct_tasks')
       - ref('dim_projects')
+      - ref('fct_task_tags_bridge')
       - ref('agg_daily_task_schedule_with_weekly_avg')
