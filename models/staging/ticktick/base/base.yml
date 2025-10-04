@@ -79,21 +79,26 @@ models:
         config:
           meta: {}
           tags: []
-      - name: reminders
+      - name: parent_id
         data_type: string
-        description: List of reminder triggers. Example [ "TRIGGER:P0DT9H0M0S", "TRIGGER:PT0S" ]
+        description: Parent task id
+        config:
+          meta: {}
+          tags: []
+      - name: tags
+        description: Array of tags assigned to the task.
         config:
           meta: {}
           tags: []
       - name: childids
-        data_type: string
+        data_type: array<string>
         description: list of subtasks
         config:
           meta: {}
           tags: []
-      - name: parent_id
-        data_type: string
-        description: Parent task id
+      - name: reminders
+        data_type: array<string>
+        description: List of reminder triggers. Example [ "TRIGGER:P0DT9H0M0S", "TRIGGER:PT0S" ]
         config:
           meta: {}
           tags: []
@@ -201,20 +206,32 @@ models:
           meta: {}
           tags: []
       - name: reminders
-        data_type: string
+        data_type: array<string>
         description: List of reminder triggers. Example [ "TRIGGER:P0DT9H0M0S", "TRIGGER:PT0S" ]
         config:
           meta: {}
           tags: []
       - name: childids
-        data_type: string
+        data_type: array<string>
         description: list of subtasks
+        config:
+          meta: {}
+          tags: []
+      - name: tags
+        description: Array of tags assigned to the task.
         config:
           meta: {}
           tags: []
       - name: parent_id
         data_type: string
         description: Parent task id
+        config:
+          meta: {}
+          tags: []
+      - name: dbt_scd_id
+        data_type: string
+        description: >-
+          A unique key generated for each snapshot row. Timezone conversion available with env var DBT_TIMEZONE
         config:
           meta: {}
           tags: []
@@ -240,13 +257,6 @@ models:
           - Task completed time in "yyyy-MM-dd'T'HH:mm:ssZ"
           - Is not useful so kept internally for reference only.
           - Timezone conversion available with env var DBT_TIMEZONE
-        config:
-          meta: {}
-          tags: []
-      - name: dbt_scd_id
-        data_type: string
-        description: >-
-          A unique key generated for each snapshot row. Timezone conversion available with env var DBT_TIMEZONE
         config:
           meta: {}
           tags: []
