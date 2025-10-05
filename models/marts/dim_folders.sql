@@ -6,5 +6,5 @@ final as (
     select *  from source
 )
 
-select * from source
+select * from final
 
