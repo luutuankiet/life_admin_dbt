@@ -14,26 +14,10 @@ exposures:
     depends_on:
       - ref('dim_tags')
       - ref('fct_tasks')
+      - ref('dim_folders')
       - ref('dim_projects')
       - ref('fct_task_tags_bridge')
       - ref('agg_daily_task_schedule_with_weekly_avg')
-  - name: ld_chart_3cd15611_0ef9_4cc7_a2d9_139bce5c2957
-    type: analysis
-    owner:
-      name: ken luu
-      email: ""
-    label: what did you do?
-    description: ""
-    url: >-
-      https://ld.kenluu.org/projects/2f8e376d-3353-4304-acfc-1bfde52e2c1d/saved/3cd15611-0ef9-4cc7-a2d9-139bce5c2957/view
-    tags:
-      - lightdash
-      - chart
-    depends_on:
-      - ref('dim_tags')
-      - ref('fct_tasks')
-      - ref('dim_projects')
-      - ref('fct_task_tags_bridge')
   - name: ld_chart_f12e500d_7bb2_491a_9769_e8d74f69df46
     type: analysis
     owner:
@@ -49,6 +33,7 @@ exposures:
     depends_on:
       - ref('dim_tags')
       - ref('fct_tasks')
+      - ref('dim_folders')
       - ref('dim_projects')
       - ref('fct_task_tags_bridge')
   - name: ld_chart_466d9992_dc80_49b3_ba47_ae8436433ce1
@@ -66,6 +51,25 @@ exposures:
     depends_on:
       - ref('dim_tags')
       - ref('fct_tasks')
+      - ref('dim_folders')
+      - ref('dim_projects')
+      - ref('fct_task_tags_bridge')
+  - name: ld_chart_3cd15611_0ef9_4cc7_a2d9_139bce5c2957
+    type: analysis
+    owner:
+      name: ken luu
+      email: ""
+    label: what did you do?
+    description: ""
+    url: >-
+      https://ld.kenluu.org/projects/2f8e376d-3353-4304-acfc-1bfde52e2c1d/saved/3cd15611-0ef9-4cc7-a2d9-139bce5c2957/view
+    tags:
+      - lightdash
+      - chart
+    depends_on:
+      - ref('dim_tags')
+      - ref('fct_tasks')
+      - ref('dim_folders')
       - ref('dim_projects')
       - ref('fct_task_tags_bridge')
   - name: ld_chart_5b5998f8_452e_4929_935d_b8b7e2b284c1
@@ -97,6 +101,7 @@ exposures:
     depends_on:
       - ref('dim_tags')
       - ref('fct_tasks')
+      - ref('dim_folders')
       - ref('dim_projects')
       - ref('fct_task_tags_bridge')
       - ref('agg_daily_task_schedule_with_weekly_avg')
