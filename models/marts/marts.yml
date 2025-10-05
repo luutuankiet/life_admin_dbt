@@ -206,10 +206,14 @@ models:
             type: left
             sql_on: ${fct_tasks.task_id} = ${fct_task_tags_bridge.task_id}
             relationship: one-to-many
+            hidden: true
           - join: dim_tags
             type: left
             sql_on: ${fct_task_tags_bridge.tag_id} = ${dim_tags.tag_id}
             relationship: many-to-one
+          - join: dim_folders
+            type: left
+            sql_on: ${dim_folders.folder_id} = ${dim_projects.group_id}
         metrics:
           total_task_instances:
             label: Total Tasks
@@ -478,9 +482,6 @@ models:
   - name: fct_task_tags_bridge
     description: >-
       Bridge table connecting tasks to their tags. The grain is one row per task-tag relationship.
-    config:
-      meta:
-        hidden: true
     columns:
       - name: tag_id
         description: Surrogate key for the tag.
@@ -497,6 +498,18 @@ models:
           - relationships:
               to: ref('fct_tasks')
               field: task_id
+        config:
+          meta: {}
+          tags: []
+  - name: dim_folders
+    columns:
+      - name: folder_id
+        description: unique identifer of the folder
+        config:
+          meta: {}
+          tags: []
+      - name: folder_name
+        description: The folder name. Inferred from dummy project manually created by users
         config:
           meta: {}
           tags: []

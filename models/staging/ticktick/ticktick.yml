@@ -205,3 +205,21 @@ models:
         config:
           meta: {}
           tags: []
+  - name: stg__ticktick__project_folder
+    description: |
+      - Folders where the projects belong to.
+      - Inferred from dummy projects created from user with this specific naming convension : `folder_map - '<the_name>'`
+      - Has a failsafe in that if user didn't create dummy label projet then we just don't load any data.
+    columns:
+      - name: folder_id
+        description: unique identifer of the folder
+        data_tests:
+          - unique
+        config:
+          meta: {}
+          tags: []
+      - name: folder_name
+        description: The folder name. Inferred from dummy project manually created by users
+        config:
+          meta: {}
+          tags: []

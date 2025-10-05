@@ -1,13 +1,14 @@
 name: what did you do?
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-10-04T09:20:08.344Z"
+updatedAt: "2025-10-05T14:28:47.126Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
     - fct_tasks_completed_time_day
     - fct_tasks_completed_time_day_of_week_name
     - fct_tasks_gtd_work_type
+    - dim_folders_folder_name
     - dim_projects_project_name
     - fct_tasks_title
     - fct_tasks_task_id
@@ -79,6 +80,7 @@ tableConfig:
     - fct_tasks_completed_time_day
     - fct_tasks_completed_time_day_of_week_name
     - fct_tasks_gtd_work_type
+    - dim_folders_folder_name
     - dim_projects_project_name
     - fct_tasks_title
     - fct_tasks_task_id
@@ -86,4 +88,4 @@ tableConfig:
     - fct_tasks_updated_time_raw
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-10-04T09:22:29.235Z"
+downloadedAt: "2025-10-05T14:29:18.917Z"
