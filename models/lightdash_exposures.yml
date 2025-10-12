@@ -1,13 +1,13 @@
 version: 2
 exposures:
-  - name: ld_project_2f8e376d_3353_4304_acfc_1bfde52e2c1d
+  - name: ld_project_75904188_446e_47ad_b22c_aae7fe80dfe2
     type: application
     owner:
       name: ken luu
       email: luutuankiet.ftu2@gmail.com
-    label: Lightdash - ken
+    label: Lightdash - magenta spider
     description: Lightdash project
-    url: https://ld.kenluu.org/projects/2f8e376d-3353-4304-acfc-1bfde52e2c1d/home
+    url: https://ld.kenluu.org/projects/75904188-446e-47ad-b22c-aae7fe80dfe2/home
     tags:
       - lightdash
       - project
@@ -16,27 +16,9 @@ exposures:
       - ref('fct_tasks')
       - ref('dim_folders')
       - ref('dim_projects')
+      - ref('dim_date_spine')
       - ref('fct_task_tags_bridge')
-      - ref('agg_daily_task_schedule_with_weekly_avg')
-  - name: ld_chart_f12e500d_7bb2_491a_9769_e8d74f69df46
-    type: analysis
-    owner:
-      name: ken luu
-      email: ""
-    label: Data freshness
-    description: ""
-    url: >-
-      https://ld.kenluu.org/projects/2f8e376d-3353-4304-acfc-1bfde52e2c1d/saved/f12e500d-7bb2-491a-9769-e8d74f69df46/view
-    tags:
-      - lightdash
-      - chart
-    depends_on:
-      - ref('dim_tags')
-      - ref('fct_tasks')
-      - ref('dim_folders')
-      - ref('dim_projects')
-      - ref('fct_task_tags_bridge')
-  - name: ld_chart_466d9992_dc80_49b3_ba47_ae8436433ce1
+  - name: ld_chart_3bce9f56_2074_4772_9bf7_53764116f3b5
     type: analysis
     owner:
       name: ken luu
@@ -44,7 +26,7 @@ exposures:
     label: next load time
     description: ""
     url: >-
-      https://ld.kenluu.org/projects/2f8e376d-3353-4304-acfc-1bfde52e2c1d/saved/466d9992-dc80-49b3-ba47-ae8436433ce1/view
+      https://ld.kenluu.org/projects/75904188-446e-47ad-b22c-aae7fe80dfe2/saved/3bce9f56-2074-4772-9bf7-53764116f3b5/view
     tags:
       - lightdash
       - chart
@@ -53,16 +35,17 @@ exposures:
       - ref('fct_tasks')
       - ref('dim_folders')
       - ref('dim_projects')
+      - ref('dim_date_spine')
       - ref('fct_task_tags_bridge')
-  - name: ld_chart_3cd15611_0ef9_4cc7_a2d9_139bce5c2957
+  - name: ld_chart_0bd67204_80c4_45e3_a289_4a3ba0e8306d
     type: analysis
     owner:
       name: ken luu
       email: ""
-    label: what did you do?
+    label: Data freshness
     description: ""
     url: >-
-      https://ld.kenluu.org/projects/2f8e376d-3353-4304-acfc-1bfde52e2c1d/saved/3cd15611-0ef9-4cc7-a2d9-139bce5c2957/view
+      https://ld.kenluu.org/projects/75904188-446e-47ad-b22c-aae7fe80dfe2/saved/0bd67204-80c4-45e3-a289-4a3ba0e8306d/view
     tags:
       - lightdash
       - chart
@@ -71,8 +54,9 @@ exposures:
       - ref('fct_tasks')
       - ref('dim_folders')
       - ref('dim_projects')
+      - ref('dim_date_spine')
       - ref('fct_task_tags_bridge')
-  - name: ld_chart_5b5998f8_452e_4929_935d_b8b7e2b284c1
+  - name: ld_chart_fbadcd63_ac91_4880_b263_414b3a9e2c91
     type: analysis
     owner:
       name: ken luu
@@ -80,13 +64,75 @@ exposures:
     label: tasks lookahead
     description: ""
     url: >-
-      https://ld.kenluu.org/projects/2f8e376d-3353-4304-acfc-1bfde52e2c1d/saved/5b5998f8-452e-4929-935d-b8b7e2b284c1/view
+      https://ld.kenluu.org/projects/75904188-446e-47ad-b22c-aae7fe80dfe2/saved/fbadcd63-ac91-4880-b263-414b3a9e2c91/view
     tags:
       - lightdash
       - chart
     depends_on:
-      - ref('agg_daily_task_schedule_with_weekly_avg')
-  - name: ld_dashboard_ecbc6ef0_7fb1_491d_9885_d761504f895b
+      - ref('dim_tags')
+      - ref('fct_tasks')
+      - ref('dim_folders')
+      - ref('dim_projects')
+      - ref('dim_date_spine')
+      - ref('fct_task_tags_bridge')
+  - name: ld_chart_d419ddd3_abaf_4ec8_8a69_ee32aacef0d7
+    type: analysis
+    owner:
+      name: ken luu
+      email: ""
+    label: drill down tasks by parent grain dimension
+    description: ""
+    url: >-
+      https://ld.kenluu.org/projects/75904188-446e-47ad-b22c-aae7fe80dfe2/saved/d419ddd3-abaf-4ec8-8a69-ee32aacef0d7/view
+    tags:
+      - lightdash
+      - chart
+    depends_on:
+      - ref('dim_tags')
+      - ref('fct_tasks')
+      - ref('dim_folders')
+      - ref('dim_projects')
+      - ref('dim_date_spine')
+      - ref('fct_task_tags_bridge')
+  - name: ld_chart_16bb7c80_af61_412c_9e91_c103ac475abb
+    type: analysis
+    owner:
+      name: ken luu
+      email: ""
+    label: what did you do?
+    description: ""
+    url: >-
+      https://ld.kenluu.org/projects/75904188-446e-47ad-b22c-aae7fe80dfe2/saved/16bb7c80-af61-412c-9e91-c103ac475abb/view
+    tags:
+      - lightdash
+      - chart
+    depends_on:
+      - ref('dim_tags')
+      - ref('fct_tasks')
+      - ref('dim_folders')
+      - ref('dim_projects')
+      - ref('dim_date_spine')
+      - ref('fct_task_tags_bridge')
+  - name: ld_chart_bda804ad_8e37_4751_803a_66a2a617afaf
+    type: analysis
+    owner:
+      name: ken luu
+      email: ""
+    label: distribution by parent dimension
+    description: ""
+    url: >-
+      https://ld.kenluu.org/projects/75904188-446e-47ad-b22c-aae7fe80dfe2/saved/bda804ad-8e37-4751-803a-66a2a617afaf/view
+    tags:
+      - lightdash
+      - chart
+    depends_on:
+      - ref('dim_tags')
+      - ref('fct_tasks')
+      - ref('dim_folders')
+      - ref('dim_projects')
+      - ref('dim_date_spine')
+      - ref('fct_task_tags_bridge')
+  - name: ld_dashboard_11b83bee_661d_4221_9c6e_85aa162e9ffc
     type: dashboard
     owner:
       name: ken luu
@@ -94,7 +140,7 @@ exposures:
     label: gtd dash v1.0
     description: ""
     url: >-
-      https://ld.kenluu.org/projects/2f8e376d-3353-4304-acfc-1bfde52e2c1d/dashboards/ecbc6ef0-7fb1-491d-9885-d761504f895b/view
+      https://ld.kenluu.org/projects/75904188-446e-47ad-b22c-aae7fe80dfe2/dashboards/11b83bee-661d-4221-9c6e-85aa162e9ffc/view
     tags:
       - lightdash
       - dashboard
@@ -103,5 +149,5 @@ exposures:
       - ref('fct_tasks')
       - ref('dim_folders')
       - ref('dim_projects')
+      - ref('dim_date_spine')
       - ref('fct_task_tags_bridge')
-      - ref('agg_daily_task_schedule_with_weekly_avg')

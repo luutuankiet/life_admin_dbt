@@ -38,6 +38,11 @@ add_completed_time as (
     select * from source
     UNION ALL
     select * from snap
+),
+
+coalesce_null_group_ids as (
+    select * except(group_id), coalesce(group_id,'default') as group_id
+    from add_completed_time
 )
 
 
@@ -45,5 +50,5 @@ add_completed_time as (
 select 
 *
 
-from add_completed_time
+from coalesce_null_group_ids
     

@@ -1,45 +1,45 @@
 name: gtd dash v1.0
 description: ""
-updatedAt: "2025-10-05T14:43:10.249Z"
+updatedAt: "2025-10-12T10:25:24.256Z"
 tiles:
-  - x: 0
-    "y": 0
-    h: 3
-    w: 12
-    tabUuid: null
-    type: saved_chart
-    properties:
-      title: ""
-      hideTitle: false
-      chartSlug: data-freshness
-      chartName: Data freshness
-    tileSlug: data-freshness
-  - x: 12
-    "y": 0
-    h: 3
-    w: 12
-    tabUuid: null
-    type: saved_chart
-    properties:
-      title: ""
-      hideTitle: false
-      chartSlug: next-load-time
-      chartName: next load time
-    tileSlug: next-load-time
   - x: 0
     "y": 3
     h: 7
-    w: 36
+    w: 18
     tabUuid: null
     type: saved_chart
     properties:
       title: ""
       hideTitle: false
-      chartSlug: tasks-lookahead
+      chartSlug: tasks-lookahead-1
       chartName: tasks lookahead
-    tileSlug: tasks-lookahead
+    tileSlug: tasks-lookahead-1
+  - x: 18
+    "y": 3
+    h: 15
+    w: 18
+    tabUuid: null
+    type: saved_chart
+    properties:
+      title: ""
+      hideTitle: false
+      chartSlug: tasks-drill-down-by-grain
+      chartName: drill down tasks by parent grain dimension
+    tileSlug: tasks-drill-down-by-grain
   - x: 0
     "y": 10
+    h: 8
+    w: 18
+    tabUuid: null
+    type: saved_chart
+    properties:
+      title: ""
+      hideTitle: false
+      chartSlug: tmp
+      chartName: distribution by parent dimension
+    tileSlug: tmp
+  - x: 0
+    "y": 18
     h: 8
     w: 36
     tabUuid: null
@@ -52,10 +52,27 @@ tiles:
     tileSlug: what-did-you-do
 filters:
   metrics: []
-  dimensions: []
+  dimensions:
+    - label: Lookahead Date day
+      target:
+        fieldId: dim_date_spine_date_day
+        fieldName: date_day
+        tableName: dim_date_spine
+      values:
+        - 5
+      disabled: false
+      operator: inTheNext
+      settings:
+        completed: false
+        unitOfTime: weeks
+      tileTargets:
+        tasks-lookahead-1:
+          fieldId: dim_date_spine_date_day
+          tableName: dim_date_spine
+        what-did-you-do: false
   tableCalculations: []
 tabs: []
 slug: gtd-dash-v1-0
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-10-05T14:43:13.793Z"
+downloadedAt: "2025-10-12T10:47:37.760Z"

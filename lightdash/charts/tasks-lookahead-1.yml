@@ -1,0 +1,244 @@
+name: tasks lookahead
+description: ""
+tableName: fct_tasks
+updatedAt: "2025-10-12T10:45:00.617Z"
+metricQuery:
+  exploreName: fct_tasks
+  dimensions:
+    - dim_date_spine_date_day_day
+    - dim_date_spine_date_day_day_of_week_name
+    - dim_date_spine_date_day_week
+  metrics:
+    - fct_tasks_count
+  filters: {}
+  sorts:
+    - fieldId: dim_date_spine_date_day_day
+      descending: true
+  limit: 500
+  metricOverrides: {}
+  tableCalculations: []
+  additionalMetrics: []
+  customDimensions: []
+chartConfig:
+  type: cartesian
+  config:
+    layout:
+      xField: dim_date_spine_date_day_day
+      yField:
+        - fct_tasks_count
+        - dim_date_spine_date_day_day_of_week_name
+      flipAxes: false
+    eChartsConfig:
+      yAxis:
+        - max: "6"
+          min: "0"
+          name: ""
+        - {}
+      legend:
+        show: false
+      series:
+        - type: line
+          stack: fct_tasks_count
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_count
+              pivotValues:
+                - field: dim_date_spine_date_day_week
+                  value: "2026-01-11T00:00:00Z"
+          areaStyle: {}
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: line
+          stack: fct_tasks_count
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_count
+              pivotValues:
+                - field: dim_date_spine_date_day_week
+                  value: "2026-01-04T00:00:00Z"
+          areaStyle: {}
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: line
+          stack: fct_tasks_count
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_count
+              pivotValues:
+                - field: dim_date_spine_date_day_week
+                  value: "2025-12-28T00:00:00Z"
+          areaStyle: {}
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: line
+          stack: fct_tasks_count
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_count
+              pivotValues:
+                - field: dim_date_spine_date_day_week
+                  value: "2025-12-21T00:00:00Z"
+          areaStyle: {}
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: line
+          stack: fct_tasks_count
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_count
+              pivotValues:
+                - field: dim_date_spine_date_day_week
+                  value: "2025-12-14T00:00:00Z"
+          areaStyle: {}
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: line
+          stack: fct_tasks_count
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_count
+              pivotValues:
+                - field: dim_date_spine_date_day_week
+                  value: "2025-12-07T00:00:00Z"
+          areaStyle: {}
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: line
+          stack: fct_tasks_count
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_count
+              pivotValues:
+                - field: dim_date_spine_date_day_week
+                  value: "2025-11-30T00:00:00Z"
+          areaStyle: {}
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: line
+          stack: fct_tasks_count
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_count
+              pivotValues:
+                - field: dim_date_spine_date_day_week
+                  value: "2025-11-23T00:00:00Z"
+          areaStyle: {}
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: line
+          stack: fct_tasks_count
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_count
+              pivotValues:
+                - field: dim_date_spine_date_day_week
+                  value: "2025-11-16T00:00:00Z"
+          areaStyle: {}
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: line
+          stack: fct_tasks_count
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_count
+              pivotValues:
+                - field: dim_date_spine_date_day_week
+                  value: "2025-11-09T00:00:00Z"
+          areaStyle: {}
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: line
+          stack: fct_tasks_count
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_count
+              pivotValues:
+                - field: dim_date_spine_date_day_week
+                  value: "2025-11-02T00:00:00Z"
+          areaStyle: {}
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: line
+          stack: fct_tasks_count
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_count
+              pivotValues:
+                - field: dim_date_spine_date_day_week
+                  value: "2025-10-26T00:00:00Z"
+          areaStyle: {}
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: line
+          stack: fct_tasks_count
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_count
+              pivotValues:
+                - field: dim_date_spine_date_day_week
+                  value: "2025-10-19T00:00:00Z"
+          areaStyle: {}
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: line
+          stack: fct_tasks_count
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_count
+              pivotValues:
+                - field: dim_date_spine_date_day_week
+                  value: "2025-10-12T00:00:00Z"
+          areaStyle: {}
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: line
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: dim_date_spine_date_day_day_of_week_name
+          areaStyle: {}
+          yAxisIndex: 0
+          isFilteredOut: false
+      tooltip: ""
+pivotConfig:
+  columns:
+    - dim_date_spine_date_day_week
+slug: tasks-lookahead-1
+tableConfig:
+  columnOrder:
+    - dim_date_spine_date_day_day
+    - dim_date_spine_date_day_day_of_week_name
+    - dim_date_spine_date_day_week
+    - fct_tasks_count
+spaceSlug: shared
+version: 1
+downloadedAt: "2025-10-12T10:47:37.567Z"

@@ -65,6 +65,10 @@ models:
           tags: []
       - name: project_id
         description: Task project id
+        data_tests:
+          - relationships:
+              to: ref('stg__ticktick__projects')
+              field: project_id
         config:
           meta: {}
           tags: []
@@ -215,6 +219,9 @@ models:
         description: unique identifer of the folder
         data_tests:
           - unique
+          - relationships:
+              to: ref('stg__ticktick__projects')
+              field: group_id
         config:
           meta: {}
           tags: []
