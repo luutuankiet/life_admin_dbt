@@ -28,7 +28,7 @@ metricQuery:
     - name: updated_time_minute_max_of_updated_time_minute
       label: Max of Updated time minute
       description: "Max of Updated time minute on the table Fct tasks "
-      uuid: bf11fbe4-b89a-4223-9d0e-7f6ceeaeda9a
+      uuid: 721e2eeb-0fc4-4e68-8e58-cac430cc0a04
       sql: DATE_TRUNC(${TABLE}.updated_time, MINUTE)
       table: fct_tasks
       type: max
@@ -52,4 +52,4 @@ tableConfig:
     - fct_tasks_updated_time_minute
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-10-05T14:43:13.428Z"
+downloadedAt: "2025-10-12T10:47:37.567Z"
