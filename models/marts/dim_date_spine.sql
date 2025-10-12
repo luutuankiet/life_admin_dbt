@@ -7,7 +7,7 @@ to ensure that all days are represented in a report, even if no events
 occurred on a given day.
 #}
 
-{%- set timezone = 'Asia/Ho_Chi_Minh' -%}
+{%- set timezone = var('timezone') -%}
 {{ config(
     materialized = 'table'
 )
