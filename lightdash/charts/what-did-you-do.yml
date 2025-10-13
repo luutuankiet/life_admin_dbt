@@ -1,7 +1,7 @@
 name: what did you do?
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-10-13T01:00:16.485Z"
+updatedAt: "2025-10-13T11:30:23.939Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
@@ -17,7 +17,7 @@ metricQuery:
   metrics: []
   filters:
     dimensions:
-      id: bc88410a-02ed-4333-ae94-0701ebc50b93
+      id: 831e4750-f60d-41f6-afd4-3a8d452f16b0
       and:
         - id: 493c28aa-ecd1-4647-b6bf-054c7a4e1b3b
           target:
@@ -29,13 +29,6 @@ metricQuery:
           settings:
             completed: false
             unitOfTime: days
-        - id: 2340db70-1950-4b25-87b5-2f89aa3a05f8
-          target:
-            fieldId: dim_projects_completed_time_raw
-          values:
-            - "2025-09-23"
-          operator: isNull
-          required: false
   sorts:
     - fieldId: fct_tasks_completed_time_day
       descending: true
@@ -88,4 +81,4 @@ tableConfig:
     - fct_tasks_updated_time_raw
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-10-13T10:30:26.315Z"
+downloadedAt: "2025-10-13T13:06:41.705Z"
