@@ -1,6 +1,6 @@
 name: gtd dash v1.0
 description: ""
-updatedAt: "2025-10-13T00:43:50.870Z"
+updatedAt: "2025-10-13T01:00:17.186Z"
 tiles:
   - x: 0
     "y": 0
@@ -66,13 +66,13 @@ filters:
         completed: false
         unitOfTime: weeks
       tileTargets:
+        what-did-you-do: false
         tasks-lookahead-1:
           fieldId: dim_date_spine_date_day
           tableName: dim_date_spine
-        what-did-you-do: false
   tableCalculations: []
 tabs: []
 slug: gtd-dash-v1-0
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-10-13T00:43:54.500Z"
+downloadedAt: "2025-10-13T01:00:20.182Z"

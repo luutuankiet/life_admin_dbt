@@ -1,7 +1,7 @@
 name: tasks lookahead
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-10-13T00:43:49.348Z"
+updatedAt: "2025-10-13T01:00:16.051Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
@@ -241,4 +241,4 @@ tableConfig:
     - fct_tasks_count
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-10-13T00:43:54.048Z"
+downloadedAt: "2025-10-13T01:00:19.820Z"
