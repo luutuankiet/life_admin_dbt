@@ -12,7 +12,7 @@ base as (
     -- pulls in the stateless raw to inject 
     -- the latest attributes before dumping 
     -- to snapshot remote.
-    select * from {{source('stateless_raw','tasks')}}
+    select *, null as parentId from {{source('stateless_raw','tasks')}}
 ),
 
 joined as (

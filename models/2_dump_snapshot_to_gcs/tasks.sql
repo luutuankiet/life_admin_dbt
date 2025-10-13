@@ -5,7 +5,7 @@
 ) }}
 
 with src as (
-    select * from {{source('stateless_raw','tasks')}}
+    select *, null as parentId from {{source('stateless_raw','tasks')}}
 ),
 
 add_load_time as (
