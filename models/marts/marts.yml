@@ -318,6 +318,7 @@ models:
               dimension: folder_name
             multiple: true
             default: [default_ld_param_value]
+            allow_custom_values: true
           project_name:
             label: project name
             description: Filter data by Project (gtd horizon lvl1)
@@ -335,6 +336,7 @@ models:
               dimension: tag
             multiple: true
             default: [default_ld_param_value]
+            allow_custom_values: true
   - name: dim_projects
     description: Dimension table for projects.
     columns:
