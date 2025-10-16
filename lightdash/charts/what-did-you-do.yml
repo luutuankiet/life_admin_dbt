@@ -1,7 +1,7 @@
 name: what did you do?
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-10-13T11:30:23.939Z"
+updatedAt: "2025-10-16T08:36:30.773Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
@@ -66,7 +66,63 @@ chartConfig:
     showResultsTotal: false
     showRowCalculation: false
     showColumnCalculation: false
-    conditionalFormattings: []
+    conditionalFormattings:
+      - color: "#5470c6"
+        rules:
+          - id: 4614997b-0d20-4468-bc5d-7fadc8af3521
+            values:
+              - Monday
+            operator: equals
+        target:
+          fieldId: fct_tasks_completed_time_day_of_week_name
+      - color: "#fc8452"
+        rules:
+          - id: b83003da-eccc-4855-b837-e4f829f0fda7
+            values:
+              - Tuesday
+            operator: equals
+        target:
+          fieldId: fct_tasks_completed_time_day_of_week_name
+      - color: "#91cc75"
+        rules:
+          - id: e95acdf7-8d89-48fd-87c3-7b7102b78644
+            values:
+              - Wednesday
+            operator: equals
+        target:
+          fieldId: fct_tasks_completed_time_day_of_week_name
+      - color: "#fac858"
+        rules:
+          - id: d10883c7-ad8b-4625-b074-537c7e7a25ef
+            values:
+              - Thursday
+            operator: equals
+        target:
+          fieldId: fct_tasks_completed_time_day_of_week_name
+      - color: "#ee6666"
+        rules:
+          - id: 898f58fc-6ac6-4860-8574-2004064117be
+            values:
+              - Friday
+            operator: equals
+        target:
+          fieldId: fct_tasks_completed_time_day_of_week_name
+      - color: "#73c0de"
+        rules:
+          - id: 552d67e8-ed2b-4a27-b3c6-f4e093308239
+            values:
+              - Saturday
+            operator: equals
+        target:
+          fieldId: fct_tasks_completed_time_day_of_week_name
+      - color: "#3ba272"
+        rules:
+          - id: f282fcab-3b8c-454b-afb9-020c25b25387
+            values:
+              - Sunday
+            operator: equals
+        target:
+          fieldId: fct_tasks_completed_time_day_of_week_name
 slug: what-did-you-do
 tableConfig:
   columnOrder:
@@ -81,4 +137,4 @@ tableConfig:
     - fct_tasks_updated_time_raw
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-10-13T13:06:41.705Z"
+downloadedAt: "2025-10-16T08:37:31.105Z"
