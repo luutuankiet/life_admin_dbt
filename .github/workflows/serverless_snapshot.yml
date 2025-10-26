@@ -29,7 +29,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
 
       - name: install project deps 
-        run: uv pip install --system --no-cache-dir --break-system-packages . 
+        run: uv sync && echo "$PWD/.venv/bin" >> $GITHUB_PATH
 
       - name: trigger extraction
         run: python ticktick_fetcher.py
