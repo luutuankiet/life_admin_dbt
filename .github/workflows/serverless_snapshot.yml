@@ -29,16 +29,16 @@ jobs:
         uses: astral-sh/setup-uv@v6
 
       - name: install project deps 
-        run: uv sync
+        run: uv pip install --system --no-cache-dir .
 
       - name: trigger extraction
-        run: uv run ticktick_fetcher.py
+        run: python ticktick_fetcher.py
         env:
           TICKTICK_API_KEY: ${{ secrets.TICKTICK_API_KEY }}
           
 
       - name: Load remote state to duckdb 🦆
-        run: uv run dbt build
+        run: dbt build
         env:
           DBT_PROFILES_DIR: .
           GCS_KEY: ${{ secrets.GCS_KEY }}
@@ -48,7 +48,7 @@ jobs:
 
           
       - name: Snapshot and dump to GCS 🪣
-        run: uv run dbt build
+        run: dbt build
         env:
           DBT_PROFILES_DIR: .
           GCS_KEY: ${{ secrets.GCS_KEY }}
