@@ -1,7 +1,7 @@
 name: drill down tasks by parent grain dimension
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-10-19T01:34:37.172Z"
+updatedAt: "2025-10-27T09:08:29.656Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
@@ -59,6 +59,9 @@ chartConfig:
     columns:
       concat_date:
         name: date
+        frozen: false
+      fct_tasks_title:
+        name: title
       fct_tasks_task_id:
         visible: false
       fct_tasks_due_date_day:
@@ -68,6 +71,9 @@ chartConfig:
         visible: false
       fct_tasks_due_date_month_num:
         visible: false
+      fct_tasks_parent_dimension_grain:
+        name: parent
+        frozen: true
       fct_tasks_due_date_day_of_month_num:
         name: ""
         visible: false
@@ -153,4 +159,4 @@ tableConfig:
     - dim_projects_project_id
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-10-19T01:42:41.317Z"
+downloadedAt: "2025-10-27T09:12:58.955Z"
