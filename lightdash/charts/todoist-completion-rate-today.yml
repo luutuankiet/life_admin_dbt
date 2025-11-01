@@ -1,7 +1,7 @@
 name: Todoist completion rate today
 description: ""
 tableName: fct_habit
-updatedAt: "2025-11-01T14:40:20.388Z"
+updatedAt: "2025-11-01T15:24:04.961Z"
 metricQuery:
   exploreName: fct_habit
   dimensions:
@@ -59,4 +59,4 @@ tableConfig:
     - fct_habit_total_task_instances
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-01T14:54:30.588Z"
+downloadedAt: "2025-11-01T15:24:09.433Z"

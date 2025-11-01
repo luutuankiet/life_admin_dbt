@@ -18,6 +18,8 @@ exposures:
       - ref('dim_projects')
       - ref('dim_date_spine')
       - ref('fct_task_tags_bridge')
+      - ref('fct_habit')
+      - ref('dim_project_todoist')
   - name: ld_chart_8a5edc68_eaca_44a0_bdc2_514d3ed6f24a
     type: analysis
     owner:
@@ -132,6 +134,51 @@ exposures:
       - ref('dim_projects')
       - ref('dim_date_spine')
       - ref('fct_task_tags_bridge')
+  - name: ld_chart_ee6f343a_a5cc_4a79_8fb5_8a8928d0b018
+    type: analysis
+    owner:
+      name: ken luu
+      email: ""
+    label: todoist completed tasks
+    description: ""
+    url: >-
+      https://ld.kenluu.org/projects/2f8e376d-3353-4304-acfc-1bfde52e2c1d/saved/ee6f343a-a5cc-4a79-8fb5-8a8928d0b018/view
+    tags:
+      - lightdash
+      - chart
+    depends_on:
+      - ref('fct_habit')
+      - ref('dim_project_todoist')
+  - name: ld_chart_ffca9510_7ca2_4e2d_a847_01f4c336eb91
+    type: analysis
+    owner:
+      name: ken luu
+      email: ""
+    label: Todoist completion rate today
+    description: ""
+    url: >-
+      https://ld.kenluu.org/projects/2f8e376d-3353-4304-acfc-1bfde52e2c1d/saved/ffca9510-7ca2-4e2d-a847-01f4c336eb91/view
+    tags:
+      - lightdash
+      - chart
+    depends_on:
+      - ref('fct_habit')
+      - ref('dim_project_todoist')
+  - name: ld_chart_9b0a6b62_0597_43ed_add3_4b53d6dcaa74
+    type: analysis
+    owner:
+      name: ken luu
+      email: ""
+    label: Todoist done tasks breakdown by project
+    description: ""
+    url: >-
+      https://ld.kenluu.org/projects/2f8e376d-3353-4304-acfc-1bfde52e2c1d/saved/9b0a6b62-0597-43ed-add3-4b53d6dcaa74/view
+    tags:
+      - lightdash
+      - chart
+    depends_on:
+      - ref('fct_habit')
+      - ref('dim_project_todoist')
   - name: ld_dashboard_a02bb60b_6dae_448f_ba04_1f5fa1d1f906
     type: dashboard
     owner:

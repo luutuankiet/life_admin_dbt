@@ -1,0 +1,170 @@
+name: tasks lookahead
+description: ""
+tableName: agg_daily_task_schedule_with_weekly_avg
+updatedAt: "2025-11-01T11:32:25.035Z"
+metricQuery:
+  exploreName: agg_daily_task_schedule_with_weekly_avg
+  dimensions:
+    - agg_daily_task_schedule_with_weekly_avg_schedule_date_day
+    - agg_daily_task_schedule_with_weekly_avg_week_start_date_week
+    - agg_daily_task_schedule_with_weekly_avg_schedule_date_day_of_week_name
+  metrics:
+    - agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
+    - >-
+      agg_daily_task_schedule_with_weekly_avg_overall_weekly_average_tasks_metric
+    - >-
+      agg_daily_task_schedule_with_weekly_avg_weekly_average_tasks_per_project_metric
+  filters:
+    dimensions:
+      id: 6fe8c86b-bf1e-44a5-a190-81f622ab102d
+      and:
+        - id: 7d6491e0-3ad6-480e-93b5-ffe6cfa8cfd2
+          target:
+            fieldId: agg_daily_task_schedule_with_weekly_avg_schedule_date_day
+          values:
+            - 4
+          operator: inTheNext
+          required: false
+          settings:
+            completed: false
+            unitOfTime: weeks
+  sorts:
+    - fieldId: agg_daily_task_schedule_with_weekly_avg_schedule_date_day
+      descending: true
+  limit: 500
+  metricOverrides: {}
+  tableCalculations: []
+  additionalMetrics: []
+  customDimensions: []
+chartConfig:
+  type: cartesian
+  config:
+    layout:
+      xField: agg_daily_task_schedule_with_weekly_avg_schedule_date_day
+      yField:
+        - agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
+        - agg_daily_task_schedule_with_weekly_avg_schedule_date_day_of_week_name
+    eChartsConfig:
+      yAxis:
+        - {}
+        - {}
+      legend:
+        show: false
+      series:
+        - type: line
+          label:
+            show: false
+          stack: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
+          encode:
+            xRef:
+              field: agg_daily_task_schedule_with_weekly_avg_schedule_date_day
+            yRef:
+              field: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
+              pivotValues:
+                - field: agg_daily_task_schedule_with_weekly_avg_week_start_date_week
+                  value: "2025-09-21T00:00:00Z"
+          smooth: true
+          areaStyle: {}
+          showSymbol: true
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: line
+          label:
+            show: false
+          stack: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
+          encode:
+            xRef:
+              field: agg_daily_task_schedule_with_weekly_avg_schedule_date_day
+            yRef:
+              field: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
+              pivotValues:
+                - field: agg_daily_task_schedule_with_weekly_avg_week_start_date_week
+                  value: "2025-10-19T00:00:00Z"
+          smooth: true
+          areaStyle: {}
+          showSymbol: true
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: line
+          label:
+            show: false
+          stack: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
+          encode:
+            xRef:
+              field: agg_daily_task_schedule_with_weekly_avg_schedule_date_day
+            yRef:
+              field: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
+              pivotValues:
+                - field: agg_daily_task_schedule_with_weekly_avg_week_start_date_week
+                  value: "2025-10-12T00:00:00Z"
+          smooth: true
+          areaStyle: {}
+          showSymbol: true
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: line
+          label:
+            show: false
+          stack: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
+          encode:
+            xRef:
+              field: agg_daily_task_schedule_with_weekly_avg_schedule_date_day
+            yRef:
+              field: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
+              pivotValues:
+                - field: agg_daily_task_schedule_with_weekly_avg_week_start_date_week
+                  value: "2025-10-05T00:00:00Z"
+          smooth: true
+          areaStyle: {}
+          showSymbol: true
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: line
+          label:
+            show: false
+          stack: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
+          encode:
+            xRef:
+              field: agg_daily_task_schedule_with_weekly_avg_schedule_date_day
+            yRef:
+              field: agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
+              pivotValues:
+                - field: agg_daily_task_schedule_with_weekly_avg_week_start_date_week
+                  value: "2025-09-28T00:00:00Z"
+          smooth: true
+          areaStyle: {}
+          showSymbol: true
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: line
+          label:
+            show: false
+          encode:
+            xRef:
+              field: agg_daily_task_schedule_with_weekly_avg_schedule_date_day
+            yRef:
+              field: >-
+                agg_daily_task_schedule_with_weekly_avg_schedule_date_day_of_week_name
+          smooth: true
+          areaStyle: {}
+          showSymbol: true
+          yAxisIndex: 0
+          isFilteredOut: false
+      tooltip: ""
+pivotConfig:
+  columns:
+    - agg_daily_task_schedule_with_weekly_avg_week_start_date_week
+slug: tasks-lookahead
+tableConfig:
+  columnOrder:
+    - agg_daily_task_schedule_with_weekly_avg_schedule_date_day
+    - agg_daily_task_schedule_with_weekly_avg_week_start_date_week
+    - agg_daily_task_schedule_with_weekly_avg_schedule_date_day_of_week_name
+    - agg_daily_task_schedule_with_weekly_avg_daily_planned_tasks
+    - >-
+      agg_daily_task_schedule_with_weekly_avg_overall_weekly_average_tasks_metric
+    - >-
+      agg_daily_task_schedule_with_weekly_avg_weekly_average_tasks_per_project_metric
+spaceSlug: shared
+version: 1
+downloadedAt: "2025-11-01T15:24:09.433Z"
