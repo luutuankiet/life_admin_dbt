@@ -1,0 +1,154 @@
+name: todoist completed tasks
+description: ""
+tableName: fct_habit
+updatedAt: "2025-11-01T13:52:06.687Z"
+metricQuery:
+  exploreName: fct_habit
+  dimensions:
+    - fct_habit_completed_at_day_of_week_name
+    - dim_project_todoist_name
+    - fct_habit_cleaned_content
+    - fct_habit_task_id
+    - fct_habit_completed_at_day_of_month_num
+    - fct_habit_completed_at_month_num
+    - fct_habit_completed_at_day
+    - fct_habit_completed_at_raw
+    - fct_habit_streak
+  metrics: []
+  filters:
+    dimensions:
+      id: 597ece66-dc79-4a61-853b-eb496ed514cc
+      and:
+        - id: e678a506-6e11-4d47-99d8-56b81e5453e7
+          target:
+            fieldId: fct_habit_completed_at_day
+          values:
+            - 7
+          operator: inThePast
+          required: false
+          settings:
+            completed: false
+            unitOfTime: days
+  sorts:
+    - fieldId: fct_habit_completed_at_raw
+      descending: true
+  limit: 500
+  metricOverrides: {}
+  tableCalculations:
+    - name: concat_date
+      displayName: concat_date
+      sql: >-
+        ${fct_habit.completed_at_day_of_month_num}  || '/' ||
+        ${fct_habit.completed_at_month_num} 
+      format:
+        type: default
+        separator: default
+      type: string
+  additionalMetrics: []
+  customDimensions: []
+chartConfig:
+  type: table
+  config:
+    columns:
+      concat_date:
+        name: date
+        frozen: false
+      fct_habit_task_id:
+        visible: false
+      dim_project_todoist_name:
+        name: project
+        frozen: false
+      fct_habit_cleaned_content:
+        name: task
+      fct_habit_completed_at_day:
+        visible: false
+      fct_habit_completed_at_raw:
+        visible: false
+      fct_habit_completed_at_month_num:
+        visible: false
+      fct_habit_completed_at_day_of_month_num:
+        visible: false
+        displayStyle: text
+      fct_habit_completed_at_day_of_week_name:
+        name: day
+        frozen: false
+    metricsAsRows: false
+    showSubtotals: false
+    hideRowNumbers: true
+    showTableNames: false
+    showResultsTotal: false
+    showRowCalculation: false
+    showColumnCalculation: false
+    conditionalFormattings:
+      - color: "#5470c6"
+        rules:
+          - id: e71484f6-8244-4f41-93d5-a0e5838587a8
+            values:
+              - Monday
+            operator: equals
+        target:
+          fieldId: fct_habit_completed_at_day_of_week_name
+      - color: "#fc8452"
+        rules:
+          - id: 362a8cc9-13ba-4565-a918-fe3205e37713
+            values:
+              - Tuesday
+            operator: equals
+        target:
+          fieldId: fct_habit_completed_at_day_of_week_name
+      - color: "#91cc75"
+        rules:
+          - id: 69f3d499-80bd-482a-a4f3-1edbabe196f8
+            values:
+              - Wednesday
+            operator: equals
+        target:
+          fieldId: fct_habit_completed_at_day_of_week_name
+      - color: "#fac858"
+        rules:
+          - id: 7bd59005-5894-4713-bc8f-139157cc8cc4
+            values:
+              - Thursday
+            operator: equals
+        target:
+          fieldId: fct_habit_completed_at_day_of_week_name
+      - color: "#ee6666"
+        rules:
+          - id: 3c383a36-0a1a-4af4-ba4b-a2ab4982d004
+            values:
+              - Friday
+            operator: equals
+        target:
+          fieldId: fct_habit_completed_at_day_of_week_name
+      - color: "#9a60b4"
+        rules:
+          - id: 7c9afa43-c591-4bc4-8c48-535ee4ae2990
+            values:
+              - Saturday
+            operator: equals
+        target:
+          fieldId: fct_habit_completed_at_day_of_week_name
+      - color: "#3ba272"
+        rules:
+          - id: 584031b9-798d-4bc1-af54-3c88b6fd26af
+            values:
+              - Sunday
+            operator: equals
+        target:
+          fieldId: fct_habit_completed_at_day_of_week_name
+slug: todoist-completed-tasks
+tableConfig:
+  columnOrder:
+    - concat_date
+    - fct_habit_completed_at_day_of_week_name
+    - dim_project_todoist_name
+    - fct_habit_cleaned_content
+    - fct_habit_task_id
+    - fct_habit_completed_at_day_of_month_num
+    - fct_habit_completed_at_month_num
+    - fct_habit_completed_at_day
+    - fct_habit_completed_at_raw
+    - fct_habit_streak
+spaceSlug: shared
+version: 1
+downloadedAt: "2025-11-01T14:54:30.588Z"

@@ -1,0 +1,1 @@
+select * from {{ ref('stg__todoist__projects') }}

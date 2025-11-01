@@ -35,6 +35,11 @@ models:
                 - YEAR
                 - DAY_OF_WEEK_INDEX
                 - DAY_OF_WEEK_NAME
+                - DAY_OF_MONTH_NUM
+                - WEEK_NUM
+                - MONTH_NUM
+                - QUARTER_NUM
+                - YEAR_NUM
           tags: []
         data_type: DATETIME
       - name: due_date
@@ -151,6 +156,11 @@ models:
                 - YEAR
                 - DAY_OF_WEEK_INDEX
                 - DAY_OF_WEEK_NAME
+                - DAY_OF_MONTH_NUM
+                - WEEK_NUM
+                - MONTH_NUM
+                - QUARTER_NUM
+                - YEAR_NUM
           tags: []
         data_type: DATETIME
       - name: status
@@ -238,6 +248,11 @@ models:
                 - YEAR
                 - DAY_OF_WEEK_INDEX
                 - DAY_OF_WEEK_NAME
+                - DAY_OF_MONTH_NUM
+                - WEEK_NUM
+                - MONTH_NUM
+                - QUARTER_NUM
+                - YEAR_NUM
           tags: []
         data_type: DATETIME
     config:
@@ -393,6 +408,11 @@ models:
                 - YEAR
                 - DAY_OF_WEEK_INDEX
                 - DAY_OF_WEEK_NAME
+                - DAY_OF_MONTH_NUM
+                - WEEK_NUM
+                - MONTH_NUM
+                - QUARTER_NUM
+                - YEAR_NUM
           tags: []
         data_type: DATETIME
       - name: group_id
@@ -542,5 +562,552 @@ models:
                 - YEAR
                 - DAY_OF_WEEK_INDEX
                 - DAY_OF_WEEK_NAME
+                - DAY_OF_MONTH_NUM
+                - WEEK_NUM
+                - MONTH_NUM
+                - QUARTER_NUM
+                - YEAR_NUM
           tags: []
         data_type: DATETIME
+  - name: fct_habit
+    config:
+      meta:
+        label: todoist habits explore
+        primary_key: id
+        joins:
+          - join: dim_project_todoist
+            type: left
+            sql_on: |
+              ${fct_habit.project_id} = ${dim_project_todoist.id}
+            relationship: many-to-one
+        metrics:
+          total_task_instances:
+            label: Total Tasks
+            type: count
+            sql: ${TABLE}.surr_id
+
+
+    columns:
+      - name: _dbt_source_relation
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: added_at
+        description: The datetime when the task was created.
+        config:
+          meta: {}
+          tags: []
+        data_type: DATETIME
+      - name: added_by_uid
+        description: >-
+          The ID of the user who created the task. This makes sense for shared projects only. For tasks
+          created before 31 Oct 2019 the value is set to null. Cannot be set explicitly or changed via
+          API.
+        config:
+          meta: {}
+          tags: []
+        data_type: INT64
+      - name: assigned_by_uid
+        description: >-
+          The ID of the user who assigned the task. This makes sense for shared projects only. Accepts
+          any user ID from the list of project collaborators. If this value is unset or invalid, it will
+          automatically be set up to your uid.
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: checked
+        description: Whether the task is marked as completed (a `true` or `false` value).
+        config:
+          meta: {}
+          tags: []
+        data_type: BOOLEAN
+      - name: child_order
+        description: >-
+          The order of the task. Defines the position of the task among all the tasks with the same parent.
+        config:
+          meta: {}
+          tags: []
+        data_type: INT64
+      - name: cleaned_content
+        data_type: STRING
+        config:
+          meta:
+            dimension:
+              label: task
+              type: string
+              description: The task name.
+              urls:
+                - label: open in todoist (mac)
+                  url: todoist://task?id=${row.fct_habit.task_id.raw}
+                - label: open in todoist (web)
+                  url: https://app.todoist.com/app/task/${row.fct_habit.task_id.raw}
+          tags: []
+        description: The task name, without all the tags.
+      - name: completed_at
+        description: The datetime when the task was completed.
+        config:
+          meta:
+            dimension:
+              type: date
+              time_intervals:
+                - RAW
+                - DAY
+                - HOUR
+                - MINUTE
+                - WEEK
+                - MONTH
+                - QUARTER
+                - YEAR
+                - DAY_OF_WEEK_INDEX
+                - DAY_OF_WEEK_NAME
+                - DAY_OF_MONTH_NUM
+                - WEEK_NUM
+                - MONTH_NUM
+                - QUARTER_NUM
+                - YEAR_NUM
+          tags: []
+        data_type: DATETIME
+      - name: content
+        description: >-
+          The text of the task. This value may contain markdown-formatted text and hyperlinks. Details
+          on markdown support can be found in the [Text Formatting article](https://www.todoist.com/help/articles/format-text-in-a-todoist-task-e5dHw9)
+          in the Help Center.
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: day_order
+        description: >-
+          The order of the task inside the `Today` or `Next 7 days` view (a number, where the smallest
+          value would place the task at the top).
+        config:
+          meta: {}
+          tags: []
+        data_type: INT64
+      - name: deadline
+        description: >-
+          The deadline of the task. See the [Deadlines](https://developer.todoist.com/api/v1/#tag/Deadlines)
+          section for more details.
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: description
+        description: >-
+          A description for the task. This value may contain markdown-formatted text and hyperlinks. Details
+          on markdown support can be found in the [Text Formatting article](https://www.todoist.com/help/articles/format-text-in-a-todoist-task-e5dHw9)
+          in the Help Center.
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: due_date
+        description: |2-
+           Due date in the format of `YYYY-MM-DD` ([RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339)).
+          For recurring dates, the date of the current iteration. 
+        config:
+          meta:
+            dimension:
+              type: date
+              time_intervals:
+                - RAW
+                - DAY
+                - HOUR
+                - MINUTE
+                - WEEK
+                - MONTH
+                - QUARTER
+                - YEAR
+                - DAY_OF_WEEK_INDEX
+                - DAY_OF_WEEK_NAME
+                - DAY_OF_MONTH_NUM
+                - WEEK_NUM
+                - MONTH_NUM
+                - QUARTER_NUM
+                - YEAR_NUM
+          tags: []
+        data_type: DATETIME
+      - name: due_is_recurring
+        description: >-
+          Boolean flag which is set to `true` if the due object represents a recurring due date.
+        config:
+          meta: {}
+          tags: []
+        data_type: BOOLEAN
+      - name: due_lang
+        description: >-
+          Lang which has to be used to parse the content of the string attribute. Used by clients and
+          on the server side to properly process due dates when date object is not set, and when dealing
+          with recurring tasks. Valid languages are: `en`, `da`, `pl`, `zh`, `ko`, `de`, `pt`, `ja`, `it`,
+          `fr`, `sv`, `ru`, `es`, `nl`, `fi`, `nb`, `tw`. 
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: due_string
+        description: >-
+          Human-readable representation of due date. String always represents the due object in user's
+          timezone. Look at our reference to see [which formats are supported](https://www.todoist.com/help/articles/introduction-to-due-dates-and-due-times-q7VobO).
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: due_timezone
+        description: Always set to `null`.
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: duration
+        description: >-
+          Object representing a task's duration. Includes a positive integer (greater than zero) for the
+          `amount` of time the task will take, and the `unit` of time that the amount represents which
+          must be either `minute` or `day`. Both the `amount` and `unit` **must** be defined. The object
+          will be `null` if the task has no duration.
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: id
+        description: The interger ID of the task. ONLY available for completed tasks.
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: is_collapsed
+        description: Whether the task's sub-tasks are collapsed (a `true` or `false` value).
+        config:
+          meta: {}
+          tags: []
+        data_type: BOOLEAN
+      - name: is_completed
+        data_type: STRING
+        config:
+          meta: {}
+          tags: []
+        description: The status of the task
+      - name: is_deleted
+        description: Whether the task is marked as deleted (a `true` or `false` value).
+        config:
+          meta: {}
+          tags: []
+        data_type: BOOLEAN
+      - name: item_object
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: labels
+        description: >-
+          The task's labels (a list of names that may represent either personal or shared labels).
+        config:
+          meta: {}
+          tags: []
+        data_type: ARRAY<STRING>
+      - name: meta_data
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: note_count
+        config:
+          meta: {}
+          tags: []
+        data_type: INT64
+      - name: notes
+        config:
+          meta: {}
+          tags: []
+        data_type: ARRAY<STRING>
+      - name: parent_id
+        description: The ID of the parent task. Set to `null` for root tasks.
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: priority
+        description: >-
+          The priority of the task (a number between `1` and `4`, `4` for very urgent and `1` for natural).
+        config:
+          meta: {}
+          tags: []
+        data_type: INT64
+      - name: project_id
+        description: The ID of the parent project.
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: responsible_uid
+        description: >-
+          The ID of user who is responsible for accomplishing the current task. This makes sense for shared
+          projects only. Accepts any user ID from the list of project collaborators or `null` or an empty
+          string to unset.
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: scheduled_date
+        data_type: DATETIME
+        config:
+          meta:
+            dimension:
+              type: date
+              time_intervals:
+                - RAW
+                - DAY
+                - HOUR
+                - MINUTE
+                - WEEK
+                - MONTH
+                - QUARTER
+                - YEAR
+                - DAY_OF_WEEK_INDEX
+                - DAY_OF_WEEK_NAME
+                - DAY_OF_MONTH_NUM
+                - WEEK_NUM
+                - MONTH_NUM
+                - QUARTER_NUM
+                - YEAR_NUM
+          tags: []
+        description: |
+          - Date the task has been either scheduled or completed.
+          - Useful for filtering both completed and new tasks in one query.
+      - name: section_id
+        description: The ID of the parent section. Set to `null` for tasks not belonging to a 
+          section.
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: streak
+        data_type: STRING
+        config:
+          meta: {}
+          tags: []
+        description: >-
+          the current streak setup via [habit tracker integration](https://www.todoist.com/integrations/apps/habit-tracker)
+      - name: surr_id
+        description: surrogate key to ensure unioned tasks model has all unique rows.
+        data_type: STRING
+        config:
+          meta: {}
+          tags: []
+      - name: task_id
+        description: |
+          - The ID of the task. 
+          - For recurring tasks will take the id of the lastest task.
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: updated_at
+        description: The datetime when the task was updated.
+        config:
+          meta:
+            dimension:
+              type: date
+              time_intervals:
+                - RAW
+                - DAY
+                - HOUR
+                - MINUTE
+                - WEEK
+                - MONTH
+                - QUARTER
+                - YEAR
+                - DAY_OF_WEEK_INDEX
+                - DAY_OF_WEEK_NAME
+                - DAY_OF_MONTH_NUM
+                - WEEK_NUM
+                - MONTH_NUM
+                - QUARTER_NUM
+                - YEAR_NUM
+          tags: []
+        data_type: DATETIME
+      - name: user_id
+        description: The owner of the task.
+        config:
+          meta: {}
+          tags: []
+        data_type: INT64
+  - name: dim_project_todoist
+    config:
+      meta:
+        primary_key: id
+    columns:
+      - name: can_assign_tasks
+        description: Whether tasks in the project can be assigned to users (a `true` or `false` 
+          value).
+        config:
+          meta: {}
+          tags: []
+        data_type: BOOLEAN
+      - name: child_order
+        description: >-
+          The order of the project. Defines the position of the project among all the projects with the
+          same `parent_id`
+        config:
+          meta: {}
+          tags: []
+        data_type: INT64
+      - name: color
+        description: >-
+          The color of the project icon. Refer to the `name` column in the [Colors](https://developer.todoist.com/api/v1/#tag/Colors)
+          guide for more info.
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: created_at
+        description: Project creation date in the format YYYY-MM-DDTHH:MM:SSZ date.
+        config:
+          meta:
+            dimension:
+              type: date
+              time_intervals:
+                - RAW
+                - DAY
+                - HOUR
+                - MINUTE
+                - WEEK
+                - MONTH
+                - QUARTER
+                - YEAR
+                - DAY_OF_WEEK_INDEX
+                - DAY_OF_WEEK_NAME
+                - DAY_OF_MONTH_NUM
+                - WEEK_NUM
+                - MONTH_NUM
+                - QUARTER_NUM
+                - YEAR_NUM
+          tags: []
+        data_type: TIMESTAMP
+      - name: creator_uid
+        config:
+          meta: {}
+          tags: []
+        data_type: INT64
+      - name: default_order
+        config:
+          meta: {}
+          tags: []
+        data_type: INT64
+      - name: description
+        description: Description for the project. *Only used for teams*
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: id
+        description: The ID of the project.
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: inbox_project
+        description: Whether the project is `Inbox` (`true` or otherwise this property is not sent).
+        config:
+          meta: {}
+          tags: []
+        data_type: BOOLEAN
+      - name: is_archived
+        description: Whether the project is marked as archived (a `true` or `false` value).
+        config:
+          meta: {}
+          tags: []
+        data_type: BOOLEAN
+      - name: is_collapsed
+        description: Whether the project's sub-projects are collapsed (a `true` or `false` value).
+        config:
+          meta: {}
+          tags: []
+        data_type: BOOLEAN
+      - name: is_deleted
+        description: Whether the project is marked as deleted (a `true` or `false` value).
+        config:
+          meta: {}
+          tags: []
+        data_type: BOOLEAN
+      - name: is_favorite
+        description: Whether the project is a favorite (a `true` or `false` value).
+        config:
+          meta: {}
+          tags: []
+        data_type: BOOLEAN
+      - name: is_frozen
+        description: >-
+          Workspace or personal projects from a cancelled subscription (a `true` or `false` value).
+        config:
+          meta: {}
+          tags: []
+        data_type: BOOLEAN
+      - name: is_shared
+        description: Whether the project is shared (a `true` or `false` value).
+        config:
+          meta: {}
+          tags: []
+        data_type: BOOLEAN
+      - name: name
+        description: The name of the project.
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: parent_id
+        description: The ID of the parent project. Set to `null` for root projects.
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: public_access
+        config:
+          meta: {}
+          tags: []
+        data_type: BOOLEAN
+      - name: public_key
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: role
+        description: >-
+          The role of the requesting user. Possible values: `CREATOR`, `ADMIN`, `READ_WRITE`, `EDIT_ONLY`,
+          `COMPLETE_ONLY`. *Only used for teams*
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: updated_at
+        description: Project update date in the format YYYY-MM-DDTHH:MM:SSZ date.
+        config:
+          meta:
+            dimension:
+              type: date
+              time_intervals:
+                - RAW
+                - DAY
+                - HOUR
+                - MINUTE
+                - WEEK
+                - MONTH
+                - QUARTER
+                - YEAR
+                - DAY_OF_WEEK_INDEX
+                - DAY_OF_WEEK_NAME
+                - DAY_OF_MONTH_NUM
+                - WEEK_NUM
+                - MONTH_NUM
+                - QUARTER_NUM
+                - YEAR_NUM
+          tags: []
+        data_type: TIMESTAMP
+      - name: view_style
+        description: >-
+          The mode in which to render tasks in this project. One of `list`, `board`, or `calendar`.
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING

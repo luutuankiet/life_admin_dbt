@@ -1,0 +1,1 @@
+select * from {{ ref('base__todoist__active_projects') }}

@@ -1,0 +1,337 @@
+version: 2
+
+sources:
+  - name: todoist_raw
+    description: |
+      - the stateless raw data that python script fetches
+      - full refresh on every run.
+    tables:
+      - name: active_tasks
+        description: Raw todoist tasks data from local JSON file
+        columns:
+          - name: assigned_by_uid
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: description
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: priority
+            config:
+              meta: {}
+              tags: []
+            data_type: INT64
+          - name: responsible_uid
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: updated_at
+            config:
+              meta: {}
+              tags: []
+            data_type: TIMESTAMP
+          - name: checked
+            config:
+              meta: {}
+              tags: []
+            data_type: BOOLEAN
+          - name: added_at
+            config:
+              meta: {}
+              tags: []
+            data_type: TIMESTAMP
+          - name: id
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: completed_at
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: is_collapsed
+            config:
+              meta: {}
+              tags: []
+            data_type: BOOLEAN
+          - name: deadline
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: parent_id
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: day_order
+            config:
+              meta: {}
+              tags: []
+            data_type: INT64
+          - name: added_by_uid
+            config:
+              meta: {}
+              tags: []
+            data_type: INT64
+          - name: is_deleted
+            config:
+              meta: {}
+              tags: []
+            data_type: BOOLEAN
+          - name: note_count
+            config:
+              meta: {}
+              tags: []
+            data_type: INT64
+          - name: project_id
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: due
+            config:
+              meta: {}
+              tags: []
+            data_type: >-
+              STRUCT<`is_recurring` BOOLEAN, `lang` STRING, `timezone` STRING, `string` STRING, `date`
+              STRING>
+          - name: due.is_recurring
+            config:
+              meta: {}
+              tags: []
+            data_type: BOOLEAN
+          - name: due.lang
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: due.timezone
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: due.string
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: due.date
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: duration
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: section_id
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: child_order
+            config:
+              meta: {}
+              tags: []
+            data_type: INT64
+          - name: labels
+            config:
+              meta: {}
+              tags: []
+            data_type: ARRAY<STRING>
+          - name: content
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: user_id
+            config:
+              meta: {}
+              tags: []
+            data_type: INT64
+      - name: completed_tasks
+        description: Raw todoist tasks data from local JSON file
+        columns:
+          - name: user_id
+            config:
+              meta: {}
+              tags: []
+            data_type: INT64
+          - name: task_id
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: project_id
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: notes
+            config:
+              meta: {}
+              tags: []
+            data_type: ARRAY<STRING>
+          - name: note_count
+            config:
+              meta: {}
+              tags: []
+            data_type: INT64
+          - name: meta_data
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: item_object
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: section_id
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: id
+            config:
+              meta: {}
+              tags: []
+            data_type: INT64
+          - name: content
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: completed_at
+            config:
+              meta: {}
+              tags: []
+            data_type: TIMESTAMP
+      - name: active_projects
+        description: Raw todoist projects data from local JSON file
+        columns:
+          - name: parent_id
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: is_collapsed
+            config:
+              meta: {}
+              tags: []
+            data_type: BOOLEAN
+          - name: role
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: public_key
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: inbox_project
+            config:
+              meta: {}
+              tags: []
+            data_type: BOOLEAN
+          - name: view_style
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: updated_at
+            config:
+              meta: {}
+              tags: []
+            data_type: TIMESTAMP
+          - name: is_shared
+            config:
+              meta: {}
+              tags: []
+            data_type: BOOLEAN
+          - name: default_order
+            config:
+              meta: {}
+              tags: []
+            data_type: INT64
+          - name: name
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: is_deleted
+            config:
+              meta: {}
+              tags: []
+            data_type: BOOLEAN
+          - name: public_access
+            config:
+              meta: {}
+              tags: []
+            data_type: BOOLEAN
+          - name: is_archived
+            config:
+              meta: {}
+              tags: []
+            data_type: BOOLEAN
+          - name: description
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: color
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+          - name: creator_uid
+            config:
+              meta: {}
+              tags: []
+            data_type: INT64
+          - name: is_frozen
+            config:
+              meta: {}
+              tags: []
+            data_type: BOOLEAN
+          - name: child_order
+            config:
+              meta: {}
+              tags: []
+            data_type: INT64
+          - name: created_at
+            config:
+              meta: {}
+              tags: []
+            data_type: TIMESTAMP
+          - name: can_assign_tasks
+            config:
+              meta: {}
+              tags: []
+            data_type: BOOLEAN
+          - name: is_favorite
+            config:
+              meta: {}
+              tags: []
+            data_type: BOOLEAN
+          - name: id
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
+      - name: archived_projects
+        description: Raw todoist projects data from local JSON file
+        columns:
+          - name: json
+            config:
+              meta: {}
+              tags: []
+            data_type: STRING
