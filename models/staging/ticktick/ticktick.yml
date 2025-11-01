@@ -7,11 +7,12 @@ models:
         config:
           meta: {}
           tags: []
+        data_type: ARRAY<STRING>
       - name: column_id
-        description: ''
         config:
           meta: {}
           tags: []
+        data_type: STRING
       - name: completed_time
         data_type: datetime
         description: |
@@ -35,6 +36,7 @@ models:
         config:
           meta: {}
           tags: []
+        data_type: STRING
       - name: gtd_work_type
         description: |
           optional field indicating if a task was done under
@@ -43,26 +45,31 @@ models:
         config:
           meta: {}
           tags: []
+        data_type: STRING
       - name: is_allday
         description: All day
         config:
           meta: {}
           tags: []
+        data_type: BOOLEAN
       - name: kind
         description: '"TASK" or "NOTE"'
         config:
           meta: {}
           tags: []
+        data_type: STRING
       - name: parent_id
         description: Parent task id
         config:
           meta: {}
           tags: []
+        data_type: STRING
       - name: priority
         description: 'Task priority. Value : None:0, Low:1, Medium:3, High5'
         config:
           meta: {}
           tags: []
+        data_type: INT64
       - name: project_id
         description: Task project id
         data_tests:
@@ -72,11 +79,13 @@ models:
         config:
           meta: {}
           tags: []
+        data_type: STRING
       - name: reminders
         description: List of reminder triggers. Example [ "TRIGGER:P0DT9H0M0S", "TRIGGER:PT0S" ]
         config:
           meta: {}
           tags: []
+        data_type: ARRAY<STRING>
       - name: repeat_flag
         description: |
           Recurring rules of task.
@@ -84,11 +93,13 @@ models:
         config:
           meta: {}
           tags: []
+        data_type: STRING
       - name: sort_order
         description: Task sort order
         config:
           meta: {}
           tags: []
+        data_type: INT64
       - name: start_date
         data_type: datetime
         description: |
@@ -102,11 +113,13 @@ models:
         config:
           meta: {}
           tags: []
+        data_type: INT64
       - name: tags
         description: Array of tags assigned to the task.
         config:
           meta: {}
           tags: []
+        data_type: ARRAY<STRING>
       - name: task_id
         data_tests:
           - unique
@@ -115,16 +128,19 @@ models:
         config:
           meta: {}
           tags: []
+        data_type: STRING
       - name: timezone
         description: Task timezone
         config:
           meta: {}
           tags: []
+        data_type: STRING
       - name: title
         description: Task title
         config:
           meta: {}
           tags: []
+        data_type: STRING
       - name: updated_time
         data_type: datetime
         description: |
@@ -141,11 +157,13 @@ models:
         config:
           meta: {}
           tags: []
+        data_type: BOOLEAN
       - name: color
         description: Project color
         config:
           meta: {}
           tags: []
+        data_type: STRING
       - name: completed_time
         data_type: datetime
         description: |
@@ -161,16 +179,19 @@ models:
         config:
           meta: {}
           tags: []
+        data_type: STRING
       - name: kind
         description: "\"TASK\" or \"NOTE\"\n"
         config:
           meta: {}
           tags: []
+        data_type: STRING
       - name: permission
         description: '"read", "write" or "comment"'
         config:
           meta: {}
           tags: []
+        data_type: STRING
       - name: project_id
         data_tests:
           - unique
@@ -179,21 +200,25 @@ models:
         config:
           meta: {}
           tags: []
+        data_type: STRING
       - name: project_name
         description: Project name
         config:
           meta: {}
           tags: []
+        data_type: STRING
       - name: sort_order
         description: Order value
         config:
           meta: {}
           tags: []
+        data_type: INT64
       - name: view_mode
         description: view mode, "list", "kanban", "timeline"
         config:
           meta: {}
           tags: []
+        data_type: STRING
   - name: stg__ticktick__task_tags
     description: |
       - Bridge table to break down tags <> task relation.
@@ -204,11 +229,13 @@ models:
         config:
           meta: {}
           tags: []
+        data_type: STRING
       - name: task_id
         description: Task identifier
         config:
           meta: {}
           tags: []
+        data_type: STRING
   - name: stg__ticktick__project_folder
     description: |
       - Folders where the projects belong to.
@@ -225,8 +252,10 @@ models:
         config:
           meta: {}
           tags: []
+        data_type: STRING
       - name: folder_name
         description: The folder name. Inferred from dummy project manually created by users
         config:
           meta: {}
           tags: []
+        data_type: STRING
