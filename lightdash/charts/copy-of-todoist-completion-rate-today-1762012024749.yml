@@ -1,7 +1,7 @@
-name: Todoist new today
+name: Todoist completed today
 description: ""
 tableName: fct_habit
-updatedAt: "2025-11-01T15:54:55.118Z"
+updatedAt: "2025-11-01T15:54:44.306Z"
 metricQuery:
   exploreName: fct_habit
   dimensions:
@@ -12,7 +12,7 @@ metricQuery:
     - fct_habit_total_task_instances
   filters:
     dimensions:
-      id: 1406e3e8-5acf-429d-8776-a64ce3296160
+      id: 96ba234f-970f-436f-ab54-05c4342a2d16
       and:
         - id: 1d38e2c1-32b1-4e20-a859-9b9078ecf3ed
           target:
@@ -24,11 +24,11 @@ metricQuery:
           settings:
             completed: false
             unitOfTime: days
-        - id: c8ef8ac6-5f2d-4da0-8234-ca9537efe9ce
+        - id: 3fe49e41-60f2-40c3-a622-a86398802d50
           target:
             fieldId: fct_habit_is_completed
           values:
-            - new
+            - completed
           operator: equals
           required: false
   sorts:
@@ -56,7 +56,7 @@ chartConfig:
     groupLabelOverrides: {}
     legendMaxItemLength: 30
     groupValueOptionOverrides: {}
-slug: todoist-completion-rate-today
+slug: copy-of-todoist-completion-rate-today-1762012024749
 tableConfig:
   columnOrder:
     - dim_project_todoist_name
