@@ -1,0 +1,65 @@
+name: todoist tracker
+description: ""
+updatedAt: "2025-11-01T14:53:35.276Z"
+tiles:
+  - x: 0
+    "y": 0
+    h: 6
+    w: 15
+    tabUuid: null
+    type: saved_chart
+    properties:
+      title: Today's tasks breakdown
+      hideTitle: false
+      chartSlug: todoist-completion-rate-today
+      chartName: Todoist completion rate today
+    tileSlug: todoist-completion-rate-today
+  - x: 15
+    "y": 0
+    h: 14
+    w: 21
+    tabUuid: null
+    type: saved_chart
+    properties:
+      title: Tasks done past days
+      hideTitle: false
+      chartSlug: todoist-completed-tasks
+      chartName: todoist completed tasks
+    tileSlug: todoist-completed-tasks
+  - x: 0
+    "y": 6
+    h: 8
+    w: 15
+    tabUuid: null
+    type: saved_chart
+    properties:
+      title: Tasks done past days, by project
+      hideTitle: false
+      chartSlug: todoist-done-tasks-breakdown-by-project
+      chartName: Todoist done tasks breakdown by project
+    tileSlug: todoist-done-tasks-breakdown-by-project
+filters:
+  metrics: []
+  dimensions:
+    - target:
+        fieldId: fct_habit_completed_at_day
+        fieldName: completed_at_day
+        tableName: fct_habit
+      values:
+        - 7
+      disabled: false
+      operator: inThePast
+      settings:
+        completed: false
+        unitOfTime: days
+      tileTargets:
+        todoist-completed-tasks:
+          fieldId: fct_habit_completed_at_day
+          tableName: fct_habit
+        todoist-completion-rate-today: false
+  tableCalculations: []
+tabs: []
+slug: todoist-tracker
+spaceSlug: shared
+version: 1
+downloadedAt: "2025-11-01T14:54:31.019Z"

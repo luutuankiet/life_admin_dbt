@@ -1,0 +1,62 @@
+name: Todoist completion rate today
+description: ""
+tableName: fct_habit
+updatedAt: "2025-11-01T14:40:20.388Z"
+metricQuery:
+  exploreName: fct_habit
+  dimensions:
+    - dim_project_todoist_name
+    - fct_habit_is_completed
+    - fct_habit_scheduled_date_day
+  metrics:
+    - fct_habit_total_task_instances
+  filters:
+    dimensions:
+      id: d9b61693-abc3-44c5-898d-eacd2e08b7cb
+      and:
+        - id: 1d38e2c1-32b1-4e20-a859-9b9078ecf3ed
+          target:
+            fieldId: fct_habit_scheduled_date_day
+          values:
+            - 1
+          operator: inTheCurrent
+          required: false
+          settings:
+            completed: false
+            unitOfTime: days
+  sorts:
+    - fieldId: fct_habit_scheduled_date_day
+      descending: true
+  limit: 500
+  metricOverrides: {}
+  tableCalculations: []
+  additionalMetrics: []
+  customDimensions: []
+chartConfig:
+  type: pie
+  config:
+    isDonut: true
+    metricId: fct_habit_total_task_instances
+    showValue: true
+    showLegend: true
+    valueLabel: outside
+    groupFieldIds:
+      - dim_project_todoist_name
+      - fct_habit_is_completed
+    legendPosition: horizontal
+    showPercentage: true
+    groupSortOverrides: []
+    groupColorOverrides: {}
+    groupLabelOverrides: {}
+    legendMaxItemLength: 30
+    groupValueOptionOverrides: {}
+slug: todoist-completion-rate-today
+tableConfig:
+  columnOrder:
+    - dim_project_todoist_name
+    - fct_habit_is_completed
+    - fct_habit_scheduled_date_day
+    - fct_habit_total_task_instances
+spaceSlug: shared
+version: 1
+downloadedAt: "2025-11-01T14:54:30.588Z"

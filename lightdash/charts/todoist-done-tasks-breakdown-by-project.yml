@@ -1,0 +1,102 @@
+name: Todoist done tasks breakdown by project
+description: ""
+tableName: fct_habit
+updatedAt: "2025-11-01T14:50:23.702Z"
+metricQuery:
+  exploreName: fct_habit
+  dimensions:
+    - dim_project_todoist_name
+    - fct_habit_is_completed
+    - fct_habit_scheduled_date_day
+  metrics:
+    - fct_habit_total_task_instances
+  filters:
+    dimensions:
+      id: 0d3dce1f-d9ea-4e0e-bdfc-e54610df474f
+      and:
+        - id: 1d38e2c1-32b1-4e20-a859-9b9078ecf3ed
+          target:
+            fieldId: fct_habit_scheduled_date_day
+          values:
+            - 7
+          operator: inThePast
+          required: false
+          settings:
+            completed: false
+            unitOfTime: days
+        - id: 55bf5ab5-542e-4674-b576-50f51e56fdfa
+          target:
+            fieldId: fct_habit_is_completed
+          values:
+            - completed
+          operator: equals
+          required: false
+  sorts:
+    - fieldId: fct_habit_scheduled_date_day
+      descending: true
+  limit: 500
+  metricOverrides: {}
+  tableCalculations: []
+  additionalMetrics: []
+  customDimensions: []
+chartConfig:
+  type: cartesian
+  config:
+    layout:
+      stack: stack
+      xField: fct_habit_scheduled_date_day
+      yField:
+        - fct_habit_total_task_instances
+      flipAxes: false
+      showGridX: false
+      showGridY: true
+      showXAxis: true
+      showYAxis: true
+    eChartsConfig:
+      legend:
+        show: true
+        type: plain
+        orient: horizontal
+      series:
+        - type: bar
+          stack: fct_habit_total_task_instances
+          encode:
+            xRef:
+              field: fct_habit_scheduled_date_day
+            yRef:
+              field: fct_habit_total_task_instances
+              pivotValues:
+                - field: dim_project_todoist_name
+                  value: Personal
+          stackLabel:
+            show: true
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: bar
+          stack: fct_habit_total_task_instances
+          encode:
+            xRef:
+              field: fct_habit_scheduled_date_day
+            yRef:
+              field: fct_habit_total_task_instances
+              pivotValues:
+                - field: dim_project_todoist_name
+                  value: Sacombank app
+          stackLabel:
+            show: true
+          yAxisIndex: 0
+          isFilteredOut: false
+      tooltip: ""
+pivotConfig:
+  columns:
+    - dim_project_todoist_name
+slug: todoist-done-tasks-breakdown-by-project
+tableConfig:
+  columnOrder:
+    - dim_project_todoist_name
+    - fct_habit_is_completed
+    - fct_habit_scheduled_date_day
+    - fct_habit_total_task_instances
+spaceSlug: shared
+version: 1
+downloadedAt: "2025-11-01T14:54:30.588Z"
