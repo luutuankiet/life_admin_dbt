@@ -82,10 +82,11 @@ filters:
         distribution-by-parent-dimension:
           fieldId: fct_tasks_status
           tableName: fct_tasks
-        tasks-lookahead-1:
+        tasks-drill-down-by-grain:
           fieldId: fct_tasks_status
           tableName: fct_tasks
-        tasks-drill-down-by-grain:
+        what-did-you-do: false
+        tasks-lookahead-1:
           fieldId: fct_tasks_status
           tableName: fct_tasks
         what-did-you-do: false
