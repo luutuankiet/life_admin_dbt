@@ -1,6 +1,6 @@
 name: todoist tracker
 description: ""
-updatedAt: "2025-11-01T14:53:35.276Z"
+updatedAt: "2025-11-01T15:32:24.383Z"
 tiles:
   - x: 0
     "y": 0
@@ -53,13 +53,13 @@ filters:
         completed: false
         unitOfTime: days
       tileTargets:
+        todoist-completion-rate-today: false
         todoist-completed-tasks:
           fieldId: fct_habit_completed_at_day
           tableName: fct_habit
-        todoist-completion-rate-today: false
   tableCalculations: []
 tabs: []
 slug: todoist-tracker
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-01T14:54:31.019Z"
+downloadedAt: "2025-11-01T15:32:28.226Z"

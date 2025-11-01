@@ -1,7 +1,7 @@
 name: Todoist done tasks breakdown by project
 description: ""
 tableName: fct_habit
-updatedAt: "2025-11-01T15:24:05.401Z"
+updatedAt: "2025-11-01T15:32:21.477Z"
 metricQuery:
   exploreName: fct_habit
   dimensions:
@@ -99,4 +99,4 @@ tableConfig:
     - fct_habit_total_task_instances
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-01T15:24:09.433Z"
+downloadedAt: "2025-11-01T15:32:27.715Z"
