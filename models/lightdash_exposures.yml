@@ -18,25 +18,6 @@ exposures:
       - ref('dim_projects')
       - ref('dim_date_spine')
       - ref('fct_task_tags_bridge')
-  - name: ld_chart_466d9992_dc80_49b3_ba47_ae8436433ce1
-    type: analysis
-    owner:
-      name: ken luu
-      email: ""
-    label: next load time
-    description: ""
-    url: >-
-      https://ld.kenluu.org/projects/2f8e376d-3353-4304-acfc-1bfde52e2c1d/saved/466d9992-dc80-49b3-ba47-ae8436433ce1/view
-    tags:
-      - lightdash
-      - chart
-    depends_on:
-      - ref('dim_tags')
-      - ref('fct_tasks')
-      - ref('dim_folders')
-      - ref('dim_projects')
-      - ref('dim_date_spine')
-      - ref('fct_task_tags_bridge')
   - name: ld_chart_8a5edc68_eaca_44a0_bdc2_514d3ed6f24a
     type: analysis
     owner:
@@ -122,6 +103,25 @@ exposures:
     description: ""
     url: >-
       https://ld.kenluu.org/projects/2f8e376d-3353-4304-acfc-1bfde52e2c1d/saved/662f91a7-90f3-469a-9d45-f5c66fe3e257/view
+    tags:
+      - lightdash
+      - chart
+    depends_on:
+      - ref('dim_tags')
+      - ref('fct_tasks')
+      - ref('dim_folders')
+      - ref('dim_projects')
+      - ref('dim_date_spine')
+      - ref('fct_task_tags_bridge')
+  - name: ld_chart_466d9992_dc80_49b3_ba47_ae8436433ce1
+    type: analysis
+    owner:
+      name: ken luu
+      email: ""
+    label: next load time
+    description: ""
+    url: >-
+      https://ld.kenluu.org/projects/2f8e376d-3353-4304-acfc-1bfde52e2c1d/saved/466d9992-dc80-49b3-ba47-ae8436433ce1/view
     tags:
       - lightdash
       - chart
