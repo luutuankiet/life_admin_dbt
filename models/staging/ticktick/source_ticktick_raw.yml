@@ -9,336 +9,336 @@ sources:
 
         columns:
           - name: parentId
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: reminders
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: ARRAY<STRING>
           - name: dueDate
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: TIMESTAMP
           - name: completedTime
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: TIMESTAMP
           - name: repeatFlag
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: kind
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: etag
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: tags
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: ARRAY<STRING>
           - name: childIds
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: ARRAY<STRING>
           - name: startDate
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: TIMESTAMP
           - name: isAllDay
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: BOOLEAN
           - name: columnId
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: status
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: INT64
           - name: priority
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: INT64
           - name: timeZone
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: title
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: sortOrder
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: INT64
           - name: projectId
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: id
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
       - name: tasks_snapshot
         description: >-
           automatically snapshot table (outside of this project) to infer ONLY completed, non repeat tasks.
 
         columns:
           - name: dbt_valid_from
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: TIMESTAMP
           - name: parentId
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: reminders
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: dueDate
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: TIMESTAMP
           - name: completedTime
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: TIMESTAMP
           - name: repeatFlag
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: kind
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: etag
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: dbt_scd_id
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: tags
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: childIds
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: startDate
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: TIMESTAMP
           - name: isAllDay
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: BOOLEAN
           - name: columnId
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: status
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: INT64
           - name: priority
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: INT64
           - name: dbt_updated_at
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: TIMESTAMP
           - name: timeZone
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: title
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: dbt_valid_to
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: sortOrder
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: INT64
           - name: projectId
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: id
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
       - name: projects
         description: raw project data
 
 
         columns:
           - name: closed
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: BOOLEAN
           - name: permission
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: color
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: kind
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: groupId
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: sortOrder
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: INT64
           - name: viewMode
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: name
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: id
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
       - name: projects_snapshot
         description: >-
           automatically snapshot table (outside of this project) to infer ONLY completed projects.
         columns:
           - name: dbt_valid_from
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: TIMESTAMP
           - name: dbt_scd_id
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: id
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: closed
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: BOOLEAN
           - name: kind
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: permission
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: dbt_valid_to
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: sortOrder
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: INT64
           - name: color
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: dbt_updated_at
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: TIMESTAMP
           - name: groupId
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: viewMode
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING
           - name: name
-            description: ''
             config:
               meta: {}
               tags: []
+            data_type: STRING

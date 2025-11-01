@@ -22,7 +22,6 @@ models:
           tags: []
       - name: column_id
         data_type: string
-        description: ''
         config:
           meta: {}
           tags: []
@@ -109,6 +108,7 @@ models:
         config:
           meta: {}
           tags: []
+        data_type: ARRAY<STRING>
       - name: task_id
         data_type: string
         description: Task identifier
@@ -148,7 +148,6 @@ models:
           tags: []
       - name: column_id
         data_type: string
-        description: ''
         config:
           meta: {}
           tags: []
@@ -266,6 +265,7 @@ models:
         config:
           meta: {}
           tags: []
+        data_type: ARRAY<STRING>
       - name: task_id
         data_type: string
         description: Task identifier
