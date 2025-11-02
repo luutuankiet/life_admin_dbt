@@ -1,6 +1,6 @@
 name: gtd dash v1.0
 description: ""
-updatedAt: "2025-11-02T04:42:16.722Z"
+updatedAt: "2025-11-02T09:16:29.339Z"
 tiles:
   - x: 0
     "y": 0
@@ -79,9 +79,6 @@ filters:
       disabled: false
       operator: notEquals
       tileTargets:
-        distribution-by-parent-dimension:
-          fieldId: fct_tasks_status
-          tableName: fct_tasks
         tasks-lookahead-1:
           fieldId: fct_tasks_status
           tableName: fct_tasks
@@ -89,9 +86,12 @@ filters:
         tasks-drill-down-by-grain:
           fieldId: fct_tasks_status
           tableName: fct_tasks
+        distribution-by-parent-dimension:
+          fieldId: fct_tasks_status
+          tableName: fct_tasks
   tableCalculations: []
 tabs: []
 slug: gtd-dash-v1-0
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-02T09:13:46.290Z"
+downloadedAt: "2025-11-02T09:16:36.630Z"
