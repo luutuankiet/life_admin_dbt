@@ -1,6 +1,8 @@
 name: Todoist EL
 on:
   workflow_dispatch:
+  repository_dispatch:
+    types: [todoist_EL]
         
   schedule:
     - cron: '0 22-23 * * *'
