@@ -38,7 +38,9 @@ with active as (
                     cast(`due_string` as STRING) as `due_string` ,
                     cast(`due_date` as DATETIME) as `due_date` ,
                     cast(null as ARRAY<STRING>) as `notes` ,
-                    cast(null as STRING) as `task_id` ,
+                    -- role play id as task_id as this is the main field
+                    -- for identifying a task.
+                    cast(id as STRING) as `task_id` ,
                     cast(null as STRING) as `meta_data` ,
                     cast(null as STRING) as `item_object` 
 
