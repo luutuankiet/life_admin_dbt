@@ -253,6 +253,8 @@ models:
         description: |
           - The ID of the task. 
           - For recurring tasks will take the id of the lastest task.
+        data_tests:
+          - not_null
         config:
           meta: {}
           tags: []
