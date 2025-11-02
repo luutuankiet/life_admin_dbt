@@ -1,7 +1,7 @@
 name: todoist due today
 description: ""
 tableName: fct_habit
-updatedAt: "2025-11-02T02:26:11.685Z"
+updatedAt: "2025-11-02T04:41:48.220Z"
 metricQuery:
   exploreName: fct_habit
   dimensions:
@@ -11,6 +11,7 @@ metricQuery:
     - fct_habit_cleaned_content
     - fct_habit_streak
     - streak_count
+    - fct_habit_task_id
   metrics:
     - fct_habit_total_task_instances
   filters:
@@ -59,6 +60,8 @@ chartConfig:
         displayStyle: bar
       fct_habit_streak:
         visible: false
+      fct_habit_task_id:
+        visible: false
       fct_habit_is_completed:
         visible: false
       fct_habit_scheduled_date_day:
@@ -83,7 +86,8 @@ tableConfig:
     - fct_habit_streak
     - streak_count
     - streak count
+    - fct_habit_task_id
     - fct_habit_total_task_instances
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-02T02:57:41.980Z"
+downloadedAt: "2025-11-02T04:42:21.039Z"
