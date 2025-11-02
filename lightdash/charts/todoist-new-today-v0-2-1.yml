@@ -1,0 +1,119 @@
+name: todoist new today v0.2
+description: ""
+tableName: fct_habit
+updatedAt: "2025-11-02T09:01:22.212Z"
+metricQuery:
+  exploreName: fct_habit
+  dimensions:
+    - dim_project_todoist_name
+    - fct_habit_is_completed
+    - fct_habit_scheduled_date_day
+    - fct_habit_cleaned_content
+    - fct_habit_streak
+    - streak_count
+    - fct_habit_task_id
+  metrics:
+    - fct_habit_total_task_instances
+  filters:
+    dimensions:
+      id: 5d631869-9af5-48d9-a3db-f09f04eb3f77
+      and:
+        - id: 5df0e629-5881-4dbc-b459-e454f6cbc0c3
+          or:
+            - id: 0743edee-3ad8-452b-95ec-eec4081c42f7
+              target:
+                fieldId: fct_habit_due_date_day
+              values:
+                - 1
+              operator: inThePast
+              required: false
+              settings:
+                completed: false
+                unitOfTime: months
+            - id: 418983b3-931b-4f48-8d1d-e4e78925b99f
+              target:
+                fieldId: fct_habit_due_date
+              values:
+                - 1
+              operator: inTheCurrent
+              required: false
+              settings:
+                completed: false
+                unitOfTime: days
+            - id: 2a9c395f-0304-45cc-b72e-c1b7f5be9d6a
+              target:
+                fieldId: fct_habit_completed_at
+              values:
+                - 1
+              operator: inTheCurrent
+              required: false
+              settings:
+                completed: false
+                unitOfTime: days
+    tableCalculations:
+      id: 08213d8b-1067-4edb-8dd6-1b8af2f0097e
+      and:
+        - id: 0831f683-fd72-47d1-9408-09b016b7108b
+          target:
+            fieldId: status
+          values:
+            - ⚪
+          operator: equals
+  sorts:
+    - fieldId: status
+      descending: false
+    - fieldId: dim_project_todoist_name
+      descending: false
+    - fieldId: fct_habit_scheduled_date_day
+      descending: true
+  limit: 500
+  metricOverrides: {}
+  tableCalculations:
+    - name: status
+      displayName: status
+      sql: "case when ${fct_habit.is_completed} = 'new' then '⚪' else '✅' end "
+      format:
+        type: default
+        separator: default
+      type: string
+  additionalMetrics: []
+  customDimensions:
+    - id: streak_count
+      name: streak count
+      type: sql
+      table: fct_habit
+      sql: cast(regexp_extract(${fct_habit.streak},r'^\d+') as int)
+      dimensionType: number
+chartConfig:
+  type: pie
+  config:
+    isDonut: true
+    metricId: fct_habit_total_task_instances
+    showValue: true
+    showLegend: true
+    valueLabel: inside
+    groupFieldIds:
+      - dim_project_todoist_name
+    legendPosition: horizontal
+    showPercentage: false
+    groupSortOverrides: []
+    groupColorOverrides: {}
+    groupLabelOverrides: {}
+    legendMaxItemLength: 30
+    groupValueOptionOverrides: {}
+slug: todoist-new-today-v0-2-1
+tableConfig:
+  columnOrder:
+    - dim_project_todoist_name
+    - fct_habit_is_completed
+    - fct_habit_scheduled_date_day
+    - fct_habit_cleaned_content
+    - fct_habit_streak
+    - status
+    - streak_count
+    - streak count
+    - fct_habit_task_id
+    - fct_habit_total_task_instances
+spaceSlug: shared
+version: 1
+downloadedAt: "2025-11-02T09:13:45.828Z"

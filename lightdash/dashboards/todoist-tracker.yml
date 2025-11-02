@@ -1,6 +1,6 @@
 name: todoist tracker
 description: ""
-updatedAt: "2025-11-02T04:42:17.663Z"
+updatedAt: "2025-11-02T09:08:51.670Z"
 tiles:
   - x: 0
     "y": 0
@@ -27,11 +27,11 @@ tiles:
     tabUuid: null
     type: saved_chart
     properties:
-      title: Today's tasks (new)
+      title: New tasks distribution
       hideTitle: false
-      chartSlug: todoist-completion-rate-today
-      chartName: Todoist new today
-    tileSlug: todoist-completion-rate-today
+      chartSlug: todoist-new-today-v0-2-1
+      chartName: todoist new today v0.2
+    tileSlug: todoist-new-today-v0-2-1
   - x: 17
     "y": 3
     h: 10
@@ -39,7 +39,7 @@ tiles:
     tabUuid: null
     type: saved_chart
     properties:
-      title: Today's tasks detailed
+      title: Detailed view
       hideTitle: false
       chartSlug: todoist-due-today
       chartName: todoist due today
@@ -51,11 +51,11 @@ tiles:
     tabUuid: null
     type: saved_chart
     properties:
-      title: Today's tasks (completed)
+      title: Completed tasks distribution
       hideTitle: false
-      chartSlug: copy-of-todoist-completion-rate-today-1762012024749
-      chartName: Todoist completed today
-    tileSlug: copy-of-todoist-completion-rate-today-1762012024749
+      chartSlug: todoist-completed-today-v0-2
+      chartName: todoist completed today v0.2
+    tileSlug: todoist-completed-today-v0-2
   - x: 0
     "y": 13
     h: 2
@@ -96,7 +96,8 @@ tiles:
 filters:
   metrics: []
   dimensions:
-    - target:
+    - label: Past day's lookback window
+      target:
         fieldId: fct_habit_completed_at_day
         fieldName: completed_at_day
         tableName: fct_habit
@@ -108,15 +109,15 @@ filters:
         completed: false
         unitOfTime: days
       tileTargets:
-        todoist-completion-rate-today: false
-        copy-of-todoist-completion-rate-today-1762012024749: false
+        todoist-completed-today-v0-2: false
         todoist-due-today: false
         todoist-completed-tasks:
           fieldId: fct_habit_completed_at_day
           tableName: fct_habit
+        todoist-new-today-v0-2-1: false
   tableCalculations: []
 tabs: []
 slug: todoist-tracker
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-02T04:42:21.594Z"
+downloadedAt: "2025-11-02T09:13:46.290Z"
