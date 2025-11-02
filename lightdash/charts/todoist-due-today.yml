@@ -1,0 +1,89 @@
+name: todoist due today
+description: ""
+tableName: fct_habit
+updatedAt: "2025-11-02T02:26:11.685Z"
+metricQuery:
+  exploreName: fct_habit
+  dimensions:
+    - dim_project_todoist_name
+    - fct_habit_is_completed
+    - fct_habit_scheduled_date_day
+    - fct_habit_cleaned_content
+    - fct_habit_streak
+    - streak_count
+  metrics:
+    - fct_habit_total_task_instances
+  filters:
+    dimensions:
+      id: 4063b93a-ef0a-4a00-88eb-bc2fc94e9d9f
+      and:
+        - id: c8ef8ac6-5f2d-4da0-8234-ca9537efe9ce
+          target:
+            fieldId: fct_habit_is_completed
+          values:
+            - new
+          operator: equals
+          required: false
+        - id: 0743edee-3ad8-452b-95ec-eec4081c42f7
+          target:
+            fieldId: fct_habit_due_date_day
+          values:
+            - 1
+          operator: inThePast
+          required: false
+          settings:
+            completed: false
+            unitOfTime: months
+  sorts:
+    - fieldId: dim_project_todoist_name
+      descending: false
+    - fieldId: fct_habit_scheduled_date_day
+      descending: true
+  limit: 500
+  metricOverrides: {}
+  tableCalculations: []
+  additionalMetrics: []
+  customDimensions:
+    - id: streak_count
+      name: streak count
+      type: sql
+      table: fct_habit
+      sql: cast(regexp_extract(${fct_habit.streak},r'^\d+') as int)
+      dimensionType: number
+chartConfig:
+  type: table
+  config:
+    columns:
+      streak_count:
+        name: streak
+        displayStyle: bar
+      fct_habit_streak:
+        visible: false
+      fct_habit_is_completed:
+        visible: false
+      fct_habit_scheduled_date_day:
+        visible: false
+      fct_habit_total_task_instances:
+        visible: false
+    metricsAsRows: false
+    showSubtotals: false
+    hideRowNumbers: true
+    showTableNames: false
+    showResultsTotal: false
+    showRowCalculation: false
+    showColumnCalculation: false
+    conditionalFormattings: []
+slug: todoist-due-today
+tableConfig:
+  columnOrder:
+    - dim_project_todoist_name
+    - fct_habit_is_completed
+    - fct_habit_scheduled_date_day
+    - fct_habit_cleaned_content
+    - fct_habit_streak
+    - streak_count
+    - streak count
+    - fct_habit_total_task_instances
+spaceSlug: shared
+version: 1
+downloadedAt: "2025-11-02T02:57:41.980Z"

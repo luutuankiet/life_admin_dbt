@@ -1,11 +1,29 @@
 name: todoist tracker
 description: ""
-updatedAt: "2025-11-01T15:53:30.587Z"
+updatedAt: "2025-11-02T02:45:03.281Z"
 tiles:
   - x: 0
     "y": 0
-    h: 7
-    w: 9
+    h: 3
+    w: 19
+    tabUuid: null
+    type: markdown
+    properties:
+      title: ""
+      hideTitle: false
+      content: >
+        # Today's numbers
+
+        🎯 Here's your focus for the day, planned by the past you. WIG away!
+
+
+        *Streak is available once the [habit tracker
+        integration](https://www.todoist.com/integrations/apps/habit-tracker) is
+        set up on desktop for the task.*
+  - x: 0
+    "y": 3
+    h: 5
+    w: 17
     tabUuid: null
     type: saved_chart
     properties:
@@ -14,10 +32,22 @@ tiles:
       chartSlug: todoist-completion-rate-today
       chartName: Todoist new today
     tileSlug: todoist-completion-rate-today
-  - x: 9
-    "y": 0
-    h: 7
-    w: 8
+  - x: 17
+    "y": 3
+    h: 10
+    w: 18
+    tabUuid: null
+    type: saved_chart
+    properties:
+      title: Today's tasks detailed
+      hideTitle: false
+      chartSlug: todoist-due-today
+      chartName: todoist due today
+    tileSlug: todoist-due-today
+  - x: 0
+    "y": 8
+    h: 5
+    w: 17
     tabUuid: null
     type: saved_chart
     properties:
@@ -26,21 +56,22 @@ tiles:
       chartSlug: copy-of-todoist-completion-rate-today-1762012024749
       chartName: Todoist completed today
     tileSlug: copy-of-todoist-completion-rate-today-1762012024749
-  - x: 17
-    "y": 0
-    h: 14
+  - x: 0
+    "y": 13
+    h: 2
     w: 19
     tabUuid: null
-    type: saved_chart
+    type: markdown
     properties:
-      title: Tasks done past days
+      title: ""
       hideTitle: false
-      chartSlug: todoist-completed-tasks
-      chartName: todoist completed tasks
-    tileSlug: todoist-completed-tasks
+      content: |
+        # Past days's number
+        😤 Take a moment and be proud of what we've done. 
+        Adjust the filter up top to preview more dates.
   - x: 0
-    "y": 7
-    h: 7
+    "y": 15
+    h: 10
     w: 17
     tabUuid: null
     type: saved_chart
@@ -50,6 +81,18 @@ tiles:
       chartSlug: todoist-done-tasks-breakdown-by-project
       chartName: Todoist done tasks breakdown by project
     tileSlug: todoist-done-tasks-breakdown-by-project
+  - x: 17
+    "y": 15
+    h: 10
+    w: 18
+    tabUuid: null
+    type: saved_chart
+    properties:
+      title: Tasks done past days
+      hideTitle: false
+      chartSlug: todoist-completed-tasks
+      chartName: todoist completed tasks
+    tileSlug: todoist-completed-tasks
 filters:
   metrics: []
   dimensions:
@@ -70,9 +113,10 @@ filters:
           fieldId: fct_habit_completed_at_day
           tableName: fct_habit
         copy-of-todoist-completion-rate-today-1762012024749: false
+        todoist-due-today: false
   tableCalculations: []
 tabs: []
 slug: todoist-tracker
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-01T15:56:22.667Z"
+downloadedAt: "2025-11-02T02:57:42.651Z"
