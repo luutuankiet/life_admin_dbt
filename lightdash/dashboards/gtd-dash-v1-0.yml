@@ -1,12 +1,12 @@
 name: gtd dash v1.0
 description: ""
-updatedAt: "2025-11-02T09:16:29.339Z"
+updatedAt: "2025-11-03T01:57:50.460Z"
 tiles:
   - x: 0
     "y": 0
     h: 7
     w: 18
-    tabUuid: null
+    tabUuid: 46023a07-3871-4fd8-9eb4-b143eef3b956
     type: saved_chart
     properties:
       title: ""
@@ -14,11 +14,23 @@ tiles:
       chartSlug: tasks-lookahead-1
       chartName: tasks lookahead
     tileSlug: tasks-lookahead-1
+  - x: 0
+    "y": 0
+    h: 5
+    w: 16
+    tabUuid: 2c58e9b5-8bd9-42f9-b4af-36b21a1877c5
+    type: saved_chart
+    properties:
+      title: ""
+      hideTitle: false
+      chartSlug: todoist-new-today-v0-2-1
+      chartName: todoist new today v0.2
+    tileSlug: todoist-new-today-v0-2-1
   - x: 18
     "y": 0
     h: 14
     w: 18
-    tabUuid: null
+    tabUuid: 46023a07-3871-4fd8-9eb4-b143eef3b956
     type: saved_chart
     properties:
       title: ""
@@ -27,10 +39,22 @@ tiles:
       chartName: drill down tasks by parent grain dimension
     tileSlug: tasks-drill-down-by-grain
   - x: 0
+    "y": 5
+    h: 5
+    w: 16
+    tabUuid: 2c58e9b5-8bd9-42f9-b4af-36b21a1877c5
+    type: saved_chart
+    properties:
+      title: ""
+      hideTitle: false
+      chartSlug: todoist-completed-today-v0-2
+      chartName: todoist completed today v0.2
+    tileSlug: todoist-completed-today-v0-2
+  - x: 0
     "y": 7
     h: 7
     w: 18
-    tabUuid: null
+    tabUuid: 46023a07-3871-4fd8-9eb4-b143eef3b956
     type: saved_chart
     properties:
       title: ""
@@ -38,11 +62,23 @@ tiles:
       chartSlug: distribution-by-parent-dimension
       chartName: distribution by parent dimension
     tileSlug: distribution-by-parent-dimension
+  - x: 16
+    "y": 10
+    h: 12
+    w: 20
+    tabUuid: 2c58e9b5-8bd9-42f9-b4af-36b21a1877c5
+    type: saved_chart
+    properties:
+      title: ""
+      hideTitle: false
+      chartSlug: todoist-due-today
+      chartName: todoist due today
+    tileSlug: todoist-due-today
   - x: 0
     "y": 14
     h: 8
     w: 36
-    tabUuid: null
+    tabUuid: 46023a07-3871-4fd8-9eb4-b143eef3b956
     type: saved_chart
     properties:
       title: ""
@@ -90,8 +126,14 @@ filters:
           fieldId: fct_tasks_status
           tableName: fct_tasks
   tableCalculations: []
-tabs: []
+tabs:
+  - name: main tasks
+    uuid: 46023a07-3871-4fd8-9eb4-b143eef3b956
+    order: 0
+  - name: recurring tasks
+    uuid: 2c58e9b5-8bd9-42f9-b4af-36b21a1877c5
+    order: 1
 slug: gtd-dash-v1-0
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-02T09:16:36.630Z"
+downloadedAt: "2025-11-03T23:49:51.978Z"
