@@ -1,19 +1,7 @@
 name: gtd dash v1.0
 description: ""
-updatedAt: "2025-11-08T04:09:17.328Z"
+updatedAt: "2025-11-08T08:38:20.597Z"
 tiles:
-  - x: 0
-    "y": 0
-    h: 7
-    w: 18
-    tabUuid: 46023a07-3871-4fd8-9eb4-b143eef3b956
-    type: saved_chart
-    properties:
-      title: ""
-      hideTitle: false
-      chartSlug: tasks-lookahead-1
-      chartName: tasks lookahead
-    tileSlug: tasks-lookahead-1
   - x: 0
     "y": 0
     h: 5
@@ -26,6 +14,30 @@ tiles:
       chartSlug: todoist-new-today-v0-2-1
       chartName: todoist new today v0.2
     tileSlug: todoist-new-today-v0-2-1
+  - x: 0
+    "y": 0
+    h: 7
+    w: 18
+    tabUuid: 46023a07-3871-4fd8-9eb4-b143eef3b956
+    type: saved_chart
+    properties:
+      title: ""
+      hideTitle: false
+      chartSlug: tasks-lookahead-1
+      chartName: tasks lookahead
+    tileSlug: tasks-lookahead-1
+  - x: 1
+    "y": 0
+    h: 3
+    w: 11
+    tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
+    type: saved_chart
+    properties:
+      title: loops (clarify them)
+      hideTitle: false
+      chartSlug: ticktick-inbox-distribution-1762589144902
+      chartName: ticktick - count inbox
+    tileSlug: ticktick-inbox-distribution-1762589144902
   - x: 9
     "y": 0
     h: 14
@@ -38,6 +50,18 @@ tiles:
       chartSlug: todoist-due-today
       chartName: todoist due today
     tileSlug: todoist-due-today
+  - x: 12
+    "y": 0
+    h: 8
+    w: 23
+    tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
+    type: saved_chart
+    properties:
+      title: loops distro (clarify them)
+      hideTitle: false
+      chartSlug: ticktick-count-of-inbox
+      chartName: ticktick - inbox distribution
+    tileSlug: ticktick-count-of-inbox
   - x: 18
     "y": 0
     h: 14
@@ -50,6 +74,18 @@ tiles:
       chartSlug: tasks-drill-down-by-grain
       chartName: drill down tasks by parent grain dimension
     tileSlug: tasks-drill-down-by-grain
+  - x: 1
+    "y": 3
+    h: 5
+    w: 11
+    tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
+    type: saved_chart
+    properties:
+      title: empty projects (archive them)
+      hideTitle: false
+      chartSlug: ticktick-empty-projects-to-be-cleaned
+      chartName: ticktick - empty projects to be cleaned
+    tileSlug: ticktick-empty-projects-to-be-cleaned
   - x: 0
     "y": 5
     h: 5
@@ -74,6 +110,42 @@ tiles:
       chartSlug: distribution-by-parent-dimension
       chartName: distribution by parent dimension
     tileSlug: distribution-by-parent-dimension
+  - x: 1
+    "y": 8
+    h: 5
+    w: 34
+    tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
+    type: saved_chart
+    properties:
+      title: project inacive > 5d (schedule new tasks / archive them)
+      hideTitle: false
+      chartSlug: tmp
+      chartName: ticktick - project pulse
+    tileSlug: tmp
+  - x: 1
+    "y": 13
+    h: 6
+    w: 14
+    tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
+    type: saved_chart
+    properties:
+      title: tasks this week (distribute them)
+      hideTitle: false
+      chartSlug: copy-of-tasks-lookahead-1762587681284
+      chartName: Copy of tasks lookahead
+    tileSlug: copy-of-tasks-lookahead-1762587681284
+  - x: 15
+    "y": 13
+    h: 13
+    w: 20
+    tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
+    type: saved_chart
+    properties:
+      title: tasks this week (distribute them)
+      hideTitle: false
+      chartSlug: copy-of-drill-down-tasks-by-parent-grain-dimension-1762587764307
+      chartName: Copy of drill down tasks by parent grain dimension
+    tileSlug: copy-of-drill-down-tasks-by-parent-grain-dimension-1762587764307
   - x: 0
     "y": 14
     h: 8
@@ -86,6 +158,18 @@ tiles:
       chartSlug: what-did-you-do
       chartName: what did you do?
     tileSlug: what-did-you-do
+  - x: 1
+    "y": 19
+    h: 7
+    w: 14
+    tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
+    type: saved_chart
+    properties:
+      title: tasks this week (distribute them)
+      hideTitle: false
+      chartSlug: copy-of-distribution-by-parent-dimension-1762588095829
+      chartName: Copy of distribution by parent dimension
+    tileSlug: copy-of-distribution-by-parent-dimension-1762588095829
 filters:
   metrics: []
   dimensions:
@@ -102,10 +186,17 @@ filters:
         completed: false
         unitOfTime: weeks
       tileTargets:
+        copy-of-drill-down-tasks-by-parent-grain-dimension-1762587764307: false
+        copy-of-distribution-by-parent-dimension-1762588095829: false
+        ticktick-count-of-inbox: false
+        ticktick-inbox-distribution-1762589144902: false
         tasks-lookahead-1:
           fieldId: dim_date_spine_date_day
           tableName: dim_date_spine
+        ticktick-empty-projects-to-be-cleaned: false
+        copy-of-tasks-lookahead-1762587681284: false
         what-did-you-do: false
+        tmp: false
     - target:
         fieldId: fct_tasks_status
         fieldName: status
@@ -115,16 +206,23 @@ filters:
       disabled: false
       operator: notEquals
       tileTargets:
+        copy-of-drill-down-tasks-by-parent-grain-dimension-1762587764307: false
+        copy-of-distribution-by-parent-dimension-1762588095829: false
         distribution-by-parent-dimension:
           fieldId: fct_tasks_status
           tableName: fct_tasks
-        tasks-drill-down-by-grain:
-          fieldId: fct_tasks_status
-          tableName: fct_tasks
+        ticktick-count-of-inbox: false
+        ticktick-inbox-distribution-1762589144902: false
         tasks-lookahead-1:
           fieldId: fct_tasks_status
           tableName: fct_tasks
+        ticktick-empty-projects-to-be-cleaned: false
+        copy-of-tasks-lookahead-1762587681284: false
         what-did-you-do: false
+        tmp: false
+        tasks-drill-down-by-grain:
+          fieldId: fct_tasks_status
+          tableName: fct_tasks
   tableCalculations: []
 tabs:
   - name: main tasks
@@ -133,7 +231,10 @@ tabs:
   - name: recurring tasks
     uuid: 2c58e9b5-8bd9-42f9-b4af-36b21a1877c5
     order: 1
+  - name: GTD weekly review
+    uuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
+    order: 2
 slug: gtd-dash-v1-0
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-08T04:11:42.511Z"
+downloadedAt: "2025-11-08T08:40:11.312Z"

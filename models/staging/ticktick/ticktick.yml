@@ -171,6 +171,8 @@ models:
           - Inferred from dbt snapshot.
           - Ticktick API do not provide this field.
           - Timezone conversion available with env var DBT_TIMEZONE
+        meta:
+          dbt-osmosis-force-inherit-descriptions: false
         config:
           meta: {}
           tags: []
@@ -182,10 +184,21 @@ models:
         data_type: STRING
       - name: kind
         description: "\"TASK\" or \"NOTE\"\n"
+        meta:
+          dbt-osmosis-force-inherit-descriptions: false
         config:
           meta: {}
           tags: []
         data_type: STRING
+      - name: last_pulse
+        description: |
+          - Indicates the last time the project is active.
+          - Logic: the (MAX due date or MAX completed at) of each project's task.
+          - (Had to anchor on these fields cause there's no reliable updated at for new tasks 🤷)
+        data_type: DATETIME
+        config:
+          meta: {}
+          tags: []
       - name: permission
         description: '"read", "write" or "comment"'
         config:
@@ -197,6 +210,8 @@ models:
           - unique
           - not_null
         description: Project identifier
+        meta:
+          dbt-osmosis-force-inherit-descriptions: false
         config:
           meta: {}
           tags: []
@@ -209,6 +224,8 @@ models:
         data_type: STRING
       - name: sort_order
         description: Order value
+        meta:
+          dbt-osmosis-force-inherit-descriptions: false
         config:
           meta: {}
           tags: []

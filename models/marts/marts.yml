@@ -415,6 +415,8 @@ models:
                 - YEAR_NUM
           tags: []
         data_type: DATETIME
+        meta:
+          dbt-osmosis-force-inherit-descriptions: true
       - name: group_id
         description: Project group identifier
         config:
@@ -427,6 +429,35 @@ models:
           meta: {}
           tags: []
         data_type: STRING
+        meta:
+          dbt-osmosis-force-inherit-descriptions: true
+      - name: last_pulse
+        description: |
+          - Indicates the last time the project is active.
+          - Logic: the (MAX due date or MAX completed at) of each project's task.
+          - (Had to anchor on these fields cause there's no reliable updated at for new tasks 🤷)
+        data_type: DATETIME
+        config:
+          meta:
+            dimension:
+              type: date
+              time_intervals:
+                - RAW
+                - DAY
+                - HOUR
+                - MINUTE
+                - WEEK
+                - MONTH
+                - QUARTER
+                - YEAR
+                - DAY_OF_WEEK_INDEX
+                - DAY_OF_WEEK_NAME
+                - DAY_OF_MONTH_NUM
+                - WEEK_NUM
+                - MONTH_NUM
+                - QUARTER_NUM
+                - YEAR_NUM
+          tags: []
       - name: permission
         description: '"read", "write" or "comment"'
         config:
@@ -441,12 +472,19 @@ models:
               type: string
           tags: []
         data_type: STRING
+        meta:
+          dbt-osmosis-force-inherit-descriptions: true
       - name: project_name
         description: Project name
         config:
           meta:
             dimension:
               type: string
+              urls:
+                - label: open in ticktick (mac)
+                  url: ticktick://ticktick.com/webapp/#p/${row.dim_projects.project_id.raw}/tasks
+                - label: open in ticktick (web)
+                  url: https://ticktick.com/webapp/#p/${row.dim_projects.project_id.raw}/tasks
           tags: []
         data_type: STRING
       - name: sort_order
@@ -455,6 +493,8 @@ models:
           meta: {}
           tags: []
         data_type: INT64
+        meta:
+          dbt-osmosis-force-inherit-descriptions: true
       - name: view_mode
         description: view mode, "list", "kanban", "timeline"
         config:
@@ -541,7 +581,14 @@ models:
       - name: folder_name
         description: The folder name. Inferred from dummy project manually created by users
         config:
-          meta: {}
+          meta:
+            dimension:
+              type: string
+              urls:
+                - label: open in ticktick (mac)
+                  url: ticktick://ticktick.com/webapp/#g/${row.dim_folders.folder_id.raw}
+                - label: open in ticktick (web)
+                  url: https://ticktick.com/webapp/#g/${row.dim_folders.folder_id.raw}
           tags: []
         data_type: STRING
   - name: dim_date_spine

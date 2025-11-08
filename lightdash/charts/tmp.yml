@@ -1,0 +1,122 @@
+name: ticktick - project pulse
+description: ""
+tableName: fct_tasks
+updatedAt: "2025-11-08T08:37:32.810Z"
+metricQuery:
+  exploreName: fct_tasks
+  dimensions:
+    - dim_folders_folder_name
+    - dim_projects_project_name
+    - dim_projects_last_pulse_day
+    - dim_projects_project_id
+  metrics:
+    - fct_tasks_total_task_instances
+  filters:
+    dimensions:
+      id: b0813ad4-30dc-4ce7-9a69-b1923bb62670
+      and:
+        - id: 1ec3dcda-4f5c-469b-9d4b-5a54ba55f879
+          target:
+            fieldId: dim_folders_folder_name
+          values:
+            - 🚀SOMEDAY lists
+            - 🛩️Horizon of focus
+            - default
+            - 💤on hold lists
+          operator: notEquals
+          required: false
+        - id: 99088be2-b65c-4eca-b8f0-34be6f1ca179
+          target:
+            fieldId: dim_tags_tag
+          values:
+            - default
+            - clarified
+          operator: equals
+          required: false
+        - id: f0737e4a-d357-4e58-834d-512d214112f5
+          target:
+            fieldId: dim_projects_closed
+          values:
+            - false
+          operator: equals
+          required: false
+        - id: e394dd69-e7d8-42c7-af55-32c2f6561c31
+          target:
+            fieldId: fct_tasks_status
+          values:
+            - "0"
+          operator: equals
+          required: false
+        - id: 1e047300-d148-43bb-8a16-59e2a1b6cdda
+          target:
+            fieldId: fct_tasks_kind
+          values:
+            - TEXT
+          operator: equals
+          required: false
+    tableCalculations:
+      id: a923cb0a-9383-446e-9f85-ad12e04a632f
+      and:
+        - id: 6b5d1e89-986a-4c48-9f6f-08a460058113
+          target:
+            fieldId: date_human_readable
+          values:
+            - 5
+          operator: greaterThan
+  sorts:
+    - fieldId: date_human_readable
+      descending: true
+    - fieldId: dim_folders_folder_name
+      descending: false
+    - fieldId: fct_tasks_total_task_instances
+      descending: false
+  limit: 500
+  metricOverrides: {}
+  tableCalculations:
+    - name: date_human_readable
+      displayName: date human readable
+      sql: date_diff(CURRENT_DATE(),${dim_projects.last_pulse_day},DAY)
+      format:
+        type: default
+        separator: default
+      type: number
+  additionalMetrics: []
+  customDimensions: []
+chartConfig:
+  type: table
+  config:
+    columns:
+      date_human_readable:
+        name: days last active
+        displayStyle: bar
+      dim_folders_folder_name:
+        name: folder
+      dim_projects_project_id:
+        visible: false
+      dim_projects_project_name:
+        name: project
+      dim_projects_last_pulse_day:
+        visible: false
+      fct_tasks_total_task_instances:
+        name: tasks
+        displayStyle: bar
+    metricsAsRows: false
+    showSubtotals: false
+    hideRowNumbers: true
+    showTableNames: false
+    showResultsTotal: false
+    showRowCalculation: false
+    showColumnCalculation: false
+    conditionalFormattings: []
+slug: tmp
+tableConfig:
+  columnOrder:
+    - dim_folders_folder_name
+    - dim_projects_project_name
+    - dim_projects_last_pulse_day
+    - dim_projects_project_id
+    - fct_tasks_total_task_instances
+    - date_human_readable
+spaceSlug: shared
+version: 1
+downloadedAt: "2025-11-08T08:40:10.455Z"

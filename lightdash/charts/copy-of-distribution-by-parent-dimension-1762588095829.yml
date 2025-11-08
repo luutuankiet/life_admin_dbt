@@ -1,7 +1,7 @@
-name: distribution by parent dimension
+name: Copy of distribution by parent dimension
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-11-08T04:13:41.852Z"
+updatedAt: "2025-11-08T07:48:15.830Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
@@ -283,7 +283,7 @@ chartConfig:
 pivotConfig:
   columns:
     - fct_tasks_parent_dimension_grain
-slug: distribution-by-parent-dimension
+slug: copy-of-distribution-by-parent-dimension-1762588095829
 tableConfig:
   columnOrder:
     - fct_tasks_parent_dimension_grain
