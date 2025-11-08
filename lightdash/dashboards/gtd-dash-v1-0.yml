@@ -1,6 +1,6 @@
 name: gtd dash v1.0
 description: ""
-updatedAt: "2025-11-08T08:38:20.597Z"
+updatedAt: "2025-11-08T09:20:24.843Z"
 tiles:
   - x: 0
     "y": 0
@@ -186,17 +186,17 @@ filters:
         completed: false
         unitOfTime: weeks
       tileTargets:
-        copy-of-drill-down-tasks-by-parent-grain-dimension-1762587764307: false
-        copy-of-distribution-by-parent-dimension-1762588095829: false
         ticktick-count-of-inbox: false
-        ticktick-inbox-distribution-1762589144902: false
+        copy-of-tasks-lookahead-1762587681284: false
+        what-did-you-do: false
+        copy-of-drill-down-tasks-by-parent-grain-dimension-1762587764307: false
+        ticktick-empty-projects-to-be-cleaned: false
         tasks-lookahead-1:
           fieldId: dim_date_spine_date_day
           tableName: dim_date_spine
-        ticktick-empty-projects-to-be-cleaned: false
-        copy-of-tasks-lookahead-1762587681284: false
-        what-did-you-do: false
+        ticktick-inbox-distribution-1762589144902: false
         tmp: false
+        copy-of-distribution-by-parent-dimension-1762588095829: false
     - target:
         fieldId: fct_tasks_status
         fieldName: status
@@ -206,23 +206,23 @@ filters:
       disabled: false
       operator: notEquals
       tileTargets:
-        copy-of-drill-down-tasks-by-parent-grain-dimension-1762587764307: false
-        copy-of-distribution-by-parent-dimension-1762588095829: false
         distribution-by-parent-dimension:
           fieldId: fct_tasks_status
           tableName: fct_tasks
         ticktick-count-of-inbox: false
-        ticktick-inbox-distribution-1762589144902: false
+        copy-of-tasks-lookahead-1762587681284: false
+        what-did-you-do: false
+        copy-of-drill-down-tasks-by-parent-grain-dimension-1762587764307: false
+        ticktick-empty-projects-to-be-cleaned: false
         tasks-lookahead-1:
           fieldId: fct_tasks_status
           tableName: fct_tasks
-        ticktick-empty-projects-to-be-cleaned: false
-        copy-of-tasks-lookahead-1762587681284: false
-        what-did-you-do: false
+        ticktick-inbox-distribution-1762589144902: false
         tmp: false
         tasks-drill-down-by-grain:
           fieldId: fct_tasks_status
           tableName: fct_tasks
+        copy-of-distribution-by-parent-dimension-1762588095829: false
   tableCalculations: []
 tabs:
   - name: main tasks
@@ -237,4 +237,4 @@ tabs:
 slug: gtd-dash-v1-0
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-08T08:40:11.312Z"
+downloadedAt: "2025-11-08T09:20:28.173Z"

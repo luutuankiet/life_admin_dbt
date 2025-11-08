@@ -1,7 +1,7 @@
 name: ticktick - count inbox
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-11-08T08:05:44.903Z"
+updatedAt: "2025-11-08T09:20:22.514Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
@@ -65,4 +65,4 @@ tableConfig:
     - fct_tasks_total_task_instances
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-08T08:40:10.455Z"
+downloadedAt: "2025-11-08T09:20:27.818Z"

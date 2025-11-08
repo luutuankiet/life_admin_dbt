@@ -1,7 +1,7 @@
 name: ticktick - inbox distribution
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-11-08T08:35:19.745Z"
+updatedAt: "2025-11-08T09:20:21.963Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
@@ -78,4 +78,4 @@ tableConfig:
     - fct_tasks_total_task_instances
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-08T08:40:10.455Z"
+downloadedAt: "2025-11-08T09:20:27.818Z"

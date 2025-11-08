@@ -1,7 +1,7 @@
 name: todoist due today
 description: ""
 tableName: fct_habit
-updatedAt: "2025-11-08T04:13:45.476Z"
+updatedAt: "2025-11-08T09:20:23.854Z"
 metricQuery:
   exploreName: fct_habit
   dimensions:
@@ -110,4 +110,4 @@ tableConfig:
     - fct_habit_task_id
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-08T08:40:10.455Z"
+downloadedAt: "2025-11-08T09:20:27.818Z"
