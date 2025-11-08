@@ -1,6 +1,6 @@
 name: gtd dash v1.0
 description: ""
-updatedAt: "2025-11-08T09:20:24.843Z"
+updatedAt: "2025-11-08T09:22:03.056Z"
 tiles:
   - x: 0
     "y": 0
@@ -16,6 +16,18 @@ tiles:
     tileSlug: todoist-new-today-v0-2-1
   - x: 0
     "y": 0
+    h: 3
+    w: 12
+    tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
+    type: saved_chart
+    properties:
+      title: loops (clarify them)
+      hideTitle: false
+      chartSlug: ticktick-inbox-distribution-1762589144902
+      chartName: ticktick - count inbox
+    tileSlug: ticktick-inbox-distribution-1762589144902
+  - x: 0
+    "y": 0
     h: 7
     w: 18
     tabUuid: 46023a07-3871-4fd8-9eb4-b143eef3b956
@@ -26,18 +38,6 @@ tiles:
       chartSlug: tasks-lookahead-1
       chartName: tasks lookahead
     tileSlug: tasks-lookahead-1
-  - x: 1
-    "y": 0
-    h: 3
-    w: 11
-    tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
-    type: saved_chart
-    properties:
-      title: loops (clarify them)
-      hideTitle: false
-      chartSlug: ticktick-inbox-distribution-1762589144902
-      chartName: ticktick - count inbox
-    tileSlug: ticktick-inbox-distribution-1762589144902
   - x: 9
     "y": 0
     h: 14
@@ -53,7 +53,7 @@ tiles:
   - x: 12
     "y": 0
     h: 8
-    w: 23
+    w: 24
     tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
     type: saved_chart
     properties:
@@ -74,10 +74,10 @@ tiles:
       chartSlug: tasks-drill-down-by-grain
       chartName: drill down tasks by parent grain dimension
     tileSlug: tasks-drill-down-by-grain
-  - x: 1
+  - x: 0
     "y": 3
     h: 5
-    w: 11
+    w: 12
     tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
     type: saved_chart
     properties:
@@ -110,10 +110,10 @@ tiles:
       chartSlug: distribution-by-parent-dimension
       chartName: distribution by parent dimension
     tileSlug: distribution-by-parent-dimension
-  - x: 1
+  - x: 0
     "y": 8
     h: 5
-    w: 34
+    w: 36
     tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
     type: saved_chart
     properties:
@@ -125,7 +125,7 @@ tiles:
   - x: 1
     "y": 13
     h: 6
-    w: 14
+    w: 15
     tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
     type: saved_chart
     properties:
@@ -134,7 +134,7 @@ tiles:
       chartSlug: copy-of-tasks-lookahead-1762587681284
       chartName: Copy of tasks lookahead
     tileSlug: copy-of-tasks-lookahead-1762587681284
-  - x: 15
+  - x: 16
     "y": 13
     h: 13
     w: 20
@@ -161,7 +161,7 @@ tiles:
   - x: 1
     "y": 19
     h: 7
-    w: 14
+    w: 15
     tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
     type: saved_chart
     properties:
@@ -237,4 +237,4 @@ tabs:
 slug: gtd-dash-v1-0
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-08T09:20:28.173Z"
+downloadedAt: "2025-11-08T09:37:27.491Z"
