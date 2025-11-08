@@ -1,6 +1,6 @@
 name: todoist tracker
 description: ""
-updatedAt: "2025-11-02T09:16:30.404Z"
+updatedAt: "2025-11-08T04:09:56.736Z"
 tiles:
   - x: 0
     "y": 0
@@ -23,7 +23,7 @@ tiles:
   - x: 0
     "y": 3
     h: 5
-    w: 17
+    w: 8
     tabUuid: null
     type: saved_chart
     properties:
@@ -32,10 +32,10 @@ tiles:
       chartSlug: todoist-new-today-v0-2-1
       chartName: todoist new today v0.2
     tileSlug: todoist-new-today-v0-2-1
-  - x: 17
+  - x: 8
     "y": 3
     h: 10
-    w: 18
+    w: 27
     tabUuid: null
     type: saved_chart
     properties:
@@ -47,7 +47,7 @@ tiles:
   - x: 0
     "y": 8
     h: 5
-    w: 17
+    w: 8
     tabUuid: null
     type: saved_chart
     properties:
@@ -109,15 +109,15 @@ filters:
         completed: false
         unitOfTime: days
       tileTargets:
-        todoist-due-today: false
         todoist-completed-tasks:
           fieldId: fct_habit_completed_at_day
           tableName: fct_habit
-        todoist-completed-today-v0-2: false
         todoist-new-today-v0-2-1: false
+        todoist-completed-today-v0-2: false
+        todoist-due-today: false
   tableCalculations: []
 tabs: []
 slug: todoist-tracker
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-03T23:49:51.979Z"
+downloadedAt: "2025-11-08T04:11:42.511Z"

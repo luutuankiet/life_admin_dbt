@@ -1,7 +1,7 @@
 name: drill down tasks by parent grain dimension
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-11-02T09:16:24.983Z"
+updatedAt: "2025-11-08T04:06:20.916Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
@@ -147,7 +147,6 @@ chartConfig:
 slug: tasks-drill-down-by-grain
 tableConfig:
   columnOrder:
-    - cnt
     - fct_tasks_due_date_day_of_week_name
     - fct_tasks_due_date_month_num
     - concat_date
@@ -159,4 +158,4 @@ tableConfig:
     - dim_projects_project_id
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-03T23:49:51.324Z"
+downloadedAt: "2025-11-08T04:11:42.097Z"

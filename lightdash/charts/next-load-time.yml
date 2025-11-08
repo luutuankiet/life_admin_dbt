@@ -1,7 +1,7 @@
 name: next load time
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-11-02T09:16:24.472Z"
+updatedAt: "2025-11-08T04:06:20.546Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
@@ -41,4 +41,4 @@ tableConfig:
     - fct_tasks_title
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-03T23:49:51.324Z"
+downloadedAt: "2025-11-08T04:11:42.097Z"

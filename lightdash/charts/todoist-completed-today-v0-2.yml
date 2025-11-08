@@ -1,7 +1,7 @@
 name: todoist completed today v0.2
 description: ""
 tableName: fct_habit
-updatedAt: "2025-11-02T09:16:26.518Z"
+updatedAt: "2025-11-08T04:08:19.000Z"
 metricQuery:
   exploreName: fct_habit
   dimensions:
@@ -90,7 +90,7 @@ chartConfig:
     isDonut: true
     metricId: fct_habit_total_task_instances
     showValue: true
-    showLegend: true
+    showLegend: false
     valueLabel: inside
     groupFieldIds:
       - dim_project_todoist_name
@@ -111,9 +111,8 @@ tableConfig:
     - fct_habit_streak
     - status
     - streak_count
-    - streak count
     - fct_habit_task_id
     - fct_habit_total_task_instances
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-03T23:49:51.324Z"
+downloadedAt: "2025-11-08T04:11:42.097Z"

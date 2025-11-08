@@ -1,6 +1,6 @@
 name: gtd dash v1.0
 description: ""
-updatedAt: "2025-11-03T01:57:50.460Z"
+updatedAt: "2025-11-08T04:09:17.328Z"
 tiles:
   - x: 0
     "y": 0
@@ -17,7 +17,7 @@ tiles:
   - x: 0
     "y": 0
     h: 5
-    w: 16
+    w: 9
     tabUuid: 2c58e9b5-8bd9-42f9-b4af-36b21a1877c5
     type: saved_chart
     properties:
@@ -26,6 +26,18 @@ tiles:
       chartSlug: todoist-new-today-v0-2-1
       chartName: todoist new today v0.2
     tileSlug: todoist-new-today-v0-2-1
+  - x: 9
+    "y": 0
+    h: 14
+    w: 27
+    tabUuid: 2c58e9b5-8bd9-42f9-b4af-36b21a1877c5
+    type: saved_chart
+    properties:
+      title: ""
+      hideTitle: false
+      chartSlug: todoist-due-today
+      chartName: todoist due today
+    tileSlug: todoist-due-today
   - x: 18
     "y": 0
     h: 14
@@ -41,7 +53,7 @@ tiles:
   - x: 0
     "y": 5
     h: 5
-    w: 16
+    w: 9
     tabUuid: 2c58e9b5-8bd9-42f9-b4af-36b21a1877c5
     type: saved_chart
     properties:
@@ -62,18 +74,6 @@ tiles:
       chartSlug: distribution-by-parent-dimension
       chartName: distribution by parent dimension
     tileSlug: distribution-by-parent-dimension
-  - x: 16
-    "y": 10
-    h: 12
-    w: 20
-    tabUuid: 2c58e9b5-8bd9-42f9-b4af-36b21a1877c5
-    type: saved_chart
-    properties:
-      title: ""
-      hideTitle: false
-      chartSlug: todoist-due-today
-      chartName: todoist due today
-    tileSlug: todoist-due-today
   - x: 0
     "y": 14
     h: 8
@@ -115,16 +115,16 @@ filters:
       disabled: false
       operator: notEquals
       tileTargets:
+        distribution-by-parent-dimension:
+          fieldId: fct_tasks_status
+          tableName: fct_tasks
+        tasks-drill-down-by-grain:
+          fieldId: fct_tasks_status
+          tableName: fct_tasks
         tasks-lookahead-1:
           fieldId: fct_tasks_status
           tableName: fct_tasks
         what-did-you-do: false
-        tasks-drill-down-by-grain:
-          fieldId: fct_tasks_status
-          tableName: fct_tasks
-        distribution-by-parent-dimension:
-          fieldId: fct_tasks_status
-          tableName: fct_tasks
   tableCalculations: []
 tabs:
   - name: main tasks
@@ -136,4 +136,4 @@ tabs:
 slug: gtd-dash-v1-0
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-03T23:49:51.978Z"
+downloadedAt: "2025-11-08T04:11:42.511Z"
