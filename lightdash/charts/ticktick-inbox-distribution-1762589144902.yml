@@ -1,0 +1,68 @@
+name: ticktick - count inbox
+description: ""
+tableName: fct_tasks
+updatedAt: "2025-11-08T08:05:44.903Z"
+metricQuery:
+  exploreName: fct_tasks
+  dimensions:
+    - dim_tags_tag
+  metrics:
+    - fct_tasks_total_task_instances
+  filters:
+    dimensions:
+      id: cd72b2b3-ef0d-46e2-b7da-c08df8be3846
+      and:
+        - id: 18ced573-86e4-451d-80ec-67aafeddb5b0
+          target:
+            fieldId: fct_tasks_status
+          values:
+            - "0"
+          operator: equals
+          required: false
+        - id: 8737f65c-755a-4446-91c5-c2865b5ffe65
+          target:
+            fieldId: dim_projects_closed
+          values:
+            - false
+          operator: equals
+          required: false
+        - id: 35167ff6-0587-4bc1-8955-7aad2e6173fc
+          target:
+            fieldId: fct_tasks_kind
+          values:
+            - TEXT
+          operator: equals
+          required: false
+        - id: 7b4213a7-08e8-4a8a-b46e-b46aa8008971
+          target:
+            fieldId: dim_tags_tag
+          values:
+            - default
+          operator: equals
+          required: false
+  sorts:
+    - fieldId: fct_tasks_total_task_instances
+      descending: true
+  limit: 500
+  metricOverrides: {}
+  tableCalculations: []
+  additionalMetrics: []
+  customDimensions: []
+chartConfig:
+  type: big_number
+  config:
+    label: to clarify
+    flipColors: false
+    selectedField: fct_tasks_total_task_instances
+    showComparison: false
+    comparisonFormat: raw
+    showBigNumberLabel: false
+    showTableNamesInLabel: false
+slug: ticktick-inbox-distribution-1762589144902
+tableConfig:
+  columnOrder:
+    - dim_tags_tag
+    - fct_tasks_total_task_instances
+spaceSlug: shared
+version: 1
+downloadedAt: "2025-11-08T08:40:10.455Z"

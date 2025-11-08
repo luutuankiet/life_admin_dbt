@@ -1,0 +1,81 @@
+name: ticktick - inbox distribution
+description: ""
+tableName: fct_tasks
+updatedAt: "2025-11-08T08:35:19.745Z"
+metricQuery:
+  exploreName: fct_tasks
+  dimensions:
+    - dim_folders_folder_name
+    - dim_projects_project_name
+    - dim_projects_project_id
+  metrics:
+    - fct_tasks_total_task_instances
+  filters:
+    dimensions:
+      id: cd72b2b3-ef0d-46e2-b7da-c08df8be3846
+      and:
+        - id: 18ced573-86e4-451d-80ec-67aafeddb5b0
+          target:
+            fieldId: fct_tasks_status
+          values:
+            - "0"
+          operator: equals
+          required: false
+        - id: 8737f65c-755a-4446-91c5-c2865b5ffe65
+          target:
+            fieldId: dim_projects_closed
+          values:
+            - false
+          operator: equals
+          required: false
+        - id: 35167ff6-0587-4bc1-8955-7aad2e6173fc
+          target:
+            fieldId: fct_tasks_kind
+          values:
+            - TEXT
+          operator: equals
+          required: false
+        - id: 7b4213a7-08e8-4a8a-b46e-b46aa8008971
+          target:
+            fieldId: dim_tags_tag
+          values:
+            - default
+          operator: equals
+          required: false
+  sorts:
+    - fieldId: dim_folders_folder_name
+      descending: false
+    - fieldId: fct_tasks_total_task_instances
+      descending: true
+  limit: 500
+  metricOverrides: {}
+  tableCalculations: []
+  additionalMetrics: []
+  customDimensions: []
+chartConfig:
+  type: table
+  config:
+    columns:
+      dim_projects_project_id:
+        visible: false
+      fct_tasks_total_task_instances:
+        name: total loops
+        displayStyle: bar
+    metricsAsRows: false
+    showSubtotals: false
+    hideRowNumbers: true
+    showTableNames: false
+    showResultsTotal: false
+    showRowCalculation: false
+    showColumnCalculation: false
+    conditionalFormattings: []
+slug: ticktick-count-of-inbox
+tableConfig:
+  columnOrder:
+    - dim_folders_folder_name
+    - dim_projects_project_name
+    - dim_projects_project_id
+    - fct_tasks_total_task_instances
+spaceSlug: shared
+version: 1
+downloadedAt: "2025-11-08T08:40:10.455Z"

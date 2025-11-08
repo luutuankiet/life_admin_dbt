@@ -1,7 +1,7 @@
-name: drill down tasks by parent grain dimension
+name: Copy of drill down tasks by parent grain dimension
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-11-08T04:13:42.895Z"
+updatedAt: "2025-11-08T07:42:44.308Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
@@ -144,7 +144,7 @@ chartConfig:
             operator: equals
         target:
           fieldId: fct_tasks_due_date_day_of_week_name
-slug: tasks-drill-down-by-grain
+slug: copy-of-drill-down-tasks-by-parent-grain-dimension-1762587764307
 tableConfig:
   columnOrder:
     - fct_tasks_due_date_day_of_week_name

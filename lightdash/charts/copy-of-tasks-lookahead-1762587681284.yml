@@ -1,7 +1,7 @@
-name: tasks lookahead
+name: Copy of tasks lookahead
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-11-08T04:13:43.422Z"
+updatedAt: "2025-11-08T07:41:21.285Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
@@ -232,7 +232,7 @@ chartConfig:
 pivotConfig:
   columns:
     - dim_date_spine_date_day_week
-slug: tasks-lookahead-1
+slug: copy-of-tasks-lookahead-1762587681284
 tableConfig:
   columnOrder:
     - dim_date_spine_date_day_day

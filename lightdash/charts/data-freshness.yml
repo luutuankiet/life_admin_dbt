@@ -1,7 +1,7 @@
 name: Data freshness
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-11-02T09:16:23.401Z"
+updatedAt: "2025-11-08T04:13:41.331Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
@@ -28,7 +28,7 @@ metricQuery:
     - name: updated_time_minute_max_of_updated_time_minute
       label: Max of Updated time minute
       description: "Max of Updated time minute on the table Fct tasks "
-      uuid: a3937799-5c05-4b4b-98f0-39cddd1ccef9
+      uuid: b1e067dd-2b98-4eeb-9088-7e148970bf12
       sql: DATE_TRUNC(${TABLE}.updated_time, MINUTE)
       table: fct_tasks
       type: max
@@ -52,4 +52,4 @@ tableConfig:
     - fct_tasks_updated_time_minute
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-03T23:49:51.324Z"
+downloadedAt: "2025-11-08T08:40:10.455Z"

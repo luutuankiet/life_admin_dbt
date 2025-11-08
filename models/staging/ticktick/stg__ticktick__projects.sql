@@ -43,6 +43,29 @@ add_completed_time as (
 coalesce_null_group_ids as (
     select * except(group_id), coalesce(group_id,'default') as group_id
     from add_completed_time
+),
+
+add_last_pulse as (
+-- pulls (MAX completed at x MAX due date) of each project's task
+-- to determine when was the project last touched.
+-- use case : gtd weekly review figure 
+-- out which projects needs attention.
+
+select 
+    coalesce(pulse.due_date, pulse.completed_time) as last_pulse,
+    project.*
+
+    from coalesce_null_group_ids project
+
+    LEFT JOIN (
+        select 
+        project_id,
+        MAX(completed_time) as completed_time,
+        MAX(due_date) as due_date
+        from {{ ref("stg__ticktick__tasks") }}
+        group by project_id
+    ) as pulse
+    on project.project_id = pulse.project_id
 )
 
 
@@ -50,5 +73,4 @@ coalesce_null_group_ids as (
 select 
 *
 
-from coalesce_null_group_ids
-    
+from add_last_pulse
