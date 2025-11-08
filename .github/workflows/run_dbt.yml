@@ -46,8 +46,8 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v6
 
-      - name: Install python deps
-        run: uv sync
+      - name: install project deps 
+        run: uv sync && echo "$PWD/.venv/bin" >> $GITHUB_PATH
         
       - name: Decode SA Key
         # This is a more secure way to decode the secret, as it avoids exposing it in the logs.
@@ -57,11 +57,11 @@ jobs:
 
 
       - name: Run dbt
-        run: uv run dbt deps && uv run dbt build
+        run: dbt deps && dbt build
 
       - name: elementary upload report
         run: |
-          uv run edr monitor send-report \
+          edr monitor send-report \
               --project-dir . \
               --profiles-dir . \
               --profile-target default \

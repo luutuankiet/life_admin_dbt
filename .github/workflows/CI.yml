@@ -52,8 +52,8 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v6
 
-      - name: Install python deps
-        run: uv sync
+      - name: install project deps 
+        run: uv sync && echo "$PWD/.venv/bin" >> $GITHUB_PATH
         
       - name: Decode SA Key
         # This is a more secure way to decode the secret, as it avoids exposing it in the logs.
@@ -76,19 +76,19 @@ jobs:
       - name: dbt tests
         env:
           DBT_CI_SCHEMA: ${{ env.DBT_CI_SCHEMA }}
-        run: source .venv/bin/activate && dbt deps && dbt build
+        run: dbt deps && dbt build
       
       - name: Start Lightdash preview
         env:
           DBT_CI_SCHEMA: ${{ env.DBT_CI_SCHEMA }}
-        run: source .venv/bin/activate && lightdash start-preview --name $DBT_CI_SCHEMA
+        run: lightdash start-preview --name $DBT_CI_SCHEMA
       
       - name: Validate Lightdash Project
         env:
           DBT_CI_SCHEMA: ${{ env.DBT_CI_SCHEMA }}
-        run: source .venv/bin/activate && lightdash validate --preview 
+        run: lightdash validate --preview 
 
       - name: Stop Lightdash preview
         env:
           DBT_CI_SCHEMA: ${{ env.DBT_CI_SCHEMA }}
-        run: source .venv/bin/activate && lightdash stop-preview --name $DBT_CI_SCHEMA
+        run: lightdash stop-preview --name $DBT_CI_SCHEMA
