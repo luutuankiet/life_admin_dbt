@@ -46,14 +46,14 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v1
 
-      - name: Install python deps
-        run: uv sync
+      - name: install project deps 
+        run: uv sync && echo "$PWD/.venv/bin" >> $GITHUB_PATH
 
       - name: Decode SA Key
         run: echo "${{ secrets.DBT_BQ_KEYFILE_JSON }}" | base64 --decode > sa.json
 
       - name: Generate dbt Docs
-        run: uv run dbt deps && uv run dbt docs generate
+        run: dbt deps && dbt docs generate
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

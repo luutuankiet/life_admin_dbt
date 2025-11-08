@@ -24,15 +24,15 @@ jobs:
         uses: astral-sh/setup-uv@v6
 
       - name: install project deps 
-        run: uv sync
+        run: uv sync && echo "$PWD/.venv/bin" >> $GITHUB_PATH
 
       - name: trigger extraction
-        run: uv run EL/todoist/fetch_todoist.py
+        run: python EL/todoist/fetch_todoist.py
         env:
           TODOIST_API_KEY: ${{ secrets.TODOIST_API_KEY }}
           
       - name: Dump extracted data to GCS 🪣
-        run: uv run dbt deps && uv run dbt run
+        run: dbt deps && dbt run
         env:
           # dbt Environment Variables
           DBT_PROFILES_DIR: .
