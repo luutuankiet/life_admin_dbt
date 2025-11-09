@@ -6,9 +6,9 @@
 
 with src as (
     select *, null as parentId from {{source('stateless_raw','tasks')}}
-),
+)
 
-add_load_time as (
+{# add_load_time as (
     -- add a dummy row to "load" the snapshot runtime to the table
     select 
         -- dummy id
@@ -39,7 +39,7 @@ unioned as (
     select * from src 
     UNION ALL
     select * from add_load_time
-)
+) #}
 
 
-select * from unioned
+select * from src
