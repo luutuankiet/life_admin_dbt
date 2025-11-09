@@ -13,7 +13,7 @@ metricQuery:
     - fct_tasks_total_task_instances
   filters:
     dimensions:
-      id: cd72b2b3-ef0d-46e2-b7da-c08df8be3846
+      id: 91b8a3f4-3563-428c-b101-d375636db68c
       and:
         - id: 18ced573-86e4-451d-80ec-67aafeddb5b0
           target:
@@ -42,6 +42,15 @@ metricQuery:
           values:
             - default
           operator: equals
+          required: false
+        - id: 7c3dc355-07b2-45f0-bf3c-eeba24842f13
+          target:
+            fieldId: dim_folders_folder_name
+          values:
+            - 💤on hold lists
+            - 🚀SOMEDAY lists
+            - 🛩️Horizon of focus
+          operator: notEquals
           required: false
   sorts:
     - fieldId: dim_folders_folder_name

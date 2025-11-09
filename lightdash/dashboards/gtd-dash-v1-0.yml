@@ -62,10 +62,10 @@ tiles:
       chartSlug: tasks-drill-down-by-grain
       chartName: drill down tasks by parent grain dimension
     tileSlug: tasks-drill-down-by-grain
-  - x: 1
+  - x: 0
     "y": 3
     h: 5
-    w: 11
+    w: 12
     tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
     type: saved_chart
     properties:
@@ -110,10 +110,10 @@ tiles:
       chartSlug: distribution-by-parent-dimension
       chartName: distribution by parent dimension
     tileSlug: distribution-by-parent-dimension
-  - x: 1
+  - x: 0
     "y": 8
     h: 5
-    w: 34
+    w: 36
     tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
     type: saved_chart
     properties:
@@ -125,7 +125,7 @@ tiles:
   - x: 1
     "y": 13
     h: 6
-    w: 14
+    w: 15
     tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
     type: saved_chart
     properties:
@@ -134,7 +134,7 @@ tiles:
       chartSlug: copy-of-tasks-lookahead-1762587681284
       chartName: Copy of tasks lookahead
     tileSlug: copy-of-tasks-lookahead-1762587681284
-  - x: 15
+  - x: 16
     "y": 13
     h: 13
     w: 20
@@ -240,6 +240,7 @@ filters:
           tableName: dim_date_spine
         what-did-you-do: false
         tmp: false
+        copy-of-distribution-by-parent-dimension-1762588095829: false
     - target:
         fieldId: fct_tasks_status
         fieldName: status
@@ -263,13 +264,12 @@ filters:
         tasks-lookahead-1:
           fieldId: fct_tasks_status
           tableName: fct_tasks
-        ticktick-empty-projects-to-be-cleaned: false
-        copy-of-tasks-lookahead-1762587681284: false
-        what-did-you-do: false
+        ticktick-inbox-distribution-1762589144902: false
         tmp: false
         tasks-drill-down-by-grain:
           fieldId: fct_tasks_status
           tableName: fct_tasks
+        copy-of-distribution-by-parent-dimension-1762588095829: false
   tableCalculations: []
 tabs:
   - name: main tasks
