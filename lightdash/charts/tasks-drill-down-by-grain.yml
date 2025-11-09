@@ -1,7 +1,7 @@
 name: drill down tasks by parent grain dimension
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-11-09T03:26:34.554Z"
+updatedAt: "2025-11-09T03:49:43.543Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
@@ -163,4 +163,4 @@ tableConfig:
     - dim_projects_project_id
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-09T03:40:27.216Z"
+downloadedAt: "2025-11-09T03:49:49.019Z"
