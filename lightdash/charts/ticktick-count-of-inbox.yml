@@ -1,13 +1,14 @@
 name: ticktick - inbox distribution
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-11-08T08:35:19.745Z"
+updatedAt: "2025-11-09T03:34:36.759Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
     - dim_folders_folder_name
     - dim_projects_project_name
     - dim_projects_project_id
+    - dim_projects_project_name_formatted
   metrics:
     - fct_tasks_total_task_instances
   filters:
@@ -58,9 +59,13 @@ chartConfig:
     columns:
       dim_projects_project_id:
         visible: false
+      dim_projects_project_name:
+        visible: false
       fct_tasks_total_task_instances:
         name: total loops
         displayStyle: bar
+      dim_projects_project_name_formatted:
+        name: Project Name
     metricsAsRows: false
     showSubtotals: false
     hideRowNumbers: true
@@ -75,7 +80,8 @@ tableConfig:
     - dim_folders_folder_name
     - dim_projects_project_name
     - dim_projects_project_id
+    - dim_projects_project_name_formatted
     - fct_tasks_total_task_instances
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-08T08:40:10.455Z"
+downloadedAt: "2025-11-09T03:40:27.216Z"

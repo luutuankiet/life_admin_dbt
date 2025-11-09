@@ -1,7 +1,7 @@
 name: Copy of distribution by parent dimension
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-11-08T07:48:15.830Z"
+updatedAt: "2025-11-09T02:27:17.962Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
@@ -293,4 +293,4 @@ tableConfig:
     - fct_tasks_total_task_instances
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-08T08:40:10.455Z"
+downloadedAt: "2025-11-09T03:40:27.216Z"
