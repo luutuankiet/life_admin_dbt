@@ -1,7 +1,7 @@
 name: ticktick - inbox distribution
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-11-09T03:49:44.058Z"
+updatedAt: "2025-11-09T07:32:11.001Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
@@ -13,7 +13,7 @@ metricQuery:
     - fct_tasks_total_task_instances
   filters:
     dimensions:
-      id: 91b8a3f4-3563-428c-b101-d375636db68c
+      id: a5a7935e-4716-44b1-b0e8-5f50395aae9a
       and:
         - id: 18ced573-86e4-451d-80ec-67aafeddb5b0
           target:
@@ -50,6 +50,13 @@ metricQuery:
             - 💤on hold lists
             - 🚀SOMEDAY lists
             - 🛩️Horizon of focus
+          operator: notEquals
+          required: false
+        - id: 3db5c874-3a65-432a-8c1e-1e000e6fa37c
+          target:
+            fieldId: dim_projects_project_name
+          values:
+            - 📍ref - tickler notes for the day
           operator: notEquals
           required: false
   sorts:
@@ -93,4 +100,4 @@ tableConfig:
     - fct_tasks_total_task_instances
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-09T04:03:08.823Z"
+downloadedAt: "2025-11-09T07:34:45.945Z"
