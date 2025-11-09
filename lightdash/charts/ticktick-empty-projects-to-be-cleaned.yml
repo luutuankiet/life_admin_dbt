@@ -1,7 +1,7 @@
 name: ticktick - empty projects to be cleaned
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-11-08T09:20:22.244Z"
+updatedAt: "2025-11-09T02:27:21.968Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
@@ -87,4 +87,4 @@ tableConfig:
     - fct_tasks_total_task_instances
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-08T09:37:26.851Z"
+downloadedAt: "2025-11-09T03:40:27.216Z"

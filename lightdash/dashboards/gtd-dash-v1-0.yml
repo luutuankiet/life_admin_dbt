@@ -1,6 +1,6 @@
 name: gtd dash v1.0
 description: ""
-updatedAt: "2025-11-08T09:22:03.056Z"
+updatedAt: "2025-11-09T03:39:28.137Z"
 tiles:
   - x: 0
     "y": 0
@@ -26,18 +26,6 @@ tiles:
       chartSlug: ticktick-inbox-distribution-1762589144902
       chartName: ticktick - count inbox
     tileSlug: ticktick-inbox-distribution-1762589144902
-  - x: 0
-    "y": 0
-    h: 7
-    w: 18
-    tabUuid: 46023a07-3871-4fd8-9eb4-b143eef3b956
-    type: saved_chart
-    properties:
-      title: ""
-      hideTitle: false
-      chartSlug: tasks-lookahead-1
-      chartName: tasks lookahead
-    tileSlug: tasks-lookahead-1
   - x: 9
     "y": 0
     h: 14
@@ -74,6 +62,18 @@ tiles:
       chartSlug: tasks-drill-down-by-grain
       chartName: drill down tasks by parent grain dimension
     tileSlug: tasks-drill-down-by-grain
+  - x: 0
+    "y": 3
+    h: 5
+    w: 12
+    tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
+    type: saved_chart
+    properties:
+      title: empty projects (archive them)
+      hideTitle: false
+      chartSlug: ticktick-empty-projects-to-be-cleaned
+      chartName: ticktick - empty projects to be cleaned
+    tileSlug: ticktick-empty-projects-to-be-cleaned
   - x: 0
     "y": 3
     h: 5
@@ -147,6 +147,42 @@ tiles:
       chartName: Copy of drill down tasks by parent grain dimension
     tileSlug: copy-of-drill-down-tasks-by-parent-grain-dimension-1762587764307
   - x: 0
+    "y": 8
+    h: 5
+    w: 36
+    tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
+    type: saved_chart
+    properties:
+      title: project inacive > 5d (schedule new tasks / archive them)
+      hideTitle: false
+      chartSlug: tmp
+      chartName: ticktick - project pulse
+    tileSlug: tmp
+  - x: 0
+    "y": 13
+    h: 7
+    w: 17
+    tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
+    type: saved_chart
+    properties:
+      title: tasks this week (distribute them)
+      hideTitle: false
+      chartSlug: copy-of-tasks-lookahead-1762587681284
+      chartName: Copy of tasks lookahead
+    tileSlug: copy-of-tasks-lookahead-1762587681284
+  - x: 17
+    "y": 13
+    h: 13
+    w: 19
+    tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
+    type: saved_chart
+    properties:
+      title: tasks this week (distribute them)
+      hideTitle: false
+      chartSlug: copy-of-drill-down-tasks-by-parent-grain-dimension-1762587764307
+      chartName: Copy of drill down tasks by parent grain dimension
+    tileSlug: copy-of-drill-down-tasks-by-parent-grain-dimension-1762587764307
+  - x: 0
     "y": 14
     h: 8
     w: 36
@@ -158,10 +194,10 @@ tiles:
       chartSlug: what-did-you-do
       chartName: what did you do?
     tileSlug: what-did-you-do
-  - x: 1
-    "y": 19
-    h: 7
-    w: 15
+  - x: 0
+    "y": 20
+    h: 6
+    w: 17
     tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
     type: saved_chart
     properties:
@@ -186,15 +222,23 @@ filters:
         completed: false
         unitOfTime: weeks
       tileTargets:
+        ticktick-inbox-distribution-1762589144902: false
+        tmp: false
         ticktick-count-of-inbox: false
-        copy-of-tasks-lookahead-1762587681284: false
-        what-did-you-do: false
-        copy-of-drill-down-tasks-by-parent-grain-dimension-1762587764307: false
-        ticktick-empty-projects-to-be-cleaned: false
+        copy-of-drill-down-tasks-by-parent-grain-dimension-1762587764307:
+          fieldId: dim_date_spine_date_day
+          tableName: dim_date_spine
+        copy-of-distribution-by-parent-dimension-1762588095829:
+          fieldId: dim_date_spine_date_day
+          tableName: dim_date_spine
         tasks-lookahead-1:
           fieldId: dim_date_spine_date_day
           tableName: dim_date_spine
-        ticktick-inbox-distribution-1762589144902: false
+        ticktick-empty-projects-to-be-cleaned: false
+        copy-of-tasks-lookahead-1762587681284:
+          fieldId: dim_date_spine_date_day
+          tableName: dim_date_spine
+        what-did-you-do: false
         tmp: false
         copy-of-distribution-by-parent-dimension-1762588095829: false
     - target:
@@ -206,14 +250,17 @@ filters:
       disabled: false
       operator: notEquals
       tileTargets:
-        distribution-by-parent-dimension:
+        ticktick-inbox-distribution-1762589144902: false
+        tmp: false
+        tasks-drill-down-by-grain:
           fieldId: fct_tasks_status
           tableName: fct_tasks
         ticktick-count-of-inbox: false
-        copy-of-tasks-lookahead-1762587681284: false
-        what-did-you-do: false
+        distribution-by-parent-dimension:
+          fieldId: fct_tasks_status
+          tableName: fct_tasks
         copy-of-drill-down-tasks-by-parent-grain-dimension-1762587764307: false
-        ticktick-empty-projects-to-be-cleaned: false
+        copy-of-distribution-by-parent-dimension-1762588095829: false
         tasks-lookahead-1:
           fieldId: fct_tasks_status
           tableName: fct_tasks
@@ -237,4 +284,4 @@ tabs:
 slug: gtd-dash-v1-0
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-08T09:37:27.491Z"
+downloadedAt: "2025-11-09T03:40:28.579Z"
