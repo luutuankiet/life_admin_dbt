@@ -9,6 +9,11 @@ on:
       - main
     paths-ignore:
       - '.github/**'
+      - 'lightdash/**'
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
 
 env:
   # dbt Environment Variables
@@ -75,7 +80,8 @@ jobs:
         run: dbt deps && dbt build
 
       - name: Set var DBT_CI_SCHEMA
-        run: echo "DBT_CI_SCHEMA=PR_${{ github.event.number }}" >> $GITHUB_ENV
+        if: ${{ github.event_name == 'pull_request' }}
+        run: echo "DBT_CI_SCHEMA=PR_${{ github.event.pull_request.number }}" >> $GITHUB_ENV
 
       - name: drop dbt CI schema
         env: 
