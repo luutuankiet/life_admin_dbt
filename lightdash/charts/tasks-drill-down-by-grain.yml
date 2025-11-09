@@ -1,15 +1,15 @@
 name: drill down tasks by parent grain dimension
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-11-09T03:49:43.543Z"
+updatedAt: "2025-11-09T03:59:33.020Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
     - fct_tasks_due_date_day_of_week_name
     - fct_tasks_due_date_month_num
     - fct_tasks_due_date_day_of_month_num
-    - fct_tasks_parent_dimension_grain
     - fct_tasks_formatted_parent_dimension_grain
+    - fct_tasks_parent_dimension_grain
     - fct_tasks_title
     - fct_tasks_due_date_day
     - fct_tasks_task_id
@@ -60,7 +60,7 @@ chartConfig:
     columns:
       concat_date:
         name: date
-        frozen: false
+        frozen: true
       fct_tasks_title:
         name: title
       fct_tasks_task_id:
@@ -82,8 +82,10 @@ chartConfig:
       fct_tasks_due_date_day_of_week_name:
         name: day
         frozen: true
+        visible: true
       fct_tasks_formatted_parent_dimension_grain:
         name: parent
+        frozen: true
     metricsAsRows: false
     showSubtotals: false
     hideRowNumbers: true
@@ -152,15 +154,15 @@ slug: tasks-drill-down-by-grain
 tableConfig:
   columnOrder:
     - fct_tasks_due_date_day_of_week_name
-    - fct_tasks_due_date_month_num
     - concat_date
+    - fct_tasks_due_date_month_num
     - fct_tasks_due_date_day_of_month_num
-    - fct_tasks_parent_dimension_grain
     - fct_tasks_formatted_parent_dimension_grain
+    - fct_tasks_parent_dimension_grain
     - fct_tasks_title
     - fct_tasks_due_date_day
     - fct_tasks_task_id
     - dim_projects_project_id
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-09T03:49:49.019Z"
+downloadedAt: "2025-11-09T04:03:08.823Z"
