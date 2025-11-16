@@ -216,6 +216,18 @@ models:
                     when ${ld.parameters.fct_tasks.count_grain} = 'folder' then ${dim_folders.folder_name}
                     END
                 description: Dynamic grain dimension for group by
+              formatted_dimension_grain:
+                description: Formatted for readability - dynamic dimension grain
+                label: Formatted grain dimension
+                type: string
+                sql: |-
+                  CONCAT(
+                    CODE_POINTS_TO_STRING([
+                        127812 + MOD(ABS(FARM_FINGERPRINT(${dimension_grain})), 50)
+                    ]),
+                    ' ',
+                    ${dimension_grain}
+                  )
               parent_dimension_grain:
                 description: Dynamic parent dimension of the dimension_grain
                 label: parent grain dimension
