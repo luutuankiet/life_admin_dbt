@@ -1,7 +1,7 @@
-name: Copy of drill down tasks by parent grain dimension
+name: Ticktick - dynamic grain count
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-11-16T11:15:55.400Z"
+updatedAt: "2025-11-16T11:07:14.157Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
@@ -10,14 +10,16 @@ metricQuery:
     - fct_tasks_due_date_day_of_month_num
     - fct_tasks_formatted_parent_dimension_grain
     - fct_tasks_parent_dimension_grain
-    - fct_tasks_title
     - fct_tasks_due_date_day
-    - fct_tasks_task_id
-    - dim_projects_project_id
-  metrics: []
+    - fct_tasks_dimension_grain
+  metrics:
+    - fct_tasks_total_task_instances
   filters:
+    metrics:
+      id: cc6af6db-edd1-46fd-ad17-6a961204e8bb
+      and: []
     dimensions:
-      id: 23f1c427-7f04-49ad-91b4-7c75b0646688
+      id: ee356741-ecc4-4910-9e55-ae1348a07e69
       and:
         - id: ef7226a9-3911-444f-b697-7d35d769266b
           target:
@@ -29,6 +31,18 @@ metricQuery:
           settings:
             completed: false
             unitOfTime: quarters
+        - id: 1b7a7090-54af-43d0-9cbb-e2b1dc44dcab
+          target:
+            fieldId: dim_date_spine_date_day
+          values:
+            - 5
+          operator: inTheNext
+          settings:
+            completed: false
+            unitOfTime: weeks
+    tableCalculations:
+      id: 2456f810-9aa5-49ea-a4c4-9966ed937106
+      and: []
   sorts:
     - fieldId: fct_tasks_due_date_day
       descending: false
@@ -62,17 +76,15 @@ chartConfig:
         name: date
         frozen: false
         visible: true
-      fct_tasks_title:
-        name: title
-      fct_tasks_task_id:
-        visible: false
       fct_tasks_due_date_day:
         name: ""
         visible: false
-      dim_projects_project_id:
-        visible: false
+      fct_tasks_dimension_grain:
+        name: grain
       fct_tasks_due_date_month_num:
         visible: false
+      fct_tasks_total_task_instances:
+        displayStyle: bar
       fct_tasks_parent_dimension_grain:
         name: parent
         frozen: true
@@ -150,19 +162,18 @@ chartConfig:
             operator: equals
         target:
           fieldId: fct_tasks_due_date_day_of_week_name
-slug: copy-of-drill-down-tasks-by-parent-grain-dimension-1762587764307
+slug: ticktick-dynamic-grain-count
 tableConfig:
   columnOrder:
     - fct_tasks_due_date_day_of_week_name
-    - fct_tasks_due_date_month_num
     - concat_date
+    - fct_tasks_due_date_month_num
     - fct_tasks_due_date_day_of_month_num
     - fct_tasks_formatted_parent_dimension_grain
     - fct_tasks_parent_dimension_grain
-    - fct_tasks_title
     - fct_tasks_due_date_day
-    - fct_tasks_task_id
-    - dim_projects_project_id
+    - fct_tasks_dimension_grain
+    - fct_tasks_total_task_instances
 spaceSlug: shared
 version: 1
 downloadedAt: "2025-11-16T11:16:04.668Z"

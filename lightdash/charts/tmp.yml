@@ -1,7 +1,7 @@
 name: ticktick - project pulse
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-11-09T03:49:44.863Z"
+updatedAt: "2025-11-16T11:15:58.675Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
@@ -119,4 +119,4 @@ tableConfig:
     - date_human_readable
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-09T07:34:45.945Z"
+downloadedAt: "2025-11-16T11:16:04.668Z"

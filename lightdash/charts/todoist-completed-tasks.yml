@@ -1,7 +1,7 @@
 name: todoist completed tasks
 description: ""
 tableName: fct_habit
-updatedAt: "2025-11-09T03:49:45.129Z"
+updatedAt: "2025-11-16T11:15:59.013Z"
 metricQuery:
   exploreName: fct_habit
   dimensions:
@@ -151,4 +151,4 @@ tableConfig:
     - fct_habit_streak
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-09T07:34:45.945Z"
+downloadedAt: "2025-11-16T11:16:04.668Z"

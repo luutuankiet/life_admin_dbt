@@ -1,6 +1,6 @@
 name: gtd dash v1.0
 description: ""
-updatedAt: "2025-11-09T04:02:21.400Z"
+updatedAt: "2025-11-16T11:16:01.065Z"
 tiles:
   - x: 0
     "y": 0
@@ -16,18 +16,6 @@ tiles:
     tileSlug: todoist-new-today-v0-2-1
   - x: 0
     "y": 0
-    h: 7
-    w: 18
-    tabUuid: 46023a07-3871-4fd8-9eb4-b143eef3b956
-    type: saved_chart
-    properties:
-      title: ""
-      hideTitle: false
-      chartSlug: tasks-lookahead-1
-      chartName: tasks lookahead
-    tileSlug: tasks-lookahead-1
-  - x: 0
-    "y": 0
     h: 3
     w: 12
     tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
@@ -38,6 +26,18 @@ tiles:
       chartSlug: ticktick-inbox-distribution-1762589144902
       chartName: ticktick - count inbox
     tileSlug: ticktick-inbox-distribution-1762589144902
+  - x: 0
+    "y": 0
+    h: 7
+    w: 18
+    tabUuid: 46023a07-3871-4fd8-9eb4-b143eef3b956
+    type: saved_chart
+    properties:
+      title: ""
+      hideTitle: false
+      chartSlug: tasks-lookahead-1
+      chartName: tasks lookahead
+    tileSlug: tasks-lookahead-1
   - x: 9
     "y": 0
     h: 14
@@ -186,23 +186,23 @@ filters:
         completed: false
         unitOfTime: weeks
       tileTargets:
-        ticktick-count-of-inbox: false
-        copy-of-tasks-lookahead-1762587681284:
-          fieldId: dim_date_spine_date_day
-          tableName: dim_date_spine
-        what-did-you-do: false
         copy-of-drill-down-tasks-by-parent-grain-dimension-1762587764307:
           fieldId: dim_date_spine_date_day
           tableName: dim_date_spine
-        ticktick-empty-projects-to-be-cleaned: false
-        tasks-lookahead-1:
-          fieldId: dim_date_spine_date_day
-          tableName: dim_date_spine
-        ticktick-inbox-distribution-1762589144902: false
-        tmp: false
         copy-of-distribution-by-parent-dimension-1762588095829:
           fieldId: dim_date_spine_date_day
           tableName: dim_date_spine
+        what-did-you-do: false
+        tasks-lookahead-1:
+          fieldId: dim_date_spine_date_day
+          tableName: dim_date_spine
+        ticktick-empty-projects-to-be-cleaned: false
+        tmp: false
+        copy-of-tasks-lookahead-1762587681284:
+          fieldId: dim_date_spine_date_day
+          tableName: dim_date_spine
+        ticktick-inbox-distribution-1762589144902: false
+        ticktick-count-of-inbox: false
     - target:
         fieldId: fct_tasks_status
         fieldName: status
@@ -212,23 +212,23 @@ filters:
       disabled: false
       operator: notEquals
       tileTargets:
-        distribution-by-parent-dimension:
-          fieldId: fct_tasks_status
-          tableName: fct_tasks
-        ticktick-count-of-inbox: false
-        copy-of-tasks-lookahead-1762587681284: false
-        what-did-you-do: false
-        copy-of-drill-down-tasks-by-parent-grain-dimension-1762587764307: false
-        ticktick-empty-projects-to-be-cleaned: false
-        tasks-lookahead-1:
-          fieldId: fct_tasks_status
-          tableName: fct_tasks
-        ticktick-inbox-distribution-1762589144902: false
-        tmp: false
         tasks-drill-down-by-grain:
           fieldId: fct_tasks_status
           tableName: fct_tasks
+        copy-of-drill-down-tasks-by-parent-grain-dimension-1762587764307: false
         copy-of-distribution-by-parent-dimension-1762588095829: false
+        what-did-you-do: false
+        tasks-lookahead-1:
+          fieldId: fct_tasks_status
+          tableName: fct_tasks
+        ticktick-empty-projects-to-be-cleaned: false
+        tmp: false
+        copy-of-tasks-lookahead-1762587681284: false
+        ticktick-inbox-distribution-1762589144902: false
+        ticktick-count-of-inbox: false
+        distribution-by-parent-dimension:
+          fieldId: fct_tasks_status
+          tableName: fct_tasks
   tableCalculations: []
 tabs:
   - name: main tasks
@@ -243,4 +243,4 @@ tabs:
 slug: gtd-dash-v1-0
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-09T07:34:46.414Z"
+downloadedAt: "2025-11-16T11:16:05.196Z"
