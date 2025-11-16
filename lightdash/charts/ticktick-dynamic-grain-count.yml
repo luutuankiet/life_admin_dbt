@@ -1,7 +1,7 @@
 name: Ticktick - dynamic grain count
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-11-16T11:07:14.157Z"
+updatedAt: "2025-11-16T11:16:41.573Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
@@ -12,6 +12,7 @@ metricQuery:
     - fct_tasks_parent_dimension_grain
     - fct_tasks_due_date_day
     - fct_tasks_dimension_grain
+    - fct_tasks_formatted_dimension_grain
   metrics:
     - fct_tasks_total_task_instances
   filters:
@@ -81,6 +82,7 @@ chartConfig:
         visible: false
       fct_tasks_dimension_grain:
         name: grain
+        visible: false
       fct_tasks_due_date_month_num:
         visible: false
       fct_tasks_total_task_instances:
@@ -95,6 +97,8 @@ chartConfig:
       fct_tasks_due_date_day_of_week_name:
         name: day
         frozen: true
+      fct_tasks_formatted_dimension_grain:
+        name: grain
       fct_tasks_formatted_parent_dimension_grain:
         name: parent
         frozen: true
@@ -173,7 +177,8 @@ tableConfig:
     - fct_tasks_parent_dimension_grain
     - fct_tasks_due_date_day
     - fct_tasks_dimension_grain
+    - fct_tasks_formatted_dimension_grain
     - fct_tasks_total_task_instances
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-16T11:16:04.668Z"
+downloadedAt: "2025-11-16T11:28:15.280Z"

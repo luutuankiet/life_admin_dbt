@@ -1,19 +1,7 @@
 name: gtd dash v1.0
 description: ""
-updatedAt: "2025-11-16T11:16:01.065Z"
+updatedAt: "2025-11-16T11:19:19.061Z"
 tiles:
-  - x: 0
-    "y": 0
-    h: 5
-    w: 9
-    tabUuid: 2c58e9b5-8bd9-42f9-b4af-36b21a1877c5
-    type: saved_chart
-    properties:
-      title: ""
-      hideTitle: false
-      chartSlug: todoist-new-today-v0-2-1
-      chartName: todoist new today v0.2
-    tileSlug: todoist-new-today-v0-2-1
   - x: 0
     "y": 0
     h: 3
@@ -38,6 +26,18 @@ tiles:
       chartSlug: tasks-lookahead-1
       chartName: tasks lookahead
     tileSlug: tasks-lookahead-1
+  - x: 0
+    "y": 0
+    h: 5
+    w: 9
+    tabUuid: 2c58e9b5-8bd9-42f9-b4af-36b21a1877c5
+    type: saved_chart
+    properties:
+      title: ""
+      hideTitle: false
+      chartSlug: todoist-new-today-v0-2-1
+      chartName: todoist new today v0.2
+    tileSlug: todoist-new-today-v0-2-1
   - x: 9
     "y": 0
     h: 14
@@ -141,11 +141,11 @@ tiles:
     tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
     type: saved_chart
     properties:
-      title: tasks this week (distribute them)
+      title: overview this week (distribute them)
       hideTitle: false
-      chartSlug: copy-of-drill-down-tasks-by-parent-grain-dimension-1762587764307
-      chartName: Copy of drill down tasks by parent grain dimension
-    tileSlug: copy-of-drill-down-tasks-by-parent-grain-dimension-1762587764307
+      chartSlug: ticktick-dynamic-grain-count
+      chartName: Ticktick - dynamic grain count
+    tileSlug: ticktick-dynamic-grain-count
   - x: 0
     "y": 14
     h: 8
@@ -186,9 +186,6 @@ filters:
         completed: false
         unitOfTime: weeks
       tileTargets:
-        copy-of-drill-down-tasks-by-parent-grain-dimension-1762587764307:
-          fieldId: dim_date_spine_date_day
-          tableName: dim_date_spine
         copy-of-distribution-by-parent-dimension-1762588095829:
           fieldId: dim_date_spine_date_day
           tableName: dim_date_spine
@@ -215,7 +212,6 @@ filters:
         tasks-drill-down-by-grain:
           fieldId: fct_tasks_status
           tableName: fct_tasks
-        copy-of-drill-down-tasks-by-parent-grain-dimension-1762587764307: false
         copy-of-distribution-by-parent-dimension-1762588095829: false
         what-did-you-do: false
         tasks-lookahead-1:
@@ -243,4 +239,4 @@ tabs:
 slug: gtd-dash-v1-0
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-16T11:16:05.196Z"
+downloadedAt: "2025-11-16T11:28:15.892Z"
