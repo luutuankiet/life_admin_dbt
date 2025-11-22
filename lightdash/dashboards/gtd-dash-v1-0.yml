@@ -1,6 +1,6 @@
 name: gtd dash v1.0
 description: ""
-updatedAt: "2025-11-16T11:19:19.061Z"
+updatedAt: "2025-11-22T12:49:17.978Z"
 tiles:
   - x: 0
     "y": 0
@@ -170,6 +170,18 @@ tiles:
       chartSlug: copy-of-distribution-by-parent-dimension-1762588095829
       chartName: Copy of distribution by parent dimension
     tileSlug: copy-of-distribution-by-parent-dimension-1762588095829
+  - x: 0
+    "y": 26
+    h: 2
+    w: 36
+    tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
+    type: markdown
+    properties:
+      title: Last item before finishing the review
+      hideTitle: false
+      content: >-
+        Ask youself this : How is you WIG doing? write it down to appreciate the
+        progress you made.
 filters:
   metrics: []
   dimensions:
@@ -239,4 +251,4 @@ tabs:
 slug: gtd-dash-v1-0
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-11-16T11:28:15.892Z"
+downloadedAt: "2025-11-22T12:50:54.759Z"
