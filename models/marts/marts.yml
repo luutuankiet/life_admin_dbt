@@ -184,6 +184,55 @@ models:
           meta:
             dimension:
               type: string
+            additional_dimensions:
+              url_metadata:
+                description: pre-compiled url as a JSON object to be used with lightdash's `url` param
+                hidden: true
+                sql: |
+                  FORMAT('''
+                    {
+                      "task": "ticktick.com/webapp/#p/%s/tasks/%s",
+                      "project": "ticktick.com/webapp/#p/%s/tasks",
+                      "folder": "ticktick.com/webapp/#g/%s"
+                    }
+                    ''',
+                    -- task object
+                    ${dim_projects.project_id},
+                    ${fct_tasks.task_id},
+
+                    -- project object
+                    ${dim_projects.project_id},
+
+                    -- folder object
+                    ${dim_folders.folder_id}
+                  )
+              dynamic_grain_url:
+                description: the dynamic url for selected grain parameter
+                sql: |
+                  JSON_VALUE(
+                    ${fct_tasks.url_metadata}, 
+                    CONCAT('$.', ${ld.parameters.fct_tasks.count_grain})
+                  )
+              dynamic_parent_grain_url:
+                description: the dynamic url for parent of selected grain parameter
+                sql: |
+                  case 
+                    when ${ld.parameters.fct_tasks.count_grain} = 'task' then 
+                      JSON_VALUE(
+                        ${fct_tasks.url_metadata}, 
+                        "$.project"
+                      )
+                    when ${ld.parameters.fct_tasks.count_grain} = 'project' then 
+                      JSON_VALUE(
+                        ${fct_tasks.url_metadata}, 
+                        "$.folder"
+                      )
+                    when ${ld.parameters.fct_tasks.count_grain} = 'folder' then
+                      JSON_VALUE(
+                        ${fct_tasks.url_metadata}, 
+                        "$.folder"
+                      )
+                    END
           tags: []
         data_type: STRING
       - name: timezone
@@ -216,6 +265,13 @@ models:
                     when ${ld.parameters.fct_tasks.count_grain} = 'folder' then ${dim_folders.folder_name}
                     END
                 description: Dynamic grain dimension for group by
+                urls:
+                  - label: open in ticktick (mac)
+                    url: |
+                      ${row.fct_tasks.dynamic_grain_url.raw | prepend: 'ticktick://'}
+                  - label: open in ticktick (web)
+                    url: |
+                      ${row.fct_tasks.dynamic_grain_url.raw | prepend: 'https://'}
               formatted_dimension_grain:
                 description: Formatted for readability - dynamic dimension grain
                 label: Formatted grain dimension
@@ -228,6 +284,13 @@ models:
                     ' ',
                     ${dimension_grain}
                   )
+                urls:
+                  - label: open in ticktick (mac)
+                    url: |
+                      ${row.fct_tasks.dynamic_grain_url.raw | prepend: 'ticktick://'}
+                  - label: open in ticktick (web)
+                    url: |
+                      ${row.fct_tasks.dynamic_grain_url.raw | prepend: 'https://'}
               parent_dimension_grain:
                 description: Dynamic parent dimension of the dimension_grain
                 label: parent grain dimension
@@ -238,6 +301,13 @@ models:
                     when ${ld.parameters.fct_tasks.count_grain} = 'project' then ${dim_folders.folder_name}
                     when ${ld.parameters.fct_tasks.count_grain} = 'folder' then ${dim_folders.folder_name}
                     END
+                urls:
+                  - label: open in ticktick (mac)
+                    url: |
+                      ${row.fct_tasks.dynamic_parent_grain_url.raw | prepend: 'ticktick://'}
+                  - label: open in ticktick (web)
+                    url: |
+                      ${row.fct_tasks.dynamic_parent_grain_url.raw | prepend: 'https://'}
               formatted_parent_dimension_grain:
                 description: Formatted for readability - dynamic parent dimension of the 
                   dimension_grain
@@ -251,6 +321,13 @@ models:
                     ' ',
                     ${parent_dimension_grain}
                   )
+                urls:
+                  - label: open in ticktick (mac)
+                    url: |
+                      ${row.fct_tasks.dynamic_parent_grain_url.raw | prepend: 'ticktick://'}
+                  - label: open in ticktick (web)
+                    url: |
+                      ${row.fct_tasks.dynamic_parent_grain_url.raw | prepend: 'https://'}
           tags: []
         data_type: STRING
       - name: updated_time
