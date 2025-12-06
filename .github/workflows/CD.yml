@@ -11,7 +11,8 @@ on:
       - '.github/**'
       - 'lightdash/**'
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: 
+      - closed
     branches:
       - main
 
@@ -43,7 +44,7 @@ permissions:
   contents: write
 jobs:
   deploy:
-    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') && github.event.pull_request.merged }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
