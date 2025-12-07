@@ -2,6 +2,7 @@ import os
 import json
 import logging
 from requests_ratelimiter import LimiterSession
+from pathlib import Path
 
 class TickTickClient:
     """
@@ -54,7 +55,7 @@ class TickTickClient:
                 project_data = self.get_tasks_for_project(project['id'])
                 tasks.extend(project_data.get('tasks', []))
                 # if index == 5:
-                    # break
+                #     break
         # add the inbox project here
         # cause it's not included in /project endpoint
         inbox = self.get_tasks_for_project('inbox')
@@ -84,11 +85,19 @@ if __name__ == "__main__":
     else:
         client = TickTickClient(api_key)
         projects, tasks = client.get_all_data()
-        
-        # Save to a file
-        with open("tasks_raw.json", "w") as f:
-            json.dump(tasks, f, indent=2)
-        with open("projects_raw.json", "w") as f:
-            json.dump(projects, f, indent=2)
-            
-        logging.info("Data fetching complete")
+        logging.info("dumping files...")
+        raw_dir = Path(__file__).parent / "raw"
+
+    datasets = {
+        "tasks_raw.jsonl": tasks,
+        "projects_raw.jsonl": projects,
+    }
+
+    for filename, data in datasets.items():
+        jsonl_content = "\n".join([json.dumps(record, ensure_ascii=False) for record in data])
+        (raw_dir / filename).write_text(
+            jsonl_content,
+            encoding="utf-8"
+        )
+
+    logging.info("Data fetching complete")
