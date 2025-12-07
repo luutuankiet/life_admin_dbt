@@ -1,12 +1,12 @@
 name: gtd dash v1.0
 description: ""
-updatedAt: "2025-12-06T06:54:55.006Z"
+updatedAt: "2025-12-06T07:16:43.939Z"
 tiles:
   - x: 0
     "y": 0
     h: 3
     w: 12
-    tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
+    tabUuid: 016984cf-f812-4c71-9605-4e58685f0300
     type: saved_chart
     properties:
       title: loops (clarify them)
@@ -18,7 +18,7 @@ tiles:
     "y": 0
     h: 7
     w: 18
-    tabUuid: 46023a07-3871-4fd8-9eb4-b143eef3b956
+    tabUuid: e9151f94-1c89-4600-b84a-9f22344194f8
     type: saved_chart
     properties:
       title: ""
@@ -30,7 +30,7 @@ tiles:
     "y": 0
     h: 5
     w: 9
-    tabUuid: 2c58e9b5-8bd9-42f9-b4af-36b21a1877c5
+    tabUuid: 8cf3276e-4812-4a1d-bb70-a24dea637558
     type: saved_chart
     properties:
       title: ""
@@ -42,7 +42,7 @@ tiles:
     "y": 0
     h: 14
     w: 27
-    tabUuid: 2c58e9b5-8bd9-42f9-b4af-36b21a1877c5
+    tabUuid: 8cf3276e-4812-4a1d-bb70-a24dea637558
     type: saved_chart
     properties:
       title: ""
@@ -54,7 +54,7 @@ tiles:
     "y": 0
     h: 8
     w: 24
-    tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
+    tabUuid: 016984cf-f812-4c71-9605-4e58685f0300
     type: saved_chart
     properties:
       title: loops distro (clarify them)
@@ -66,7 +66,7 @@ tiles:
     "y": 0
     h: 14
     w: 18
-    tabUuid: 46023a07-3871-4fd8-9eb4-b143eef3b956
+    tabUuid: e9151f94-1c89-4600-b84a-9f22344194f8
     type: saved_chart
     properties:
       title: ""
@@ -78,7 +78,7 @@ tiles:
     "y": 3
     h: 5
     w: 12
-    tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
+    tabUuid: 016984cf-f812-4c71-9605-4e58685f0300
     type: saved_chart
     properties:
       title: empty projects (archive them)
@@ -90,7 +90,7 @@ tiles:
     "y": 5
     h: 5
     w: 9
-    tabUuid: 2c58e9b5-8bd9-42f9-b4af-36b21a1877c5
+    tabUuid: 8cf3276e-4812-4a1d-bb70-a24dea637558
     type: saved_chart
     properties:
       title: ""
@@ -102,7 +102,7 @@ tiles:
     "y": 7
     h: 7
     w: 18
-    tabUuid: 46023a07-3871-4fd8-9eb4-b143eef3b956
+    tabUuid: e9151f94-1c89-4600-b84a-9f22344194f8
     type: saved_chart
     properties:
       title: ""
@@ -114,7 +114,7 @@ tiles:
     "y": 8
     h: 5
     w: 36
-    tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
+    tabUuid: 016984cf-f812-4c71-9605-4e58685f0300
     type: saved_chart
     properties:
       title: project inacive > 5d (schedule new tasks / archive them)
@@ -126,7 +126,7 @@ tiles:
     "y": 13
     h: 6
     w: 15
-    tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
+    tabUuid: 016984cf-f812-4c71-9605-4e58685f0300
     type: saved_chart
     properties:
       title: tasks this week (distribute them)
@@ -138,7 +138,7 @@ tiles:
     "y": 13
     h: 13
     w: 20
-    tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
+    tabUuid: 016984cf-f812-4c71-9605-4e58685f0300
     type: saved_chart
     properties:
       title: overview this week (distribute them)
@@ -150,7 +150,7 @@ tiles:
     "y": 14
     h: 8
     w: 36
-    tabUuid: 46023a07-3871-4fd8-9eb4-b143eef3b956
+    tabUuid: e9151f94-1c89-4600-b84a-9f22344194f8
     type: saved_chart
     properties:
       title: ""
@@ -162,7 +162,7 @@ tiles:
     "y": 19
     h: 7
     w: 15
-    tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
+    tabUuid: 016984cf-f812-4c71-9605-4e58685f0300
     type: saved_chart
     properties:
       title: tasks this week (distribute them)
@@ -174,7 +174,7 @@ tiles:
     "y": 26
     h: 2
     w: 36
-    tabUuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
+    tabUuid: 016984cf-f812-4c71-9605-4e58685f0300
     type: markdown
     properties:
       title: Last item before finishing the review
@@ -198,20 +198,20 @@ filters:
         completed: false
         unitOfTime: weeks
       tileTargets:
-        ticktick-count-of-inbox: false
-        ticktick-inbox-distribution-1762589144902: false
-        copy-of-tasks-lookahead-1762587681284:
-          fieldId: dim_date_spine_date_day
-          tableName: dim_date_spine
-        ticktick-empty-projects-to-be-cleaned: false
         copy-of-distribution-by-parent-dimension-1762588095829:
           fieldId: dim_date_spine_date_day
           tableName: dim_date_spine
+        what-did-you-do: false
         tasks-lookahead-1:
           fieldId: dim_date_spine_date_day
           tableName: dim_date_spine
-        what-did-you-do: false
+        ticktick-empty-projects-to-be-cleaned: false
         tmp: false
+        copy-of-tasks-lookahead-1762587681284:
+          fieldId: dim_date_spine_date_day
+          tableName: dim_date_spine
+        ticktick-inbox-distribution-1762589144902: false
+        ticktick-count-of-inbox: false
     - target:
         fieldId: fct_tasks_status
         fieldName: status
@@ -221,34 +221,34 @@ filters:
       disabled: false
       operator: notEquals
       tileTargets:
-        ticktick-count-of-inbox: false
-        ticktick-inbox-distribution-1762589144902: false
         tasks-drill-down-by-grain:
           fieldId: fct_tasks_status
           tableName: fct_tasks
-        copy-of-tasks-lookahead-1762587681284: false
-        ticktick-empty-projects-to-be-cleaned: false
         copy-of-distribution-by-parent-dimension-1762588095829: false
-        distribution-by-parent-dimension:
-          fieldId: fct_tasks_status
-          tableName: fct_tasks
+        what-did-you-do: false
         tasks-lookahead-1:
           fieldId: fct_tasks_status
           tableName: fct_tasks
-        what-did-you-do: false
+        ticktick-empty-projects-to-be-cleaned: false
         tmp: false
+        copy-of-tasks-lookahead-1762587681284: false
+        ticktick-inbox-distribution-1762589144902: false
+        ticktick-count-of-inbox: false
+        distribution-by-parent-dimension:
+          fieldId: fct_tasks_status
+          tableName: fct_tasks
   tableCalculations: []
 tabs:
   - name: main tasks
-    uuid: 46023a07-3871-4fd8-9eb4-b143eef3b956
+    uuid: e9151f94-1c89-4600-b84a-9f22344194f8
     order: 0
   - name: recurring tasks
-    uuid: 2c58e9b5-8bd9-42f9-b4af-36b21a1877c5
+    uuid: 8cf3276e-4812-4a1d-bb70-a24dea637558
     order: 1
   - name: GTD weekly review
-    uuid: 6b327da5-dfce-47c9-8cff-e16769cf2588
+    uuid: 016984cf-f812-4c71-9605-4e58685f0300
     order: 2
 slug: gtd-dash-v1-0
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-12-06T06:54:59.310Z"
+downloadedAt: "2025-12-07T03:49:14.076Z"

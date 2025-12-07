@@ -1,7 +1,7 @@
 name: drill down tasks by parent grain dimension
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-12-06T06:54:51.346Z"
+updatedAt: "2025-12-07T02:46:24.428Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
@@ -9,11 +9,11 @@ metricQuery:
     - fct_tasks_due_date_month_num
     - fct_tasks_due_date_day_of_month_num
     - fct_tasks_formatted_parent_dimension_grain
-    - fct_tasks_parent_dimension_grain
-    - fct_tasks_title
     - fct_tasks_due_date_day
-    - fct_tasks_task_id
     - dim_projects_project_id
+    - fct_tasks_formatted_dimension_grain
+    - fct_tasks_dynamic_parent_grain_url
+    - fct_tasks_dynamic_grain_url
   metrics: []
   filters:
     dimensions:
@@ -31,8 +31,6 @@ metricQuery:
             unitOfTime: quarters
   sorts:
     - fieldId: fct_tasks_due_date_day
-      descending: false
-    - fieldId: fct_tasks_parent_dimension_grain
       descending: false
   limit: 500
   metricOverrides: {}
@@ -61,20 +59,16 @@ chartConfig:
       concat_date:
         name: date
         frozen: false
-      fct_tasks_title:
-        name: title
-      fct_tasks_task_id:
-        visible: false
       fct_tasks_due_date_day:
         name: ""
         visible: false
       dim_projects_project_id:
         visible: false
+      fct_tasks_dynamic_grain_url:
+        visible: false
       fct_tasks_due_date_month_num:
         visible: false
-      fct_tasks_parent_dimension_grain:
-        name: parent
-        frozen: true
+      fct_tasks_dynamic_parent_grain_url:
         visible: false
       fct_tasks_due_date_day_of_month_num:
         name: ""
@@ -83,6 +77,8 @@ chartConfig:
         name: day
         frozen: true
         visible: true
+      fct_tasks_formatted_dimension_grain:
+        name: grain
       fct_tasks_formatted_parent_dimension_grain:
         name: parent
         frozen: true
@@ -92,7 +88,7 @@ chartConfig:
     showTableNames: false
     showResultsTotal: false
     showRowCalculation: false
-    showColumnCalculation: true
+    showColumnCalculation: false
     conditionalFormattings:
       - color: "#5470c6"
         rules:
@@ -158,11 +154,11 @@ tableConfig:
     - fct_tasks_due_date_month_num
     - fct_tasks_due_date_day_of_month_num
     - fct_tasks_formatted_parent_dimension_grain
-    - fct_tasks_parent_dimension_grain
-    - fct_tasks_title
     - fct_tasks_due_date_day
-    - fct_tasks_task_id
     - dim_projects_project_id
+    - fct_tasks_formatted_dimension_grain
+    - fct_tasks_dynamic_parent_grain_url
+    - fct_tasks_dynamic_grain_url
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-12-06T06:54:58.917Z"
+downloadedAt: "2025-12-07T03:49:13.430Z"

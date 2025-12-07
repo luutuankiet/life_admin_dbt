@@ -1,7 +1,7 @@
 name: Ticktick - dynamic grain count
 description: ""
 tableName: fct_tasks
-updatedAt: "2025-12-06T06:54:52.178Z"
+updatedAt: "2025-12-07T02:48:27.226Z"
 metricQuery:
   exploreName: fct_tasks
   dimensions:
@@ -9,10 +9,10 @@ metricQuery:
     - fct_tasks_due_date_month_num
     - fct_tasks_due_date_day_of_month_num
     - fct_tasks_formatted_parent_dimension_grain
-    - fct_tasks_parent_dimension_grain
     - fct_tasks_due_date_day
-    - fct_tasks_dimension_grain
     - fct_tasks_formatted_dimension_grain
+    - fct_tasks_dynamic_grain_url
+    - fct_tasks_dynamic_parent_grain_url
   metrics:
     - fct_tasks_total_task_instances
   filters:
@@ -47,8 +47,6 @@ metricQuery:
   sorts:
     - fieldId: fct_tasks_due_date_day
       descending: false
-    - fieldId: fct_tasks_parent_dimension_grain
-      descending: false
   limit: 500
   metricOverrides: {}
   tableCalculations:
@@ -80,16 +78,13 @@ chartConfig:
       fct_tasks_due_date_day:
         name: ""
         visible: false
-      fct_tasks_dimension_grain:
-        name: grain
+      fct_tasks_dynamic_grain_url:
         visible: false
       fct_tasks_due_date_month_num:
         visible: false
       fct_tasks_total_task_instances:
         displayStyle: bar
-      fct_tasks_parent_dimension_grain:
-        name: parent
-        frozen: true
+      fct_tasks_dynamic_parent_grain_url:
         visible: false
       fct_tasks_due_date_day_of_month_num:
         name: ""
@@ -174,11 +169,11 @@ tableConfig:
     - fct_tasks_due_date_month_num
     - fct_tasks_due_date_day_of_month_num
     - fct_tasks_formatted_parent_dimension_grain
-    - fct_tasks_parent_dimension_grain
     - fct_tasks_due_date_day
-    - fct_tasks_dimension_grain
     - fct_tasks_formatted_dimension_grain
+    - fct_tasks_dynamic_grain_url
+    - fct_tasks_dynamic_parent_grain_url
     - fct_tasks_total_task_instances
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-12-06T06:54:58.917Z"
+downloadedAt: "2025-12-07T03:49:13.430Z"
