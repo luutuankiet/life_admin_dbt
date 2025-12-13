@@ -2,7 +2,7 @@ name: CI on PR
 
 on:
   # Use pull_request_target to allow access to secrets for PRs from forks
-  pull_request_target:
+  pull_request:
     types: [opened, synchronize, reopened] # Explicitly define when the workflow runs
     branches:
       - main
