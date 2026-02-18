@@ -9,3 +9,14 @@ target/
 /EL/**/raw/**
 !/EL/**/raw/**/.gitkeep
 /edr_target/**/*
+
+/lightdash_docs/*
+/*.json
+.python-version
+duckdb.dbt
+package-lock.yml
+uv.lock
+tmp
+
+
+.opencode
