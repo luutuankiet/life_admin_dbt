@@ -1,0 +1,296 @@
+name: distribution by parent dimension v3
+description: ""
+tableName: fct_tasks_v3
+updatedAt: "2026-02-20T00:00:00.000Z"
+metricQuery:
+  exploreName: fct_tasks_v3
+  dimensions:
+    - fct_tasks_v3_parent_dimension_grain
+    - dim_date_spine_date_day_day_of_week_name
+    - dim_date_spine_date_day_day
+    - dim_date_spine_date_day_week
+  metrics:
+    - fct_tasks_v3_total_task_instances
+  filters: {}
+  sorts:
+    - fieldId: dim_date_spine_date_day_day
+      descending: true
+  limit: 500
+  metricOverrides: {}
+  tableCalculations: []
+  additionalMetrics: []
+  customDimensions: []
+chartConfig:
+  type: cartesian
+  config:
+    layout:
+      xField: dim_date_spine_date_day_day
+      yField:
+        - fct_tasks_v3_total_task_instances
+        - dim_date_spine_date_day_day_of_week_name
+    eChartsConfig:
+      legend:
+        show: false
+      series:
+        - type: bar
+          stack: fct_tasks_v3_total_task_instances
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_v3_total_task_instances
+              pivotValues:
+                - field: fct_tasks_v3_parent_dimension_grain
+                  value: ⏭NEXT
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: bar
+          stack: fct_tasks_v3_total_task_instances
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_v3_total_task_instances
+              pivotValues:
+                - field: fct_tasks_v3_parent_dimension_grain
+                  value: null
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: bar
+          stack: fct_tasks_v3_total_task_instances
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_v3_total_task_instances
+              pivotValues:
+                - field: fct_tasks_v3_parent_dimension_grain
+                  value: build scripts and utils with python
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: bar
+          stack: fct_tasks_v3_total_task_instances
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_v3_total_task_instances
+              pivotValues:
+                - field: fct_tasks_v3_parent_dimension_grain
+                  value: joon agent bug fixing
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: bar
+          stack: fct_tasks_v3_total_task_instances
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_v3_total_task_instances
+              pivotValues:
+                - field: fct_tasks_v3_parent_dimension_grain
+                  value: ▶️BAU NEXT ACTION
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: bar
+          stack: fct_tasks_v3_total_task_instances
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_v3_total_task_instances
+              pivotValues:
+                - field: fct_tasks_v3_parent_dimension_grain
+                  value: keeping healthy habits in check
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: bar
+          stack: fct_tasks_v3_total_task_instances
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_v3_total_task_instances
+              pivotValues:
+                - field: fct_tasks_v3_parent_dimension_grain
+                  value: learn stream processing
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: bar
+          stack: fct_tasks_v3_total_task_instances
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_v3_total_task_instances
+              pivotValues:
+                - field: fct_tasks_v3_parent_dimension_grain
+                  value: ONE dev the backfill workflow
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: bar
+          stack: fct_tasks_v3_total_task_instances
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_v3_total_task_instances
+              pivotValues:
+                - field: fct_tasks_v3_parent_dimension_grain
+                  value: caress for my body and soul under soltitude
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: bar
+          stack: fct_tasks_v3_total_task_instances
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_v3_total_task_instances
+              pivotValues:
+                - field: fct_tasks_v3_parent_dimension_grain
+                  value: monthly goal retro area of improvement
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: bar
+          stack: fct_tasks_v3_total_task_instances
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_v3_total_task_instances
+              pivotValues:
+                - field: fct_tasks_v3_parent_dimension_grain
+                  value: joon agents eval
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: bar
+          stack: fct_tasks_v3_total_task_instances
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_v3_total_task_instances
+              pivotValues:
+                - field: fct_tasks_v3_parent_dimension_grain
+                  value: learn gcp budgeting free tier
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: bar
+          stack: fct_tasks_v3_total_task_instances
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_v3_total_task_instances
+              pivotValues:
+                - field: fct_tasks_v3_parent_dimension_grain
+                  value: gtd lookahead dash enhancements
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: bar
+          stack: fct_tasks_v3_total_task_instances
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_v3_total_task_instances
+              pivotValues:
+                - field: fct_tasks_v3_parent_dimension_grain
+                  value: financing for next 3 months
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: bar
+          stack: fct_tasks_v3_total_task_instances
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_v3_total_task_instances
+              pivotValues:
+                - field: fct_tasks_v3_parent_dimension_grain
+                  value: learn agent evaluation skills
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: bar
+          stack: fct_tasks_v3_total_task_instances
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_v3_total_task_instances
+              pivotValues:
+                - field: fct_tasks_v3_parent_dimension_grain
+                  value: OL provision dev infra
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: bar
+          stack: fct_tasks_v3_total_task_instances
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_v3_total_task_instances
+              pivotValues:
+                - field: fct_tasks_v3_parent_dimension_grain
+                  value: deploy lightdash for her
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: bar
+          stack: fct_tasks_v3_total_task_instances
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_v3_total_task_instances
+              pivotValues:
+                - field: fct_tasks_v3_parent_dimension_grain
+                  value: joon agents generate dataset
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: bar
+          stack: fct_tasks_v3_total_task_instances
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_v3_total_task_instances
+              pivotValues:
+                - field: fct_tasks_v3_parent_dimension_grain
+                  value: joon agent init dev token management
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: bar
+          stack: fct_tasks_v3_total_task_instances
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: fct_tasks_v3_total_task_instances
+              pivotValues:
+                - field: fct_tasks_v3_parent_dimension_grain
+                  value: learn schema on read for DE
+          yAxisIndex: 0
+          isFilteredOut: false
+        - type: bar
+          encode:
+            xRef:
+              field: dim_date_spine_date_day_day
+            yRef:
+              field: dim_date_spine_date_day_day_of_week_name
+          yAxisIndex: 0
+      tooltip: ""
+pivotConfig:
+  columns:
+    - fct_tasks_v3_parent_dimension_grain
+slug: distribution-by-parent-dimension-v3
+tableConfig:
+  columnOrder:
+    - fct_tasks_v3_parent_dimension_grain
+    - dim_date_spine_date_day_day_of_week_name
+    - dim_date_spine_date_day_day
+    - dim_date_spine_date_day_week
+    - fct_tasks_v3_total_task_instances
+spaceSlug: shared
+version: 1
+downloadedAt: "2026-02-20T00:00:00.000Z"

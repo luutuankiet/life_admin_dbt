@@ -1278,3 +1278,455 @@ models:
           meta: {}
           tags: []
         data_type: STRING
+
+  - name: fct_tasks_v3
+    description: Core fact table for TickTick v3 tasks. The grain is one row per task instance from v3 staging.
+    columns:
+      - name: childids
+        description: list of subtasks
+        config:
+          meta: {}
+          tags: []
+        data_type: ARRAY<STRING>
+      - name: column_id
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: completed_time
+        description: Timestamp when the task was completed.
+        config:
+          meta:
+            dimension:
+              type: date
+              time_intervals: [RAW, DAY, HOUR, MINUTE, WEEK, MONTH, QUARTER, YEAR, DAY_OF_WEEK_INDEX, DAY_OF_WEEK_NAME, DAY_OF_MONTH_NUM, WEEK_NUM, MONTH_NUM, QUARTER_NUM, YEAR_NUM]
+          tags: []
+        data_type: DATETIME
+      - name: due_date
+        description: Task due datetime.
+        config:
+          meta:
+            dimension:
+              type: date
+              time_intervals: [RAW, DAY, HOUR, MINUTE, WEEK, MONTH, QUARTER, YEAR, DAY_OF_WEEK_INDEX, DAY_OF_WEEK_NAME, DAY_OF_MONTH_NUM, WEEK_NUM, MONTH_NUM, QUARTER_NUM, YEAR_NUM]
+          tags: []
+        data_type: DATETIME
+      - name: gtd_work_type
+        description: Optional shallow/deep work classification.
+        config:
+          meta:
+            dimension:
+              type: string
+          tags: []
+        data_type: STRING
+      - name: is_allday
+        description: All day
+        config:
+          meta: {}
+          tags: []
+        data_type: BOOLEAN
+      - name: kind
+        description: '"TASK" or "NOTE"'
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: parent_id
+        description: Parent task id
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: priority
+        description: Task priority
+        config:
+          meta: {}
+          tags: []
+        data_type: INT64
+      - name: project_id
+        description: Task project id
+        config:
+          meta:
+            dimension:
+              hidden: true
+          tags: []
+        data_type: STRING
+      - name: reminders
+        description: List of reminder triggers
+        config:
+          meta: {}
+          tags: []
+        data_type: ARRAY<STRING>
+      - name: repeat_flag
+        description: Recurring rule
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: sort_order
+        description: Task sort order
+        config:
+          meta: {}
+          tags: []
+        data_type: INT64
+      - name: start_date
+        description: Task start datetime
+        config:
+          meta:
+            dimension:
+              type: date
+              time_intervals: [RAW, DAY, HOUR, MINUTE, WEEK, MONTH, QUARTER, YEAR, DAY_OF_WEEK_INDEX, DAY_OF_WEEK_NAME, DAY_OF_MONTH_NUM, WEEK_NUM, MONTH_NUM, QUARTER_NUM, YEAR_NUM]
+          tags: []
+        data_type: DATETIME
+      - name: status
+        description: 'Task completion status. Value: Normal=0, Completed=2'
+        config:
+          meta:
+            dimension:
+              type: number
+          tags: []
+        data_type: INT64
+      - name: tags
+        description: Array of tags assigned to the task.
+        config:
+          meta:
+            hidden: true
+          tags: []
+        data_type: ARRAY<STRING>
+      - name: task_id
+        description: Task identifier
+        config:
+          meta:
+            dimension:
+              type: string
+            additional_dimensions:
+              url_metadata:
+                description: Precompiled URL object for dynamic links
+                hidden: true
+                sql: |
+                  FORMAT('''
+                    {
+                      "task": "ticktick.com/webapp/#p/%s/tasks/%s",
+                      "project": "ticktick.com/webapp/#p/%s/tasks",
+                      "folder": "ticktick.com/webapp/#g/%s"
+                    }
+                    ''',
+                    ${dim_projects_v3.project_id},
+                    ${fct_tasks_v3.task_id},
+                    ${dim_projects_v3.project_id},
+                    ${dim_folders_v3.folder_id}
+                  )
+              dynamic_grain_url:
+                description: Dynamic URL for selected grain
+                sql: |
+                  JSON_VALUE(
+                    ${fct_tasks_v3.url_metadata},
+                    CONCAT('$.', ${ld.parameters.fct_tasks_v3.count_grain})
+                  )
+              dynamic_parent_grain_url:
+                description: Dynamic URL for parent of selected grain
+                sql: |
+                  case
+                    when ${ld.parameters.fct_tasks_v3.count_grain} = 'task' then JSON_VALUE(${fct_tasks_v3.url_metadata}, '$.project')
+                    when ${ld.parameters.fct_tasks_v3.count_grain} = 'project' then JSON_VALUE(${fct_tasks_v3.url_metadata}, '$.folder')
+                    when ${ld.parameters.fct_tasks_v3.count_grain} = 'folder' then JSON_VALUE(${fct_tasks_v3.url_metadata}, '$.folder')
+                  end
+          tags: []
+        data_type: STRING
+      - name: timezone
+        description: Task timezone
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: title
+        description: Task title
+        config:
+          meta:
+            dimension:
+              type: string
+              urls:
+                - label: open in ticktick (mac)
+                  url: ticktick://ticktick.com/webapp/#p/${row.dim_projects_v3.project_id.raw}/tasks/${row.fct_tasks_v3.task_id.raw}
+                - label: open in ticktick (web)
+                  url: https://ticktick.com/webapp/#p/${row.dim_projects_v3.project_id.raw}/tasks/${row.fct_tasks_v3.task_id.raw}
+            additional_dimensions:
+              dimension_grain:
+                label: grain dimension
+                type: string
+                sql: |
+                  case
+                    when ${ld.parameters.fct_tasks_v3.count_grain} = 'task' then ${TABLE}.title
+                    when ${ld.parameters.fct_tasks_v3.count_grain} = 'project' then ${dim_projects_v3.project_name}
+                    when ${ld.parameters.fct_tasks_v3.count_grain} = 'folder' then ${dim_folders_v3.folder_name}
+                  end
+                description: Dynamic grain dimension for group by
+                urls:
+                  - label: open in ticktick (mac)
+                    url: |
+                      ${row.fct_tasks_v3.dynamic_grain_url.raw | prepend: 'ticktick://'}
+                  - label: open in ticktick (web)
+                    url: |
+                      ${row.fct_tasks_v3.dynamic_grain_url.raw | prepend: 'https://'}
+              parent_dimension_grain:
+                description: Dynamic parent dimension of selected grain
+                label: parent grain dimension
+                type: string
+                sql: |
+                  case
+                    when ${ld.parameters.fct_tasks_v3.count_grain} = 'task' then ${dim_projects_v3.project_name}
+                    when ${ld.parameters.fct_tasks_v3.count_grain} = 'project' then ${dim_folders_v3.folder_name}
+                    when ${ld.parameters.fct_tasks_v3.count_grain} = 'folder' then ${dim_folders_v3.folder_name}
+                  end
+                urls:
+                  - label: open in ticktick (mac)
+                    url: |
+                      ${row.fct_tasks_v3.dynamic_parent_grain_url.raw | prepend: 'ticktick://'}
+                  - label: open in ticktick (web)
+                    url: |
+                      ${row.fct_tasks_v3.dynamic_parent_grain_url.raw | prepend: 'https://'}
+          tags: []
+        data_type: STRING
+      - name: updated_time
+        description: Updated time (currently populated for completed tasks)
+        config:
+          meta:
+            dimension:
+              type: date
+              time_intervals: [RAW, DAY, HOUR, MINUTE, WEEK, MONTH, QUARTER, YEAR, DAY_OF_WEEK_INDEX, DAY_OF_WEEK_NAME, DAY_OF_MONTH_NUM, WEEK_NUM, MONTH_NUM, QUARTER_NUM, YEAR_NUM]
+          tags: []
+        data_type: DATETIME
+    config:
+      meta:
+        label: ticktick tasks explore v3
+        primary_key: task_id
+        joins:
+          - join: dim_projects_v3
+            type: inner
+            sql_on: |
+              ${fct_tasks_v3.project_id} = ${dim_projects_v3.project_id}
+              AND
+              CASE
+                WHEN 'default_ld_param_value' in (${ld.parameters.fct_tasks_v3.project_name}) then 1=1
+                ELSE ${dim_projects_v3.project_name} IN (${ld.parameters.fct_tasks_v3.project_name})
+              END
+            relationship: many-to-one
+          - join: dim_folders_v3
+            type: inner
+            sql_on: |
+              ${dim_folders_v3.folder_id} = ${dim_projects_v3.group_id}
+              AND
+              CASE
+                WHEN 'default_ld_param_value' in (${ld.parameters.fct_tasks_v3.folder_name}) then 1=1
+                ELSE ${dim_folders_v3.folder_name} IN (${ld.parameters.fct_tasks_v3.folder_name})
+              END
+            relationship: many-to-one
+          - join: dim_date_spine
+            type: right
+            label: Task due date spine
+            sql_on: ${dim_date_spine.date_day} = ${fct_tasks_v3.due_date}
+        metrics:
+          total_task_instances:
+            label: Total Tasks
+            type: count
+            sql: ${TABLE}.task_id
+            description: Total number of task rows.
+          completed_tasks:
+            label: Completed Tasks
+            type: count_distinct
+            sql: CASE WHEN ${TABLE}.status = 2 THEN ${TABLE}.task_id ELSE NULL END
+            description: Number of completed tasks.
+          count:
+            label: Count
+            type: count_distinct
+            sql: |
+              case
+                when ${ld.parameters.fct_tasks_v3.count_grain} = 'task' then ${TABLE}.task_id
+                when ${ld.parameters.fct_tasks_v3.count_grain} = 'project' then ${dim_projects_v3.project_id}
+                when ${ld.parameters.fct_tasks_v3.count_grain} = 'folder' then ${dim_folders_v3.folder_id}
+              end
+            description: Distinct count by selected grain.
+          overdue_tasks:
+            label: Overdue Tasks
+            type: count_distinct
+            sql: |
+              CASE
+                WHEN ${TABLE}.due_date < current_timestamp()
+                AND ${TABLE}.status != 2
+                THEN ${TABLE}.task_id
+                ELSE NULL
+              END
+            description: Open tasks past due.
+          completion_rate:
+            label: Task Completion Rate
+            type: number
+            sql: SAFE_DIVIDE(${completed_tasks}, ${total_task_instances})
+            format: percent
+            description: Completed over total task instances.
+        parameters:
+          count_grain:
+            label: grain of counts
+            options: [task, project, folder]
+            default: task
+          folder_name:
+            label: folder name
+            description: Filter by folder
+            options_from_dimension:
+              model: dim_folders_v3
+              dimension: folder_name
+            multiple: true
+            default: [default_ld_param_value]
+            allow_custom_values: true
+          project_name:
+            label: project name
+            description: Filter by project
+            options_from_dimension:
+              model: dim_projects_v3
+              dimension: project_name
+            multiple: true
+            default: [default_ld_param_value]
+            allow_custom_values: true
+
+  - name: dim_projects_v3
+    description: Dimension table for TickTick v3 projects.
+    columns:
+      - name: closed
+        description: Project closed status
+        config:
+          meta: {}
+          tags: []
+        data_type: BOOLEAN
+      - name: color
+        description: Project color
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: completed_time
+        description: Timestamp when the project was closed/archived.
+        config:
+          meta:
+            dimension:
+              type: date
+              time_intervals: [RAW, DAY, HOUR, MINUTE, WEEK, MONTH, QUARTER, YEAR, DAY_OF_WEEK_INDEX, DAY_OF_WEEK_NAME, DAY_OF_MONTH_NUM, WEEK_NUM, MONTH_NUM, QUARTER_NUM, YEAR_NUM]
+          tags: []
+        data_type: DATETIME
+      - name: group_id
+        description: Project group identifier
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: kind
+        description: '"TASK" or "NOTE"'
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: last_pulse
+        description: Last active pulse inferred from tasks.
+        config:
+          meta:
+            dimension:
+              type: date
+              time_intervals: [RAW, DAY, HOUR, MINUTE, WEEK, MONTH, QUARTER, YEAR, DAY_OF_WEEK_INDEX, DAY_OF_WEEK_NAME, DAY_OF_MONTH_NUM, WEEK_NUM, MONTH_NUM, QUARTER_NUM, YEAR_NUM]
+          tags: []
+        data_type: DATETIME
+      - name: permission
+        description: '"read", "write" or "comment"'
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: project_id
+        description: Project identifier
+        config:
+          meta:
+            dimension:
+              type: string
+          tags: []
+        data_type: STRING
+      - name: project_name
+        description: Project name
+        config:
+          meta:
+            dimension:
+              type: string
+              urls:
+                - label: open in ticktick (mac)
+                  url: ticktick://ticktick.com/webapp/#p/${row.dim_projects_v3.project_id.raw}/tasks
+                - label: open in ticktick (web)
+                  url: https://ticktick.com/webapp/#p/${row.dim_projects_v3.project_id.raw}/tasks
+            additional_dimensions:
+              project_name_formatted:
+                description: Formatted project name
+                label: Formatted Project Name
+                type: string
+                sql: |
+                  CONCAT(
+                    CODE_POINTS_TO_STRING([
+                      127812 + MOD(ABS(FARM_FINGERPRINT(${project_name})), 50)
+                    ]),
+                    ' ',
+                    ${project_name}
+                  )
+                urls:
+                  - label: open in ticktick (mac)
+                    url: ticktick://ticktick.com/webapp/#p/${row.dim_projects_v3.project_id.raw}/tasks
+                  - label: open in ticktick (web)
+                    url: https://ticktick.com/webapp/#p/${row.dim_projects_v3.project_id.raw}/tasks
+          tags: []
+        data_type: STRING
+      - name: sort_order
+        description: Order value
+        config:
+          meta: {}
+          tags: []
+        data_type: INT64
+      - name: view_mode
+        description: view mode
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+    config:
+      meta:
+        primary_key: project_id
+        metrics:
+          count:
+            label: Count
+            type: count_distinct
+            sql: ${TABLE}.project_id
+            description: Distinct project count
+
+  - name: dim_folders_v3
+    description: Dimension table for TickTick v3 folders/groups.
+    config:
+      meta:
+        primary_key: folder_id
+        metrics:
+          count:
+            label: Count
+            type: count_distinct
+            sql: ${TABLE}.folder_id
+            description: Distinct folder count
+    columns:
+      - name: folder_id
+        description: Unique identifier of the folder
+        config:
+          meta: {}
+          tags: []
+        data_type: STRING
+      - name: folder_name
+        description: Folder/group name from TickTick v3 groups
+        config:
+          meta:
+            dimension:
+              type: string
+              urls:
+                - label: open in ticktick (mac)
+                  url: ticktick://ticktick.com/webapp/#g/${row.dim_folders_v3.folder_id.raw}
+                - label: open in ticktick (web)
+                  url: https://ticktick.com/webapp/#g/${row.dim_folders_v3.folder_id.raw}
+          tags: []
+        data_type: STRING

@@ -1,0 +1,100 @@
+name: gtd dash v2.0
+description: ""
+updatedAt: "2026-02-20T00:00:00.000Z"
+tiles:
+  - x: 0
+    "y": 0
+    h: 7
+    w: 18
+    tabUuid: 39a6f194-6bb1-4f15-ac03-8f49a0a6d602
+    type: saved_chart
+    properties:
+      title: ""
+      hideTitle: false
+      chartSlug: tasks-lookahead-v3
+      chartName: tasks lookahead v3
+    tileSlug: tasks-lookahead-v3
+  - x: 18
+    "y": 0
+    h: 14
+    w: 18
+    tabUuid: 39a6f194-6bb1-4f15-ac03-8f49a0a6d602
+    type: saved_chart
+    properties:
+      title: ""
+      hideTitle: false
+      chartSlug: tasks-drill-down-by-grain-v3
+      chartName: drill down tasks by parent grain dimension v3
+    tileSlug: tasks-drill-down-by-grain-v3
+  - x: 0
+    "y": 7
+    h: 7
+    w: 18
+    tabUuid: 39a6f194-6bb1-4f15-ac03-8f49a0a6d602
+    type: saved_chart
+    properties:
+      title: ""
+      hideTitle: false
+      chartSlug: distribution-by-parent-dimension-v3
+      chartName: distribution by parent dimension v3
+    tileSlug: distribution-by-parent-dimension-v3
+  - x: 0
+    "y": 14
+    h: 8
+    w: 36
+    tabUuid: 39a6f194-6bb1-4f15-ac03-8f49a0a6d602
+    type: saved_chart
+    properties:
+      title: ""
+      hideTitle: false
+      chartSlug: what-did-you-do-v3
+      chartName: what did you do v3
+    tileSlug: what-did-you-do-v3
+filters:
+  metrics: []
+  dimensions:
+    - label: Lookahead Date day
+      target:
+        fieldId: dim_date_spine_date_day
+        fieldName: date_day
+        tableName: dim_date_spine
+      values:
+        - 5
+      disabled: false
+      operator: inTheNext
+      settings:
+        completed: false
+        unitOfTime: weeks
+      tileTargets:
+        what-did-you-do-v3: false
+        tasks-lookahead-v3:
+          fieldId: dim_date_spine_date_day
+          tableName: dim_date_spine
+    - target:
+        fieldId: fct_tasks_v3_status
+        fieldName: status
+        tableName: fct_tasks_v3
+      values:
+        - "2"
+      disabled: false
+      operator: notEquals
+      tileTargets:
+        tasks-drill-down-by-grain-v3:
+          fieldId: fct_tasks_v3_status
+          tableName: fct_tasks_v3
+        what-did-you-do-v3: false
+        tasks-lookahead-v3:
+          fieldId: fct_tasks_v3_status
+          tableName: fct_tasks_v3
+        distribution-by-parent-dimension-v3:
+          fieldId: fct_tasks_v3_status
+          tableName: fct_tasks_v3
+  tableCalculations: []
+tabs:
+  - name: main tasks
+    uuid: 39a6f194-6bb1-4f15-ac03-8f49a0a6d602
+    order: 0
+slug: gtd-dash-v2-0
+spaceSlug: shared
+version: 1
+downloadedAt: "2026-02-20T00:00:00.000Z"

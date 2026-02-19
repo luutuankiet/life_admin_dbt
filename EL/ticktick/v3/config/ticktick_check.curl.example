@@ -1,0 +1,7 @@
+curl 'https://api.ticktick.com/api/v3/batch/check/0' \
+  -H 'User-Agent: Mozilla/5.0 ...' \
+  -H 'X-Device: {"platform":"web","os":"macOS"}' \
+  -H 'x-tz: Asia/Ho_Chi_Minh' \
+  -H 'hl: en_US' \
+  -H 'X-Csrftoken: ...' \
+  -H 'Cookie: t=YOUR_T_COOKIE; _csrf_token=YOUR_CSRF_COOKIE; ...'

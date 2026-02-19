@@ -1,0 +1,152 @@
+name: what did you do v3
+description: ""
+tableName: fct_tasks_v3
+updatedAt: "2026-02-20T00:00:00.000Z"
+metricQuery:
+  exploreName: fct_tasks_v3
+  dimensions:
+    - fct_tasks_v3_completed_time_day
+    - fct_tasks_v3_completed_time_day_of_week_name
+    - fct_tasks_v3_gtd_work_type
+    - dim_folders_v3_folder_name
+    - dim_projects_v3_project_name_formatted
+    - dim_projects_v3_project_name
+    - fct_tasks_v3_title
+    - fct_tasks_v3_task_id
+    - dim_projects_v3_project_id
+    - fct_tasks_v3_updated_time_raw
+  metrics: []
+  filters:
+    dimensions:
+      id: a31e220e-e88d-4725-9dfe-ba2b8143c057
+      and:
+        - id: 493c28aa-ecd1-4647-b6bf-054c7a4e1b3b
+          target:
+            fieldId: fct_tasks_v3_completed_time_day
+          values:
+            - 2
+          operator: inThePast
+          required: false
+          settings:
+            completed: false
+            unitOfTime: days
+        - id: 01c881be-a004-4434-87e5-7b2b9acce9c6
+          target:
+            fieldId: fct_tasks_v3_due_date_day
+          values:
+            - "2025-10-19"
+          operator: notNull
+          required: false
+  sorts:
+    - fieldId: fct_tasks_v3_completed_time_day
+      descending: true
+    - fieldId: fct_tasks_v3_updated_time_raw
+      descending: true
+  limit: 100
+  metricOverrides: {}
+  tableCalculations: []
+  additionalMetrics: []
+  customDimensions: []
+chartConfig:
+  type: table
+  config:
+    columns:
+      fct_tasks_v3_title:
+        name: task
+      fct_tasks_v3_task_id:
+        visible: false
+      dim_projects_v3_project_id:
+        visible: false
+      fct_tasks_v3_gtd_work_type:
+        name: " "
+      dim_projects_v3_project_name:
+        name: project
+        visible: false
+      fct_tasks_v3_updated_time_raw:
+        visible: false
+      fct_tasks_v3_completed_time_day:
+        name: date
+      dim_projects_v3_project_name_formatted:
+        name: project
+      fct_tasks_v3_completed_time_day_of_week_name:
+        name: day
+    metricsAsRows: false
+    showSubtotals: false
+    hideRowNumbers: true
+    showTableNames: false
+    showResultsTotal: false
+    showRowCalculation: false
+    showColumnCalculation: false
+    conditionalFormattings:
+      - color: "#5470c6"
+        rules:
+          - id: 4614997b-0d20-4468-bc5d-7fadc8af3521
+            values:
+              - Monday
+            operator: equals
+        target:
+          fieldId: fct_tasks_v3_completed_time_day_of_week_name
+      - color: "#fc8452"
+        rules:
+          - id: b83003da-eccc-4855-b837-e4f829f0fda7
+            values:
+              - Tuesday
+            operator: equals
+        target:
+          fieldId: fct_tasks_v3_completed_time_day_of_week_name
+      - color: "#91cc75"
+        rules:
+          - id: e95acdf7-8d89-48fd-87c3-7b7102b78644
+            values:
+              - Wednesday
+            operator: equals
+        target:
+          fieldId: fct_tasks_v3_completed_time_day_of_week_name
+      - color: "#fac858"
+        rules:
+          - id: d10883c7-ad8b-4625-b074-537c7e7a25ef
+            values:
+              - Thursday
+            operator: equals
+        target:
+          fieldId: fct_tasks_v3_completed_time_day_of_week_name
+      - color: "#ee6666"
+        rules:
+          - id: 898f58fc-6ac6-4860-8574-2004064117be
+            values:
+              - Friday
+            operator: equals
+        target:
+          fieldId: fct_tasks_v3_completed_time_day_of_week_name
+      - color: "#73c0de"
+        rules:
+          - id: 552d67e8-ed2b-4a27-b3c6-f4e093308239
+            values:
+              - Saturday
+            operator: equals
+        target:
+          fieldId: fct_tasks_v3_completed_time_day_of_week_name
+      - color: "#3ba272"
+        rules:
+          - id: f282fcab-3b8c-454b-afb9-020c25b25387
+            values:
+              - Sunday
+            operator: equals
+        target:
+          fieldId: fct_tasks_v3_completed_time_day_of_week_name
+slug: what-did-you-do-v3
+tableConfig:
+  columnOrder:
+    - fct_tasks_v3_completed_time_day
+    - fct_tasks_v3_completed_time_day_of_week_name
+    - fct_tasks_v3_gtd_work_type
+    - dim_folders_v3_folder_name
+    - dim_projects_v3_project_name_formatted
+    - dim_projects_v3_project_name
+    - fct_tasks_v3_title
+    - fct_tasks_v3_task_id
+    - dim_projects_v3_project_id
+    - fct_tasks_v3_updated_time_raw
+spaceSlug: shared
+version: 1
+downloadedAt: "2026-02-20T00:00:00.000Z"

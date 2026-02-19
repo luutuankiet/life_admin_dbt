@@ -342,3 +342,87 @@ sources:
               meta: {}
               tags: []
             data_type: STRING
+
+      - name: tasks_v3
+        description: TickTick v3 task replica exported from poller parquet emitter
+        columns:
+          - name: task_id
+            data_type: STRING
+          - name: account_id
+            data_type: STRING
+          - name: project_id
+            data_type: STRING
+          - name: title
+            data_type: STRING
+          - name: content
+            data_type: STRING
+          - name: status
+            data_type: INT64
+          - name: deleted
+            data_type: INT64
+          - name: completed_time
+            data_type: TIMESTAMP
+          - name: completed_user_id
+            data_type: STRING
+          - name: created_time
+            data_type: TIMESTAMP
+          - name: modified_time
+            data_type: TIMESTAMP
+          - name: kind
+            data_type: STRING
+          - name: column_id
+            data_type: STRING
+          - name: etag
+            data_type: STRING
+          - name: raw_json
+            data_type: STRING
+          - name: updated_at
+            data_type: TIMESTAMP
+      - name: projects_v3
+        description: TickTick v3 project replica exported from poller parquet emitter
+        columns:
+          - name: project_id
+            data_type: STRING
+          - name: account_id
+            data_type: STRING
+          - name: name
+            data_type: STRING
+          - name: group_id
+            data_type: STRING
+          - name: closed
+            data_type: INT64
+          - name: sort_order
+            data_type: INT64
+          - name: kind
+            data_type: STRING
+          - name: view_mode
+            data_type: STRING
+          - name: modified_time
+            data_type: TIMESTAMP
+          - name: etag
+            data_type: STRING
+          - name: raw_json
+            data_type: STRING
+          - name: updated_at
+            data_type: TIMESTAMP
+      - name: groups_v3
+        description: TickTick v3 project-group replica exported from poller parquet emitter
+        columns:
+          - name: group_id
+            data_type: STRING
+          - name: account_id
+            data_type: STRING
+          - name: name
+            data_type: STRING
+          - name: deleted
+            data_type: INT64
+          - name: sort_order
+            data_type: INT64
+          - name: sort_type
+            data_type: STRING
+          - name: etag
+            data_type: STRING
+          - name: raw_json
+            data_type: STRING
+          - name: updated_at
+            data_type: TIMESTAMP

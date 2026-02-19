@@ -276,3 +276,72 @@ models:
           meta: {}
           tags: []
         data_type: STRING
+
+  - name: stg__ticktick_v3__tasks
+    description: |
+      TickTick v3 staging tasks with completion semantics sourced directly from first-class v3 status/completed_time.
+    columns:
+      - name: task_id
+        description: Task identifier
+        data_tests:
+          - unique
+          - not_null
+        data_type: STRING
+      - name: project_id
+        description: Task project id
+        data_tests:
+          - relationships:
+              to: ref('stg__ticktick_v3__projects')
+              field: project_id
+        data_type: STRING
+      - name: status
+        description: 'Task completion status. Value : Normal: 0, Completed: 2'
+        data_type: INT64
+      - name: completed_time
+        description: Completion timestamp from TickTick v3 payload
+        data_type: DATETIME
+      - name: updated_time
+        description: Last modified timestamp for completed tasks
+        data_type: DATETIME
+      - name: gtd_work_type
+        description: Optional deep or shallow work classification
+        data_type: STRING
+
+  - name: stg__ticktick_v3__projects
+    description: |
+      TickTick v3 staging projects with completion semantics inferred from closed state and modified_time.
+    columns:
+      - name: project_id
+        description: Project identifier
+        data_tests:
+          - unique
+          - not_null
+        data_type: STRING
+      - name: group_id
+        description: Project group identifier with default fallback
+        data_type: STRING
+      - name: closed
+        description: Project closed state
+        data_type: BOOLEAN
+      - name: completed_time
+        description: Timestamp when project became closed based on modified_time
+        data_type: DATETIME
+      - name: last_pulse
+        description: Max project pulse derived from due_date/completed_time of v3 tasks
+        data_type: DATETIME
+
+  - name: stg__ticktick_v3__project_folder
+    description: |
+      Folder map sourced directly from TickTick v3 groups replica.
+    columns:
+      - name: folder_id
+        description: unique identifier of the folder
+        data_tests:
+          - unique
+          - relationships:
+              to: ref('stg__ticktick_v3__projects')
+              field: group_id
+        data_type: STRING
+      - name: folder_name
+        description: Folder name from TickTick v3 groups replica
+        data_type: STRING
