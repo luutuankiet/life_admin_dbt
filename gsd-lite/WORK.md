@@ -5,11 +5,11 @@
 ## 1. Current Understanding (Read First)
 
 <current_mode>
-discussion
+execution
 </current_mode>
 
 <active_task>
-- Post-deploy data integration planning: define path from v3 SQLite replica on VM/container to dbt models
+- Phase 4 Lightdash BI migration: clone GTD Dash v2.0 and repoint TickTick charts to v3 marts
 </active_task>
 
 <parked_tasks>
@@ -33,6 +33,8 @@ Personal data platform for GTD-driven life decisions. The goal is "perceptual re
 - DECISION-009: v3 API delivers completion as first-class fact (status=2 + completedTime in update[] lane). SCD2 snapshot workaround is fully obsolete. taskreplica retains completed tasks.
 - DECISION-010: SQLite→GCS bridge is DuckDB COPY TO (httpfs + HMAC). Fires in-process after every poll cycle where state_updated=True. Emitter errors are swallowed — poller loop must not die from GCS flakiness.
 - DECISION-011: Legacy dual-target dbt pipeline (tmp/branches/incremental_run_gha) is dead code once v3 Parquet path is validated end-to-end.
+- DECISION-012: v3 folder dimension should source directly from `groups_v3`/`base__ticktick_v3__groups`, not from convention-based `folder_map - '...'` projects.
+- DECISION-013: Do not pursue TickTick v2 completed endpoint fan-out (`/api/v2/project/{ids}/completed`) for backfill; keep checkpoint endpoint as primary path and accept historical completion gap before poller start.
 </decisions>
 
 <blockers>
@@ -40,7 +42,7 @@ Personal data platform for GTD-driven life decisions. The goal is "perceptual re
 </blockers>
 
 <next_action>
-Deploy updated v3 container to VM (with GCS emitter enabled), then wire BQ external tables + dbt source YAML to consume ticktick/v3/{tasks,projects,groups}.parquet.
+Begin Phase 4: create GTD Dash v2.0 in Lightdash and repoint chart explores from legacy `fct_tasks`/`dim_projects`/`dim_folders` to v3 marts while preserving weekly-review UX.
 </next_action>
 
 ---
@@ -3057,3 +3059,590 @@ graph TD
 **Fork paths:**
 - Continue execution → perform live drill with synthetic bad cookie and capture evidence in next EXEC log
 - Discuss tuning → add per-alert Alertmanager route if later you want 24h repeat for auth-only alerts
+
+### [LOG-019] - [DISCOVERY+PLAN] - v3 external tables validated, schema gaps mapped, and GTD Dash v2.0 modeling plan locked - Task: TASK-005
+**Timestamp:** 2026-02-19 20:05
+**Depends On:** LOG-017 (v3 Parquet emitter contract and SCD2 deprecation), LOG-018 (post-deploy operational hardening)
+
+---
+
+#### Executive Summary
+
+We closed the discovery loop needed before modeling.
+
+What is now confirmed:
+1. v3 Parquet external tables are live and queryable in BigQuery.
+2. The v3 dataset shape is materially different from the legacy `ticktick_raw.tasks/projects` source contract used by current dbt staging models.
+3. Current Lightdash GTD v1.0 charts are tightly coupled to snapshot-era semantics (especially inferred completion/update fields), so a safe migration requires a parallel v3 modeling path before dashboard cutover.
+4. We have a concrete, phased execution plan for TickTick v3 modeling and GTD Dash v2.0.
+
+---
+
+#### Discovery Narrative and Pivots
+
+**Initial state at start of this session:** LOG-017 said next action was "wire BQ external tables + dbt source YAML." At that moment, external tables were not yet created.
+
+**Pivot 1 (permissions reality):** I attempted to create external tables directly but hit dataset-level `bigquery.tables.create` denial. User created the tables manually.
+
+**Pivot 2 (IAM reality):** We then attempted row-count validation and hit GCS permission errors (`storage.objects.get` denied while BigQuery tried to read Parquet). User fixed IAM.
+
+**Pivot 3 (modeling scope clarity):** After validation succeeded, schema inspection showed v3 top-level columns are replica-centric (`raw_json`, `updated_at`, identifiers) and do not match legacy v1 dbt source schema expected by `base__ticktick__tasks` and snapshot-based staging. This changed the implementation strategy from "swap source in place" to "build parallel v3 base/staging/marts then cut over."
+
+---
+
+#### Step-by-Step Discovery Walkthrough
+
+1. Re-onboarded and traced dependency chain from LOG-017 through current state in `WORK.md`.
+2. Verified warehouse context:
+   - Lightdash project points to `airbyte-468412.ticktick_dbt_prod`.
+   - Existing dbt prod tables are legacy snapshot-era models (`base__ticktick__tasks_snapshot`, `stg__ticktick__tasks`, `fct_tasks`, etc.).
+3. Inspected dbt lineage from `manifest_slim.json` to identify impacted nodes:
+   - `base__ticktick__tasks` and `base__ticktick__tasks_snapshot` feed `stg__ticktick__tasks`.
+   - `base__ticktick__projects` and `base__ticktick__projects_snapshot` feed `stg__ticktick__projects`.
+   - `stg__ticktick__tasks/projects` feed `fct_tasks`, `dim_projects`, and downstream chart joins.
+4. Inspected current staging SQL and confirmed hard snapshot dependency:
+   - `stg__ticktick__tasks` unions live source + snapshot and infers completion from `dbt_valid_to`.
+   - `stg__ticktick__projects` infers archive completion from `projects_snapshot`.
+5. Pulled Lightdash dashboard-as-code and chart definitions for GTD v1.0 and confirmed semantic coupling to current `fct_tasks` field IDs and status filters.
+6. User confirmed external tables were created; we retried validation after IAM fix.
+7. Validated row counts and schema for `ticktick_raw.tasks_v3/projects_v3/groups_v3`.
+8. Mapped migration strategy: parallel v3 path first, parity checks second, dashboard cutover third.
+
+---
+
+#### Raw Evidence
+
+Dataset/table creation attempts initially failed due write permissions:
+```text
+Error 400: Access Denied: Dataset airbyte-468412:ticktick_raw: Permission bigquery.tables.create denied
+Error 403: Access Denied: Dataset airbyte-468412:ticktick_dbt_prod: Permission bigquery.tables.create denied
+```
+
+First validation attempts failed due GCS read IAM:
+```text
+Permission 'storage.objects.get' denied on resource ... gs://life_admin_raw/ticktick/v3/tasks.parquet
+Permission 'storage.objects.get' denied on resource ... gs://life_admin_raw/ticktick/v3/projects.parquet
+Permission 'storage.objects.get' denied on resource ... gs://life_admin_raw/ticktick/v3/groups.parquet
+```
+
+Post-IAM-fix validation succeeded:
+```sql
+SELECT COUNT(*) AS row_count FROM `airbyte-468412.ticktick_raw.tasks_v3`;    -- 582
+SELECT COUNT(*) AS row_count FROM `airbyte-468412.ticktick_raw.projects_v3`; -- 406
+SELECT COUNT(*) AS row_count FROM `airbyte-468412.ticktick_raw.groups_v3`;   -- 8
+```
+
+v3 external table schema (autodetected) includes replica-centric fields:
+```text
+tasks_v3: task_id, account_id, project_id, title, content, status, deleted,
+          completed_time, completed_user_id, created_time, modified_time,
+          kind, column_id, etag, raw_json, updated_at
+projects_v3: project_id, account_id, name, group_id, closed, sort_order,
+             kind, view_mode, modified_time, etag, raw_json, updated_at
+groups_v3: group_id, account_id, name, deleted, sort_order, sort_type,
+           etag, raw_json, updated_at
+```
+
+---
+
+#### What We Got Wrong (Explicit)
+
+- **Old assumption:** "Once external tables exist, we can point existing base models to v3."
+- **New reality:** Existing base/staging models assume legacy raw field contract + snapshot tables. v3 provides a different top-level contract and no SCD2 tables. Direct in-place source replacement would break `stg__ticktick__tasks/projects` semantics and dashboard fields.
+
+- **Old assumption:** "Validation is blocked only by table creation."
+- **New reality:** Even with tables created, BigQuery external reads require GCS object read permission for querying principal. IAM alignment was a separate unblock step.
+
+---
+
+#### Decision Record (for Modeling Foundation)
+
+**Decision A: Build parallel v3 modeling path first (chosen).**
+- Rationale: minimizes risk; keeps GTD v1.0 available while validating v3 parity.
+
+**Decision B: Do not mutate legacy snapshot models yet (chosen).**
+- Rationale: preserves rollback path and avoids breaking existing Lightdash charts tied to `fct_tasks`/`dim_projects` semantics.
+
+**Decision C: Cut over dashboard only after KPI parity gates (chosen).**
+- Rationale: avoids silent semantic drift in weekly-review metrics.
+
+Rejected alternatives:
+- **Direct source swap in `source_ticktick_raw.yml`:** rejected; would invalidate snapshot-based logic immediately.
+- **Immediate dashboard repoint before model parity:** rejected; high risk of field/semantic mismatch.
+
+---
+
+#### Multi-System Interaction Map
+
+```mermaid
+graph TD
+    A[v3 poller SQLite replica] --> B[DuckDB emitter]
+    B --> C[gs://life_admin_raw/ticktick/v3 parquet]
+    C --> D[BigQuery external tables tasks_v3 projects_v3 groups_v3]
+    D --> E[dbt v3 parallel base and staging]
+    E --> F[dbt v3 marts parity layer]
+    F --> G[Lightdash GTD Dash v2.0]
+    G --> H[Cutover after KPI parity checks]
+```
+
+---
+
+#### Proposed Plan for Modeling Phase (Approved for Execution)
+
+**Goal:** Deliver TickTick v3-backed GTD Dash v2.0 while preserving semantic continuity for planning and weekly review.
+
+1. **Phase 1 - Source and Base Layer**
+   - Add v3 source tables in dbt for `tasks_v3`, `projects_v3`, `groups_v3`.
+   - Create `base__ticktick_v3__tasks/projects/groups` with strict type casting and JSON extraction from `raw_json` for missing legacy fields.
+   - Complexity: Medium.
+
+2. **Phase 2 - Staging Semantics Layer**
+   - Build `stg__ticktick_v3__tasks` and `stg__ticktick_v3__projects` that emulate required analytical semantics without snapshots.
+   - Recreate completion/update date grains directly from v3 first-class completion facts.
+   - Complexity: High.
+
+3. **Phase 3 - Mart Compatibility Layer**
+   - Add `fct_tasks_v3`, `dim_projects_v3`, and related bridges, preserving critical field semantics used by current charts.
+   - Build parity check queries against current marts (counts by status, due-date horizon, completed-time windows, project pulse metrics).
+   - Complexity: High.
+
+4. **Phase 4 - GTD Dash v2.0**
+   - Clone `gtd-dash-v1-0` to `gtd-dash-v2-0` and repoint charts to v3 explores.
+   - Remove snapshot-era descriptive language and stale assumptions.
+   - Keep v1.0 live during bake period; cut over after parity signoff.
+   - Complexity: Medium.
+
+---
+
+#### Citations
+
+- `gsd-lite/WORK.md:2784` - LOG-017 states v3 emitter shipped and SCD2 obsolete
+- `EL/ticktick/v3/poller/emitter.py:58` - task export query start
+- `EL/ticktick/v3/poller/emitter.py:76` - source table `replica.taskreplica`
+- `EL/ticktick/v3/poller/emitter.py:85` - projects export query start
+- `EL/ticktick/v3/poller/emitter.py:99` - source table `replica.projectreplica`
+- `EL/ticktick/v3/poller/emitter.py:108` - groups export query start
+- `EL/ticktick/v3/poller/emitter.py:119` - source table `replica.groupreplica`
+- `EL/ticktick/v3/poller/models.py:58` - TaskReplica schema anchor
+- `EL/ticktick/v3/poller/models.py:80` - ProjectReplica schema anchor
+- `EL/ticktick/v3/poller/models.py:98` - GroupReplica schema anchor
+- `models/staging/ticktick/source_ticktick_raw.yml:3` - source name `ticktick_raw`
+- `models/staging/ticktick/source_ticktick_raw.yml:106` - legacy `tasks_snapshot` source exists
+- `models/staging/ticktick/source_ticktick_raw.yml:276` - legacy `projects_snapshot` source exists
+- `models/staging/ticktick/stg__ticktick__tasks.sql:43` - dedupe over `base__ticktick__tasks_snapshot`
+- `models/staging/ticktick/stg__ticktick__tasks.sql:97` - union path still anchored on legacy sources
+- `models/staging/ticktick/stg__ticktick__projects.sql:28` - dedupe over `base__ticktick__projects_snapshot`
+- `models/staging/ticktick/base/base__ticktick__tasks.sql:5` - legacy source `ticktick_raw.tasks`
+- `models/staging/ticktick/base/base__ticktick__projects.sql:5` - legacy source `ticktick_raw.projects`
+- `models/marts/marts.yml:20` - docs claim completed time inferred from snapshot
+- `models/marts/marts.yml:335` - docs claim updated time inferred from snapshot
+- `lightdash/dashboards/gtd-dash-v1-0.yml:216` - dashboard-level `fct_tasks_status` filter
+- `lightdash/dashboards/gtd-dash-v1-0.yml:222` - `notEquals` operator on status=2 path
+- `lightdash/charts/what-did-you-do.yml:25` - completed-time filter dependency
+- `lightdash/charts/what-did-you-do.yml:43` - updated-time sort dependency
+- `lightdash/charts/tasks-lookahead-1.yml:8` - dependency on `dim_date_spine` join fields
+- `lightdash/charts/ticktick-dynamic-grain-count.yml:12` - due-date field dependency for dynamic grain
+- `lightdash/charts/tasks-drill-down-by-grain.yml:12` - due-date field dependency for drilldown
+
+---
+
+📦 STATELESS HANDOFF
+**Layer 1 — Local Context:**
+→ Last action: LOG-019 captured full discovery, blockers, pivots, evidence, and approved migration plan for modeling phase
+→ Dependency chain: LOG-019 ← LOG-018 ← LOG-017 ← LOG-016 ← LOG-015 ← LOG-014 ← LOG-013 ← LOG-012 ← LOG-010 ← LOG-006
+→ Next action: execute Phase 1 by adding dbt v3 source + base models, then run first parity checks against existing `fct_tasks`/`dim_projects`
+
+**Layer 2 — Global Context:**
+→ Architecture: v3 poller emits Parquet to GCS; BigQuery external v3 tables now live; dbt/Lightdash still on legacy snapshot-era semantic layer
+→ Patterns: safety-first migration via parallel modeling path, explicit parity gates before dashboard cutover
+
+**Fork paths:**
+- Continue execution → implement Phase 1 dbt models and ship first runnable v3 DAG slice
+- Fork for implementation → use LOG-019 as canonical discovery baseline and start from cited model/chart touchpoints
+
+### [LOG-020] - [EXEC] - Phase 1 and Phase 2 of v3 modeling shipped and validated in dbt dev - Task: TASK-005
+**Timestamp:** 2026-02-20 17:10
+**Depends On:** LOG-019 (approved v3 phased migration plan), LOG-017 (v3 completion semantics are first-class)
+
+---
+
+#### Executive Summary
+
+We executed and validated the first two migration phases from LOG-019:
+1. **Phase 1 complete**: v3 sources + v3 base models shipped.
+2. **Phase 2 complete**: v3 staging semantics shipped (`tasks/projects/project_folder`).
+3. dbt dev run succeeded for all 6 v3 base+staging views after one BigQuery SQL compatibility fix in `stg__ticktick_v3__project_folder`.
+
+This is the first runnable end-to-end v3 semantic layer that no longer depends on snapshot tables.
+
+---
+
+#### What Changed (Step-by-Step)
+
+1. Added v3 raw source definitions in dbt:
+   - `tasks_v3`, `projects_v3`, `groups_v3` under `ticktick_raw`.
+2. Implemented parallel v3 base models:
+   - `base__ticktick_v3__tasks`
+   - `base__ticktick_v3__projects`
+   - `base__ticktick_v3__groups`
+3. Implemented parallel v3 staging models:
+   - `stg__ticktick_v3__tasks` (completion/update semantics from v3 status + timestamps)
+   - `stg__ticktick_v3__projects` (project close completion + last pulse)
+   - `stg__ticktick_v3__project_folder`
+4. Updated staging docs/tests registry in `ticktick.yml` for all new v3 staging models.
+5. Fixed SQL portability bug in folder model and re-ran successfully.
+
+---
+
+#### What We Got Wrong (Explicit Pivot)
+
+- **Old implementation (wrong for BigQuery):** In `inject_defaults`, we used `SELECT 'default' ... WHERE NOT EXISTS (...)` without a `FROM` clause.
+- **Observed failure:** BigQuery rejected it with `Query without FROM clause cannot have a WHERE clause`.
+- **Corrected implementation:** Added `FROM (SELECT 1) AS seed` to both default-injection branches.
+
+This was a tactical SQL-engine compatibility mistake, not a semantic modeling error.
+
+---
+
+#### Raw Evidence
+
+User-provided dbt run showed one failing node while five succeeded:
+```text
+17:09:39  Failure in model stg__ticktick_v3__project_folder
+Database Error ... Query without FROM clause cannot have a WHERE clause at [26:5]
+```
+
+After the SQL fix, user confirmed rerun passed:
+```text
+"yep all passed!"
+```
+
+---
+
+#### Decision Record
+
+**Decision A (chosen): keep legacy and v3 paths in parallel during migration.**
+- Why: preserves rollback safety and prevents dashboard breakage during parity work.
+
+**Decision B (chosen): source v3 folder dimension from groups replica, not naming convention projects.**
+- Why: `groups_v3` is direct source-of-truth and removes dependency on manual `folder_map - '...'` project hygiene.
+
+Rejected alternatives:
+- **Replace legacy models in place now:** rejected due high blast radius before parity gates.
+- **Keep v3 folder logic project-name-derived:** rejected due brittle manual convention coupling.
+
+---
+
+#### Multi-System Interaction Map
+
+```mermaid
+graph TD
+    A[ticktick_raw tasks_v3 projects_v3 groups_v3] --> B[base__ticktick_v3 tasks projects groups]
+    B --> C[stg__ticktick_v3__tasks]
+    C --> D[stg__ticktick_v3__projects]
+    B --> E[stg__ticktick_v3__project_folder]
+    D --> F[Phase 3 marts v3]
+    E --> F
+    F --> G[GTD Dash v2.0 parity gate]
+```
+
+---
+
+#### Citations
+
+- `gsd-lite/WORK.md:3061` - LOG-019 phase plan baseline
+- `models/staging/ticktick/source_ticktick_raw.yml:346` - `tasks_v3` source added
+- `models/staging/ticktick/source_ticktick_raw.yml:381` - `projects_v3` source added
+- `models/staging/ticktick/source_ticktick_raw.yml:408` - `groups_v3` source added
+- `models/staging/ticktick/base/base.yml:436` - `base__ticktick_v3__tasks` registered
+- `models/staging/ticktick/base/base.yml:522` - `base__ticktick_v3__projects` registered
+- `models/staging/ticktick/base/base.yml:569` - `base__ticktick_v3__groups` registered
+- `models/staging/ticktick/base/base__ticktick_v3__tasks.sql:1` - v3 task base model implementation
+- `models/staging/ticktick/base/base__ticktick_v3__projects.sql:1` - v3 project base model implementation
+- `models/staging/ticktick/base/base__ticktick_v3__groups.sql:1` - v3 groups base model implementation
+- `models/staging/ticktick/stg__ticktick_v3__tasks.sql:1` - v3 task staging implementation
+- `models/staging/ticktick/stg__ticktick_v3__projects.sql:1` - v3 project staging implementation
+- `models/staging/ticktick/stg__ticktick_v3__project_folder.sql:1` - v3 folder staging implementation and bugfix target
+- `models/staging/ticktick/ticktick.yml:280` - `stg__ticktick_v3__tasks` metadata entry
+- `models/staging/ticktick/ticktick.yml:310` - `stg__ticktick_v3__projects` metadata entry
+- `models/staging/ticktick/ticktick.yml:333` - `stg__ticktick_v3__project_folder` metadata entry
+
+---
+
+📦 STATELESS HANDOFF
+**Layer 1 — Local Context:**
+→ Last action: LOG-020 shipped and validated Phase 1+2 (v3 source/base/staging) with one SQL compatibility bug resolved
+→ Dependency chain: LOG-020 ← LOG-019 ← LOG-018 ← LOG-017 ← LOG-016 ← LOG-015 ← LOG-014 ← LOG-013 ← LOG-012 ← LOG-010 ← LOG-006
+→ Next action: execute Phase 3 by building `fct_tasks_v3`, `dim_projects_v3`, `dim_folders_v3` and run parity SQL checks vs legacy marts
+
+**Layer 2 — Global Context:**
+→ Architecture: v3 poller emits parquet to GCS and BQ external tables; dbt now has parallel v3 semantic layers through staging
+→ Patterns: parallel migration + parity-gated cutover + rollback-safe coexistence
+
+**Fork paths:**
+- Continue execution → implement v3 marts and parity pack from LOG-019 Phase 3
+- Fork new session → onboard via Section 1 + LOG-020, then continue Phase 3 immediately
+### [LOG-021] - [DECISION] [EXEC] - Phase 3 accepted with forward-parity semantics, NULL-closed patch shipped, and Lightdash BI phase started - Task: TASK-005
+**Timestamp:** 2026-02-20 18:35
+**Depends On:** LOG-020 (v3 base+staging shipped), LOG-019 (Phase 3 parity gate plan)
+
+---
+
+#### Executive Summary
+
+We completed the practical Phase 3 checkpoint and explicitly reframed parity criteria for this migration stage:
+
+1. v3 marts are built and queryable in `ticktick_dbt_dev` (`fct_tasks_v3`, `dim_projects_v3`, `dim_folders_v3`).
+2. Strict historical parity on completed-task metrics is not expected yet because checkpoint polling only captures completion events after poller start.
+3. User-approved interpretation: forward correctness is primary, historical completion gaps are acceptable for now.
+4. We shipped a semantic patch in staging so `closed = NULL` is treated as open (`false`) in v3 project dimensions.
+5. Next phase is now Lightdash BI cutover work (GTD Dash v2.0 repoint to v3 marts).
+
+---
+
+#### What Happened and Why It Changed
+
+Initial parity checks flagged large diffs on completed metrics (`status=2`, `completed_time`, total rows). That looked like a blocker if we used strict v1-v3 historical equality as the gate.
+
+After discussing pipeline behavior with the user, we confirmed this is expected: v3 completion facts are captured from checkpoint deltas only since poller start, not as a full historical backfill. That reframed the gate from "historical equality" to "forward correctness + operational reliability," which matches project priority A (freshness) and de-risks migration from snapshot inference.
+
+---
+
+#### Raw Evidence
+
+Parity evidence from dev marts:
+
+```text
+folders_total_rows: legacy=10, v3=10
+tasks_status_0_open: legacy=585, v3=582
+tasks_due_next_35d_open: legacy=40, v3=39
+
+tasks_status_2_done: legacy=1623, v3=0
+tasks_completed_last_30d: legacy=169, v3=0
+tasks_total_rows: legacy=2208, v3=582
+```
+
+Upstream shape confirms no historical done rows currently in raw v3 extract:
+
+```text
+ticktick_raw.tasks_v3 grouped by status/deleted:
+status=0, deleted=0, row_count=582
+```
+
+Project closed semantics before patch showed null-open ambiguity:
+
+```text
+dim_projects_v3 closed distribution (pre-patch):
+closed=true: 340
+closed=NULL: 66
+```
+
+---
+
+#### What We Got Wrong (Explicit Pivot)
+
+- **Old framing (too strict for this stage):** treat historical completed-task parity as mandatory cutover gate.
+- **New framing (accepted):** historical completion gap is expected with checkpoint-only capture start; gate focuses on forward correctness and core planning metrics.
+
+This is a migration-stage scope correction, not a data-contract regression.
+
+---
+
+#### Decision Record
+
+**Decision A (chosen): accept completion-gap metrics for now.**
+- Why: expected by checkpoint-start semantics and still materially better than v1 snapshot inference risk profile.
+
+**Decision B (chosen): keep `/api/v3/batch/check/{checkpoint}` as top-priority extraction path.**
+- Why: low call overhead and stable with current spoofing approach.
+
+**Decision C (chosen): do not pursue v2 completed endpoint fan-out for backfill now.**
+- Why: requires iterating 400+ projects and increases spoofing/operational risk.
+
+Rejected alternative:
+- **Backfill immediately via `/api/v2/project/{ids}/completed` loops:** rejected due high request fan-out and complexity under current auth/spoof constraints.
+
+---
+
+#### Implementation Patch Shipped
+
+We normalized project closed semantics in staging:
+- `stg__ticktick_v3__projects` now computes `closed` as `coalesce(closed, false)`.
+- `completed_time` now keys off `coalesce(closed, false)` to avoid null-state ambiguity in `dim_projects_v3`.
+
+---
+
+#### Lightdash BI Start Point
+
+Current production dashboard is still legacy-model bound (`gtd dash v1.0` using `fct_tasks` explores). Phase 4 begins now: clone to GTD Dash v2.0 and repoint TickTick chart explores to v3 marts while preserving user-facing weekly-review flows.
+
+```mermaid
+graph TD
+    A[v3 checkpoint poller] --> B[ticktick_raw tasks_v3 projects_v3 groups_v3]
+    B --> C[dbt v3 staging and marts]
+    C --> D[fct_tasks_v3 dim_projects_v3 dim_folders_v3]
+    D --> E[Lightdash GTD Dash v2.0]
+    F[legacy GTD Dash v1.0] --> G[bake period parallel run]
+    E --> G
+```
+
+---
+
+#### Citations
+
+- `models/marts/fct_tasks_v3.sql:3` - v3 fact model points to `stg__ticktick_v3__tasks`
+- `models/marts/dim_projects_v3.sql:3` - v3 project dimension points to `stg__ticktick_v3__projects`
+- `models/marts/dim_folders_v3.sql:3` - v3 folder dimension points to `stg__ticktick_v3__project_folder`
+- `models/marts/marts.yml:1282` - `fct_tasks_v3` model entry
+- `models/marts/marts.yml:1284` - `dim_projects_v3` model entry
+- `models/marts/marts.yml:1286` - `dim_folders_v3` model entry
+- `models/staging/ticktick/stg__ticktick_v3__projects.sql:5` - `coalesce(closed, false)` applied for completion derivation
+- `models/staging/ticktick/stg__ticktick_v3__projects.sql:8` - `coalesce(closed, false) as closed`
+- `lightdash/dashboards/gtd-dash-v1-0.yml:1` - legacy dashboard baseline name
+- `lightdash/charts/what-did-you-do.yml:3` - chart currently bound to legacy `fct_tasks`
+- `lightdash/charts/tasks-lookahead-1.yml:3` - chart currently bound to legacy `fct_tasks`
+- `https://api.ticktick.com/api/v2/project/{ids}/completed` (user web-inspector observation, 2026-02-20) - candidate endpoint explicitly deferred
+
+---
+
+📦 STATELESS HANDOFF
+**Layer 1 — Local Context:**
+→ Last action: LOG-021 accepted forward-parity interpretation, patched NULL-closed semantics, and moved execution to Lightdash BI cutover
+→ Dependency chain: LOG-021 ← LOG-020 ← LOG-019 ← LOG-017 ← LOG-006
+→ Next action: build GTD Dash v2.0 by cloning legacy dashboard and repointing TickTick charts from legacy explores to v3 marts
+
+**Layer 2 — Global Context:**
+→ Architecture: v3 poller + Parquet + external tables + parallel dbt v3 marts are live in dev; legacy dashboard remains active
+→ Patterns: parallel-run migration with explicit assumptions, rollback-safe coexistence, and user-approved scope boundaries
+
+**Fork paths:**
+- Continue execution → Lightdash dashboard/charts-as-code migration for GTD Dash v2.0
+- Investigate data contract → audit checkpoint lanes for completion/tag variance while keeping BI track moving
+
+### [LOG-022] - [EXEC] - GTD Dash v2.0 v3 variant reconciled and marked complete (4 tiles + prod-parity filters) - Task: TASK-005
+**Timestamp:** 2026-02-20 19:20
+**Depends On:** LOG-021 (BI migration kickoff + parity framing), LOG-020 (v3 marts shipped)
+
+---
+
+#### Executive Summary
+
+Fork reconciliation confirms the v3 dashboard variant is already implemented in repo and matches the requested scope:
+- Four requested tiles are wired to v3 chart slugs.
+- All four charts are bound to `fct_tasks_v3`.
+- Global filters preserve prod logic while targeting v3 fields (`status != 2` and lookahead window), including intentional exclusion of the "what did you do" tile from dashboard-level filters.
+
+This closes the requested dashboard replication checkpoint for dev preview.
+
+---
+
+#### Reconciliation Walkthrough
+
+The active branch already contained the v3 wiring from the fork, so no additional dashboard patch was needed.
+
+Validated artifacts:
+1. `lightdash/dashboards/gtd-dash-v2-0.yml` now references:
+   - `tasks-lookahead-v3`
+   - `tasks-drill-down-by-grain-v3`
+   - `distribution-by-parent-dimension-v3`
+   - `what-did-you-do-v3`
+2. Dashboard global filters are v3-scoped:
+   - lookahead date filter on `dim_date_spine_date_day`
+   - status filter on `fct_tasks_v3_status` with `notEquals 2`
+3. Each `*-v3` chart file uses `tableName: fct_tasks_v3`.
+
+---
+
+#### Raw Evidence
+
+```yaml
+# dashboard tile wiring
+chartSlug: tasks-lookahead-v3
+chartSlug: tasks-drill-down-by-grain-v3
+chartSlug: distribution-by-parent-dimension-v3
+chartSlug: what-did-you-do-v3
+
+# dashboard filter wiring
+fieldId: dim_date_spine_date_day
+operator: inTheNext
+
+fieldId: fct_tasks_v3_status
+operator: notEquals
+```
+
+```yaml
+# chart explore/model binding
+tableName: fct_tasks_v3
+```
+
+---
+
+#### What We Got Wrong (Pivot)
+
+- **Old assumption during reconciliation start:** v3 dashboard wiring might still be missing in this branch.
+- **Corrected reality after file-level checks:** v3 slugs and filter targeting were already present from the fork; task here is formal reconciliation + execution logging.
+
+---
+
+#### Decision Record
+
+**Chosen path:** mark Phase-4 dashboard replication milestone complete in execution log.
+- Why: implementation evidence exists and matches requested scope.
+
+**Rejected path A:** re-edit dashboard file despite matching state.
+- Why not: unnecessary churn, risk of accidental drift.
+
+**Rejected path B:** postpone closure until data parity in dev preview.
+- Why not: request was skeleton/structure replication; data sparsity is already acknowledged and out of scope for this checkpoint.
+
+---
+
+#### System Interaction Map
+
+```mermaid
+graph TD
+    A[gtd-dash-v2-0 dashboard] --> B[tasks-lookahead-v3]
+    A --> C[tasks-drill-down-by-grain-v3]
+    A --> D[distribution-by-parent-dimension-v3]
+    A --> E[what-did-you-do-v3]
+    B --> F[fct_tasks_v3]
+    C --> F
+    D --> F
+    E --> F
+    A --> G[global filter inTheNext dim_date_spine_date_day]
+    A --> H[global filter notEquals fct_tasks_v3_status]
+```
+
+---
+
+#### Citations
+
+- `lightdash/dashboards/gtd-dash-v2-0.yml:14` - tile 1 uses `tasks-lookahead-v3`
+- `lightdash/dashboards/gtd-dash-v2-0.yml:26` - tile 2 uses `tasks-drill-down-by-grain-v3`
+- `lightdash/dashboards/gtd-dash-v2-0.yml:38` - tile 3 uses `distribution-by-parent-dimension-v3`
+- `lightdash/dashboards/gtd-dash-v2-0.yml:50` - tile 4 uses `what-did-you-do-v3`
+- `lightdash/dashboards/gtd-dash-v2-0.yml:58` - lookahead filter target `dim_date_spine_date_day`
+- `lightdash/dashboards/gtd-dash-v2-0.yml:74` - status filter target `fct_tasks_v3_status`
+- `lightdash/dashboards/gtd-dash-v2-0.yml:97` - dashboard slug `gtd-dash-v2-0`
+- `lightdash/charts/tasks-lookahead-v3.yml:3` - `tableName: fct_tasks_v3`
+- `lightdash/charts/tasks-drill-down-by-grain-v3.yml:3` - `tableName: fct_tasks_v3`
+- `lightdash/charts/distribution-by-parent-dimension-v3.yml:3` - `tableName: fct_tasks_v3`
+- `lightdash/charts/what-did-you-do-v3.yml:3` - `tableName: fct_tasks_v3`
+- `lightdash/dashboards/gtd-dash-v1-0.yml:190` - prod baseline includes lookahead filter target
+- `lightdash/dashboards/gtd-dash-v1-0.yml:216` - prod baseline includes status filter target
+
+---
+
+📦 STATELESS HANDOFF
+**Layer 1 — Local Context:**
+→ Last action: LOG-022 reconciled fork state and marked v3 dashboard replication done for requested 4-tile scope
+→ Dependency chain: LOG-022 ← LOG-021 ← LOG-020 ← LOG-019
+→ Next action: run preview QA pass (tile render, drill links, filter behavior, row-level sanity) and decide cutover window from v1.0 to v2.0
+
+**Layer 2 — Global Context:**
+→ Architecture: Lightdash dashboard-as-code now points GTD v2 tiles to v3 charts backed by `fct_tasks_v3`
+→ Patterns: migration remains rollback-safe via side-by-side v1.0 and v2.0 dashboards with parity checks
+
+**Fork paths:**
+- Continue execution → validate in dev preview and promote dashboard/charts to prod project
+- Pivot to hardening → add smoke checklist for filter-to-tile target correctness and broken-link checks

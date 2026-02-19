@@ -432,3 +432,171 @@ models:
         config:
           meta: {}
           tags: []
+
+  - name: base__ticktick_v3__tasks
+    description: >-
+      v3 base task replica with strict typing plus legacy-compatible fields extracted from raw_json
+    columns:
+      - name: task_id
+        data_type: string
+        description: Task identifier
+      - name: account_id
+        data_type: string
+        description: TickTick account identifier
+      - name: project_id
+        data_type: string
+        description: Project identifier
+      - name: sort_order
+        data_type: int64
+        description: Task ordering value from v3 payload
+      - name: title
+        data_type: string
+        description: Task title
+      - name: content
+        data_type: string
+        description: Task note or description body
+      - name: timezone
+        data_type: string
+        description: IANA timezone parsed from raw_json
+      - name: is_allday
+        data_type: boolean
+        description: All-day flag parsed from raw_json
+      - name: priority
+        data_type: int64
+        description: Task priority value
+      - name: status
+        data_type: int64
+        description: Task status code
+      - name: deleted
+        data_type: int64
+        description: Soft-delete marker from replica
+      - name: column_id
+        data_type: string
+        description: TickTick column identifier
+      - name: etag
+        data_type: string
+        description: ETag for optimistic concurrency
+      - name: kind
+        data_type: string
+        description: Task kind
+      - name: repeat_flag
+        data_type: string
+        description: Repeat rule from raw_json
+      - name: start_date
+        data_type: datetime
+        description: Start date normalized to DBT timezone
+      - name: due_date
+        data_type: datetime
+        description: Due date normalized to DBT timezone
+      - name: _completed_time
+        data_type: datetime
+        description: Completion timestamp normalized to DBT timezone
+      - name: completed_user_id
+        data_type: string
+        description: User ID that completed the task
+      - name: created_time
+        data_type: datetime
+        description: Creation timestamp normalized to DBT timezone
+      - name: modified_time
+        data_type: datetime
+        description: Last modified timestamp normalized to DBT timezone
+      - name: updated_at
+        data_type: datetime
+        description: Replica update timestamp normalized to DBT timezone
+      - name: parent_id
+        data_type: string
+        description: Parent task identifier
+      - name: tags
+        data_type: array<string>
+        description: Tag list parsed from raw_json
+      - name: childids
+        data_type: array<string>
+        description: Child task identifiers parsed from raw_json
+      - name: reminders
+        data_type: array<string>
+        description: Reminder values parsed from raw_json
+      - name: raw_json
+        data_type: string
+        description: Original v3 payload for forward-compatible extraction
+
+  - name: base__ticktick_v3__projects
+    description: >-
+      v3 base project replica with typed fields and legacy compatibility fields extracted from raw_json
+    columns:
+      - name: project_id
+        data_type: string
+        description: Project identifier
+      - name: account_id
+        data_type: string
+        description: TickTick account identifier
+      - name: project_name
+        data_type: string
+        description: Project name
+      - name: sort_order
+        data_type: int64
+        description: Project ordering value
+      - name: group_id
+        data_type: string
+        description: Group identifier
+      - name: kind
+        data_type: string
+        description: Project kind
+      - name: color
+        data_type: string
+        description: Project color extracted from raw_json
+      - name: view_mode
+        data_type: string
+        description: Project view mode
+      - name: permission
+        data_type: string
+        description: Project permission extracted from raw_json
+      - name: closed
+        data_type: boolean
+        description: Project closed state
+      - name: etag
+        data_type: string
+        description: ETag for optimistic concurrency
+      - name: modified_time
+        data_type: datetime
+        description: Last modified timestamp normalized to DBT timezone
+      - name: updated_at
+        data_type: datetime
+        description: Replica update timestamp normalized to DBT timezone
+      - name: raw_json
+        data_type: string
+        description: Original v3 payload for forward-compatible extraction
+
+  - name: base__ticktick_v3__groups
+    description: >-
+      v3 base project-group replica used for folder-level context in downstream v3 staging
+    columns:
+      - name: group_id
+        data_type: string
+        description: Group identifier
+      - name: account_id
+        data_type: string
+        description: TickTick account identifier
+      - name: group_name
+        data_type: string
+        description: Group name
+      - name: deleted
+        data_type: boolean
+        description: Group deleted state
+      - name: sort_order
+        data_type: int64
+        description: Group ordering value
+      - name: sort_type
+        data_type: string
+        description: Group sort type
+      - name: view_mode
+        data_type: string
+        description: Group view mode extracted from raw_json
+      - name: etag
+        data_type: string
+        description: ETag for optimistic concurrency
+      - name: updated_at
+        data_type: datetime
+        description: Replica update timestamp normalized to DBT timezone
+      - name: raw_json
+        data_type: string
+        description: Original v3 payload for forward-compatible extraction

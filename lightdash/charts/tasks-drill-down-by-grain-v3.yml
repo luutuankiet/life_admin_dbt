@@ -1,0 +1,164 @@
+name: drill down tasks by parent grain dimension v3
+description: ""
+tableName: fct_tasks_v3
+updatedAt: "2026-02-20T00:00:00.000Z"
+metricQuery:
+  exploreName: fct_tasks_v3
+  dimensions:
+    - fct_tasks_v3_due_date_day_of_week_name
+    - fct_tasks_v3_due_date_month_num
+    - fct_tasks_v3_due_date_day_of_month_num
+    - fct_tasks_v3_parent_dimension_grain
+    - fct_tasks_v3_due_date_day
+    - dim_projects_v3_project_id
+    - fct_tasks_v3_dimension_grain
+    - fct_tasks_v3_dynamic_parent_grain_url
+    - fct_tasks_v3_dynamic_grain_url
+  metrics: []
+  filters:
+    dimensions:
+      id: 23f1c427-7f04-49ad-91b4-7c75b0646688
+      and:
+        - id: ef7226a9-3911-444f-b697-7d35d769266b
+          target:
+            fieldId: fct_tasks_v3_due_date_day
+          values:
+            - 1
+          operator: inTheNext
+          required: false
+          settings:
+            completed: false
+            unitOfTime: quarters
+  sorts:
+    - fieldId: fct_tasks_v3_due_date_day
+      descending: false
+  limit: 500
+  metricOverrides: {}
+  tableCalculations:
+    - name: concat_date
+      displayName: concat_date
+      sql: >-
+        ${fct_tasks_v3.due_date_month_num} || '/' ||
+        ${fct_tasks_v3.due_date_day_of_month_num}
+      format:
+        type: default
+        separator: default
+      type: string
+  additionalMetrics: []
+  customDimensions:
+    - id: cnt
+      name: cnt
+      type: sql
+      table: fct_tasks_v3
+      sql: count(${fct_tasks_v3.task_id})
+      dimensionType: number
+chartConfig:
+  type: table
+  config:
+    columns:
+      concat_date:
+        name: date
+        frozen: false
+      fct_tasks_v3_due_date_day:
+        name: ""
+        visible: false
+      dim_projects_v3_project_id:
+        visible: false
+      fct_tasks_v3_dynamic_grain_url:
+        visible: false
+      fct_tasks_v3_due_date_month_num:
+        visible: false
+      fct_tasks_v3_dynamic_parent_grain_url:
+        visible: false
+      fct_tasks_v3_due_date_day_of_month_num:
+        name: ""
+        visible: false
+      fct_tasks_v3_due_date_day_of_week_name:
+        name: day
+        frozen: true
+        visible: true
+      fct_tasks_v3_dimension_grain:
+        name: grain
+      fct_tasks_v3_parent_dimension_grain:
+        name: parent
+        frozen: true
+    metricsAsRows: false
+    showSubtotals: false
+    hideRowNumbers: true
+    showTableNames: false
+    showResultsTotal: false
+    showRowCalculation: false
+    showColumnCalculation: false
+    conditionalFormattings:
+      - color: "#5470c6"
+        rules:
+          - id: 3bc7d8aa-15bb-40a9-b320-ed310443e41c
+            values:
+              - Monday
+            operator: equals
+        target:
+          fieldId: fct_tasks_v3_due_date_day_of_week_name
+      - color: "#fc8452"
+        rules:
+          - id: a850c98d-b6e5-42b3-8f3e-a0afa454ace0
+            values:
+              - Tuesday
+            operator: equals
+        target:
+          fieldId: fct_tasks_v3_due_date_day_of_week_name
+      - color: "#91cc75"
+        rules:
+          - id: 95075ce6-9dc9-4c15-aef3-824a8a65766d
+            values:
+              - Wednesday
+            operator: equals
+        target:
+          fieldId: fct_tasks_v3_due_date_day_of_week_name
+      - color: "#fac858"
+        rules:
+          - id: 599f5878-0cc9-4f73-b64f-0b6400b37876
+            values:
+              - Thursday
+            operator: equals
+        target:
+          fieldId: fct_tasks_v3_due_date_day_of_week_name
+      - color: "#ee6666"
+        rules:
+          - id: f59ca058-5458-4b6b-b936-45813231d39d
+            values:
+              - Friday
+            operator: equals
+        target:
+          fieldId: fct_tasks_v3_due_date_day_of_week_name
+      - color: "#3ba272"
+        rules:
+          - id: 7c994e28-e405-4a5d-a253-9355023efafe
+            values:
+              - Saturday
+            operator: equals
+        target:
+          fieldId: fct_tasks_v3_due_date_day_of_week_name
+      - color: "#9a60b4"
+        rules:
+          - id: 5a275fd4-3bfb-43eb-836b-f123ca844d4d
+            values:
+              - Sunday
+            operator: equals
+        target:
+          fieldId: fct_tasks_v3_due_date_day_of_week_name
+slug: tasks-drill-down-by-grain-v3
+tableConfig:
+  columnOrder:
+    - fct_tasks_v3_due_date_day_of_week_name
+    - concat_date
+    - fct_tasks_v3_due_date_month_num
+    - fct_tasks_v3_due_date_day_of_month_num
+    - fct_tasks_v3_parent_dimension_grain
+    - fct_tasks_v3_due_date_day
+    - dim_projects_v3_project_id
+    - fct_tasks_v3_dimension_grain
+    - fct_tasks_v3_dynamic_parent_grain_url
+    - fct_tasks_v3_dynamic_grain_url
+spaceSlug: shared
+version: 1
+downloadedAt: "2026-02-20T00:00:00.000Z"
