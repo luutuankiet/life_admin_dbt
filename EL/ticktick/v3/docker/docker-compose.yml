@@ -1,0 +1,38 @@
+services:
+  ticktick-v3:
+    image: ${IMAGE_NAME:-ghcr.io/your-org/ticktick-v3-poller:latest}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    restart: unless-stopped
+    environment:
+      TICKTICK_V3_DB_PATH: /app/data/ticktick_replica.db
+      TICKTICK_V3_RAW_ARCHIVE_DIR: /app/data/raw_batches
+      TICKTICK_V3_RAW_RETENTION_HOURS: ${TICKTICK_V3_RAW_RETENTION_HOURS:-24}
+      TICKTICK_V3_POLL_INTERVAL: ${TICKTICK_V3_POLL_INTERVAL:-30}
+      TICKTICK_V3_AUTH_PAUSE_SECONDS: ${TICKTICK_V3_AUTH_PAUSE_SECONDS:-300}
+      TICKTICK_V3_ARCHIVE_RAW: ${TICKTICK_V3_ARCHIVE_RAW:-1}
+      # GCS emitter — set TICKTICK_V3_GCS_EMIT_ENABLED=1 to activate
+      TICKTICK_V3_GCS_EMIT_ENABLED: ${TICKTICK_V3_GCS_EMIT_ENABLED:-0}
+      GCS_RAW_BUCKET: ${GCS_RAW_BUCKET:-}
+      GCS_KEY: ${GCS_KEY:-}
+      GCS_SECRET: ${GCS_SECRET:-}
+      TICKTICK_V3_GCS_PREFIX: ${TICKTICK_V3_GCS_PREFIX:-ticktick/v3}
+    volumes:
+      - ../data:/app/data
+      - ../config:/app/config
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${TRAEFIK_ROUTER:-ticktick-v3}.rule=Host(`${TRAEFIK_HOST}`)
+      - traefik.http.routers.${TRAEFIK_ROUTER:-ticktick-v3}.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}
+      - traefik.http.routers.${TRAEFIK_ROUTER:-ticktick-v3}.tls=true
+      - traefik.http.routers.${TRAEFIK_ROUTER:-ticktick-v3}.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}
+      - traefik.http.services.${TRAEFIK_SERVICE:-ticktick-v3}.loadbalancer.server.port=8000
+      - traefik.http.routers.${TRAEFIK_ROUTER:-ticktick-v3}.service=${TRAEFIK_SERVICE:-ticktick-v3}
+    ports:
+      - 8001:8000
+
+# networks:
+#   default:
+#     name: ${TRAEFIK_NETWORK:-traefik-public}
+#     external: true

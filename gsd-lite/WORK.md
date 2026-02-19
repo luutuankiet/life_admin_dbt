@@ -5,11 +5,11 @@
 ## 1. Current Understanding (Read First)
 
 <current_mode>
-planning
+discussion
 </current_mode>
 
 <active_task>
-- Finalize implementation plan for v3 poller + operator webapp (SQLite lease, SQLModel, Pydantic, Traefik)
+- Post-deploy data integration planning: define path from v3 SQLite replica on VM/container to dbt models
 </active_task>
 
 <parked_tasks>
@@ -23,22 +23,24 @@ Personal data platform for GTD-driven life decisions. The goal is "perceptual re
 
 <decisions>
 - DECISION-001: Priority order is A (data freshness) > B (query latency) > D (architecture consolidation).
-- DECISION-002: Snapshot-based completion tracking is mandatory (API data loss).
+- DECISION-002: Snapshot-based completion tracking is mandatory (API data loss). [SUPERSEDED by DECISION-009 — v3 API includes completion natively]
 - DECISION-003: No webhooks exist; polling is the only path forward.
 - DECISION-004: Canonical extraction path is unofficial browser-session sync with checkpoint deltas (`/api/v3/batch/check/{checkPoint}`) using spoofed user-agent and `t` cookie.
 - DECISION-005: LOG-003, LOG-004, LOG-005 are deprecated as conflicting exploratory drafts; LOG-006 is authoritative.
 - DECISION-006: Phase-1 merge contract prioritizes entity state (`syncTaskBean`, `projectProfiles`, `projectGroups`); `sync*Order*` is deferred from normalized replica.
 - DECISION-007: Concurrency control will use single-writer lease on SQLite; stack standardizes on FastAPI + SQLModel + Pydantic.
 - DECISION-008: Orchestration remains lightweight now; Dagster deferred until operational complexity justifies it.
+- DECISION-009: v3 API delivers completion as first-class fact (status=2 + completedTime in update[] lane). SCD2 snapshot workaround is fully obsolete. taskreplica retains completed tasks.
+- DECISION-010: SQLite→GCS bridge is DuckDB COPY TO (httpfs + HMAC). Fires in-process after every poll cycle where state_updated=True. Emitter errors are swallowed — poller loop must not die from GCS flakiness.
+- DECISION-011: Legacy dual-target dbt pipeline (tmp/branches/incremental_run_gha) is dead code once v3 Parquet path is validated end-to-end.
 </decisions>
 
 <blockers>
-- ~~Need targeted capture set (6-8 actions) to increase confidence on payload variance coverage.~~ RESOLVED: LOG-014
-- Remaining capture gaps (low-medium risk): tag add/remove, project hard delete (disappear semantics suspected but unconfirmed)
+- Remaining capture gap (low-medium risk): tag add/remove lane variance still uncaptured.
 </blockers>
 
 <next_action>
-Proceed to schema and endpoint scaffolding per LOG-013 plan — parser rules fully confirmed in LOG-014. Optionally capture tag add/remove + project hard delete to close remaining gaps.
+Deploy updated v3 container to VM (with GCS emitter enabled), then wire BQ external tables + dbt source YAML to consume ticktick/v3/{tasks,projects,groups}.parquet.
 </next_action>
 
 ---
@@ -53,6 +55,9 @@ Proceed to schema and endpoint scaffolding per LOG-013 plan — parser rules ful
 | LOG-012 | BREAKTHROUGH | TASK-002 | Learning detour resolved: server-owned cursor model + entity-first merge scope finalized |
 | LOG-013 | PLAN | TASK-003 | Lightweight FastAPI operator control plane and poller plan (SQLite lease, SQLModel/Pydantic, Traefik) |
 | LOG-014 | DISCOVERY | TASK-003 | Targeted capture matrix (11 actions): parser rules confirmed — task upsert, delete lane, `closed:true` archive, group disappear-diff semantics |
+| LOG-015 | EXEC | TASK-003 | v3 poller + Pass A operator webapp implemented (disk replica, import-curl UI, status/control endpoints) |
+| LOG-016 | EXEC | TASK-003 | Bounded raw retention + isolated v3 packaging shipped and image published for VM deploy |
+| LOG-017 | DECISION+EXEC | TASK-004 | GCS Parquet emitter shipped; tz-naive lease bug fixed; SCD2 workaround declared obsolete; DuckDB httpfs path validated end-to-end |
 
 ---
 
@@ -2499,3 +2504,556 @@ jq '{cp:.checkPoint, empty:.syncTaskBean.empty, updates:(.syncTaskBean.update|le
 **Fork paths:**
 - Continue to scaffolding → SQLModel tables + FastAPI endpoints from LOG-013 plan, parser rules from LOG-014
 - Discuss LOOP-001 → hierarchy cascade (what API emits for child tasks/projects when parent deleted)
+
+### [LOG-015] - [EXEC] - Implemented v3 disk replica poller and Pass A operator webapp for no-SSH operations - Task: TASK-003
+**Timestamp:** 2026-02-19 15:40
+**Depends On:** LOG-014 (parser and merge semantics locked), LOG-013 (control-plane implementation plan)
+
+---
+
+#### Executive Summary
+
+Executed the implementation plan end-to-end for TASK-003:
+- Built a working TickTick v3 poller that persists replica state to SQLite on disk.
+- Implemented Pass A web operator app so day-to-day operations no longer require SSH.
+- Confirmed by operator (user) that spoofed browser credentials flow works in practice.
+
+Current result is operationally useful now, with one known hardening gap: raw payload archive retention is still unbounded and must be addressed next.
+
+---
+
+#### What Changed and Why
+
+We moved from planning artifacts into executable components to close the reliability loop:
+1. **Schema and contracts finalized in code** so model ownership is clear and maintainable.
+2. **Poller merge semantics implemented exactly from LOG-014**:
+   - task upsert from `syncTaskBean.update[]`
+   - task delete from `syncTaskBean.delete[]`
+   - full-replace for `projectProfiles` and `projectGroups` when non-null
+3. **Checkpoint-last durability implemented** so checkpoint advances only after state writes.
+4. **Pass A webapp shipped** for profile import, run controls, and status visibility behind Traefik.
+
+---
+
+#### Correction and Pivot Notes
+
+What we corrected during execution:
+- **Old state:** CLI-only operation path required filesystem/SSH for profile import and operations.
+- **New state:** Webapp now supports paste-curl profile activation and runtime control over HTTPS route.
+
+What remains intentionally deferred:
+- Archive retention policy
+- Webapp auth hardening pass
+- Docker packaging and deployment manifests
+
+---
+
+#### Step-by-Step Execution Walkthrough
+
+1. Added runtime dependencies for control-plane stack (`fastapi`, `uvicorn`) and schema stack (`sqlmodel`, `pydantic`, `requests`).
+2. Created `EL/ticktick/v3/poller` module layout with explicit boundaries:
+   - `models.py` for SQLModel tables
+   - `schemas.py` for Pydantic DTOs
+   - `repository.py` for persistence logic
+   - `service.py` for merge/checkpoint orchestration
+   - `auth.py` for curl header parsing
+   - `client.py` for TickTick batch check client
+3. Implemented CLI entrypoints for init, profile import, run once, loop run, and web serve.
+4. Added FastAPI operator webapp with minimal HTML and JSON API endpoints:
+   - `/profiles/import-curl`
+   - `/status`
+   - `/cycles`
+   - `/poll/run-once`
+   - `/poll/start`
+   - `/poll/stop`
+5. Added status observability helpers (row counts, lease inspection, cycle listing).
+6. Captured runbook in v3 README and kept project-level architecture pointer in root docs.
+7. User confirmed spoofed credential flow works, validating the execution path.
+
+---
+
+#### Raw Evidence Snippets
+
+Implemented run command used for Traefik target process:
+```bash
+python -m EL.ticktick.v3.poller.main serve-webapp --host 0.0.0.0 --port 8000
+```
+
+Implemented status surface in web layer:
+```python
+@app.get("/status")
+def status(account_id: str = "default") -> dict:
+    return _build_status_payload(engine, account_id, loop_controller.status())
+```
+
+Implemented checkpoint update path in poller service:
+```python
+if state_updated:
+    repo.update_checkpoint_success(account_id, delta.checkPoint)
+```
+
+---
+
+#### Decision Record with Rejected Paths
+
+Chosen:
+- Keep lightweight local SQLite + FastAPI operator surface.
+- Preserve raw archive by default for replayability, then add bounded retention next.
+
+Rejected:
+- Immediate migration to heavier orchestrator.
+  - Rejected due to current scope and solo-maintenance overhead.
+- Delaying webapp until after Docker packaging.
+  - Rejected because no-SSH operator workflow is immediate value and unblocks safer daily operations.
+
+---
+
+#### Diagram - Pass A Operator and Poller Interaction
+
+```mermaid
+flowchart TD
+    A[Operator browser on HTTPS] --> B[FastAPI operator webapp]
+    B --> C[Import curl profile endpoint]
+    B --> D[Run controls and status endpoints]
+    C --> E[SQLite credentialprofile and checkpointstate]
+    D --> F[Poller service]
+    F --> G[TickTick batch check API]
+    F --> H[SQLite taskreplica projectreplica groupreplica]
+    F --> I[Raw payload archive on disk]
+```
+
+---
+
+#### Citations
+
+- `EL/ticktick/v3/poller/main.py` - CLI commands including `serve-webapp`
+- `EL/ticktick/v3/poller/webapp.py` - Pass A web endpoints and HTML operator page
+- `EL/ticktick/v3/poller/service.py` - merge execution and checkpoint update behavior
+- `EL/ticktick/v3/poller/repository.py` - lease handling, row counts, cycle history helpers
+- `EL/ticktick/v3/poller/models.py` - SQLModel schema ownership location
+- `EL/ticktick/v3/poller/schemas.py` - Pydantic schema ownership location
+- `EL/ticktick/v3/README.md` - operator runbook and structure explanation
+
+---
+
+📦 STATELESS HANDOFF
+**Layer 1 — Local Context:**
+→ Last action: LOG-015 completed TASK-003 implementation for disk replica poller + Pass A operator webapp and validated operator flow
+→ Dependency chain: LOG-015 ← LOG-014 ← LOG-013 ← LOG-012 ← LOG-010 ← LOG-006
+→ Next action: implement bounded raw archive retention policy, then package `EL/ticktick/v3` as Docker image
+
+**Layer 2 — Global Context:**
+→ Architecture: v3 extraction now has operational control plane via FastAPI and durable SQLite replica state; v1 remains production baseline
+→ Patterns: checkpoint-last durability, single-writer lease, task lane upsert-delete semantics, project/group full-replace semantics
+
+**Fork paths:**
+- Continue execution → retention policy implementation and containerization prep for Traefik
+- Discuss design options → retention strategy knobs and Docker image runtime contract
+
+### [LOG-016] - [EXEC] - Bounded raw retention + isolated v3 packaging shipped and image published for VM deploy - Task: TASK-003
+**Timestamp:** 2026-02-19 16:20
+**Depends On:** LOG-015 (v3 poller + operator webapp baseline), LOG-014 (merge semantics and capture scope)
+
+---
+
+#### What Happened
+
+Completed the hardening slice that was explicitly left as next action in LOG-015:
+1. Implemented bounded retention for raw payload archive with a 24-hour default window.
+2. Isolated v3 module packaging via module-local `pyproject.toml` to support future repo split.
+3. Added Docker + compose templates under `EL/ticktick/v3/docker/` for Traefik deployment.
+4. User confirmed live publish/deploy: `https://hub.docker.com/r/boyluu96/ticktick-v3-poller` and successful remote VM compose rollout.
+
+This closes the immediate ops blocker (unbounded archive growth) while keeping rollout lightweight for rapid deployment.
+
+---
+
+#### Why This Matters
+
+- Raw archive no longer grows forever on weak VM disks.
+- v3 runtime is now deployable as a standalone service contract (`ticktick-v3-poller` entrypoint).
+- Packaging boundary now mirrors intended future extraction into a separate repository.
+
+---
+
+#### Step-by-Step Execution Walkthrough
+
+1. Added retention knob in poller settings (`raw_retention_hours`, env-driven).
+2. Added runtime archive prune routine and invoked it immediately after payload archive write in each poll cycle.
+3. Switched v3 defaults to root-aware paths so monorepo and standalone packaging both work.
+4. Created module-local `pyproject.toml` with script entrypoint `ticktick-v3-poller`.
+5. Created docker assets (`Dockerfile`, compose, env template) with persistent `/app/data` mount and Traefik labels.
+6. Revised image build to use `uv` install flow for faster, cleaner image setup.
+7. User pushed image to Docker Hub and deployed on remote VM.
+
+---
+
+#### Raw Evidence
+
+Retention setting and env override:
+```python
+raw_retention_hours: int = Field(default=24, ge=1, le=720)
+raw_retention_hours=int(os.getenv("TICKTICK_V3_RAW_RETENTION_HOURS", "24"))
+```
+
+Retention prune execution in poll loop:
+```python
+self._archive_payload(account_id, delta.checkPoint, payload)
+self._prune_raw_archive()
+```
+
+Docker build path switched to uv:
+```dockerfile
+COPY --from=ghcr.io/astral-sh/uv:0.8.15 /uv /uvx /bin/
+RUN uv pip install --system .
+CMD ["ticktick-v3-poller", "serve-webapp", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+Traefik compose contract and runtime DB path:
+```yaml
+TICKTICK_V3_DB_PATH: /app/data/ticktick_replica.db
+- traefik.http.routers.${TRAEFIK_ROUTER:-ticktick-v3}.rule=Host(`${TRAEFIK_HOST}`)
+```
+
+Deployment target reported by operator:
+- `https://hub.docker.com/r/boyluu96/ticktick-v3-poller`
+
+---
+
+#### Decision Record and Rejected Paths
+
+Chosen path:
+- Time-bound retention (24h) with eager prune per cycle, plus minimal Docker packaging for immediate deploy.
+
+Rejected for now:
+- Multi-dimensional retention (time + size + count) and compression policies.
+  - Rejected to minimize deployment complexity under 20-minute rollout window.
+- Delaying containerization until additional hardening.
+  - Rejected because immediate VM deployment value outweighed non-critical enhancements.
+
+---
+
+#### Integration Topology After Deploy
+
+```mermaid
+graph TD
+    A[TickTick batch check API] --> B[v3 poller service]
+    B --> C[SQLite replica on VM<br/>/app/data/ticktick_replica.db]
+    B --> D[Raw archive with prune<br/>/app/data/raw_batches]
+    E[Operator browser via Traefik] --> F[FastAPI webapp]
+    F --> B
+    G[Next phase<br/>dbt ingestion bridge] --> C
+```
+
+---
+
+#### Citations
+
+- `EL/ticktick/v3/poller/config.py:9` - root resolution helper for monorepo/standalone operation
+- `EL/ticktick/v3/poller/config.py:33` - `raw_retention_hours` setting default and bound
+- `EL/ticktick/v3/poller/config.py:44` - env override `TICKTICK_V3_RAW_RETENTION_HOURS`
+- `EL/ticktick/v3/poller/service.py:29` - `_prune_raw_archive` implementation
+- `EL/ticktick/v3/poller/service.py:62` - archive write site
+- `EL/ticktick/v3/poller/service.py:63` - prune invocation in cycle flow
+- `EL/ticktick/v3/pyproject.toml` - isolated package metadata and script entrypoint
+- `EL/ticktick/v3/docker/Dockerfile:3` - uv binary source
+- `EL/ticktick/v3/docker/Dockerfile:15` - uv install command
+- `EL/ticktick/v3/docker/Dockerfile:21` - webapp runtime command
+- `EL/ticktick/v3/docker/docker-compose.yml:9` - runtime db path mount contract
+- `EL/ticktick/v3/docker/docker-compose.yml:19` - Traefik router host rule
+- `https://hub.docker.com/r/boyluu96/ticktick-v3-poller` (user-confirmed deploy target, 2026-02-19)
+
+---
+
+📦 STATELESS HANDOFF
+**Layer 1 — Local Context:**
+→ Last action: LOG-016 completed retention hardening and Docker deployment milestone for v3 poller
+→ Dependency chain: LOG-016 ← LOG-015 ← LOG-014 ← LOG-013 ← LOG-012 ← LOG-010 ← LOG-006
+→ Next action: decide and implement SQLite-to-dbt bridge from VM/container runtime data
+
+**Layer 2 — Global Context:**
+→ Architecture: v3 now runs as containerized FastAPI+poller service with persistent SQLite volume and bounded raw archive
+→ Patterns: keep checkpoint-last + single-writer lease semantics unchanged while adding minimal ops hardening
+
+**Fork paths:**
+- Continue execution → choose ingestion bridge design and implement first production path
+- Discuss architecture → compare batch export vs direct ingestion for dbt source contract
+
+---
+
+### [LOG-017] - [DECISION+EXEC] - GCS Parquet emitter shipped + tz-naive lease bug fixed + SCD2 obsolete - Task: TASK-004
+**Timestamp:** 2026-02-19 15:30
+**Depends On:** LOG-016 (v3 poller + Docker packaging baseline), LOG-015 (operator webapp + SQLite lease design)
+
+---
+
+#### Executive Summary
+
+Two separate problems solved in one session:
+
+1. **Bug:** SQLite datetime timezone mismatch crashed the poller when switching between container and host runtimes.
+2. **Feature:** DuckDB-based GCS Parquet emitter wired into the poller loop — replaces the legacy dual-target dbt dump pipeline entirely.
+
+Both are validated end-to-end (all 3 smoke test steps passed by user).
+
+---
+
+#### The Timezone Bug
+
+**Root cause:** Docker container wrote `lease_until` to SQLite as a tz-aware UTC datetime. When the host Python runtime read it back via SQLModel, SQLite returned a naive datetime (no `tzinfo`). The comparison `lease.lease_until <= now` then crashed with `TypeError: can't compare offset-naive and offset-aware datetimes` (`repository.py:91`).
+
+**Fix:** Added `ensure_utc()` to `models.py` — attaches UTC to any naive datetime coming from SQLite, passthrough if already tz-aware. Applied at the single comparison point.
+
+```python
+# models.py
+def ensure_utc(dt: datetime) -> datetime:
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt
+
+# repository.py:91 — before
+if lease.owner_id == owner_id or lease.lease_until <= now:
+
+# repository.py:91 — after
+if lease.owner_id == owner_id or ensure_utc(lease.lease_until) <= now:
+```
+
+**Files changed:** `poller/models.py`, `poller/repository.py`
+
+---
+
+#### Why SCD2 Is Obsolete
+
+The legacy v1 pipeline (in `tmp/branches/incremental_run_gha/`) ran two dbt targets — `load_snapshot` then `dump_snapshot` — to detect task completions via SCD2 row disappearance. This was necessary because v1 does not return completed tasks or update the `status` field.
+
+**v3 API sends completion as a first-class update fact:**
+- Completed tasks arrive in `syncTaskBean.update[]` with `status=2` and `completedTime=<timestamp>`
+- They are NOT moved to `delete[]`
+- `taskreplica` retains them permanently (user-confirmed)
+- `repository.py:170` already writes `completed_time` from `completedTime` payload field
+
+The entire SCD2 workaround is dead code. `DECISION-002` is superseded by `DECISION-009`.
+
+---
+
+#### The Emitter Design
+
+**Architecture decision:** DuckDB `httpfs` extension reading SQLite via `ATTACH ... (TYPE SQLITE)` and writing directly to GCS via `COPY TO 's3://...' WITH (FORMAT PARQUET)`. GCS uses S3-compatible API with HMAC keys (`GCS_KEY` + `GCS_SECRET` from existing repo secrets).
+
+**Why DuckDB over alternatives:**
+- `sqlite-utils --nl | gsutil` — JSONL not typed, schema drift risk
+- `sqlite2parquet` (Rust CLI) — compiled binary dep, no GCS upload built-in
+- `pandas + pyarrow + google-cloud-storage` — 3 new deps for what DuckDB does in one call
+- DuckDB: already in the Python ecosystem, single dep, typed Parquet, native GCS write
+
+**GCS cost math:** ~2880 writes/day × 30 days = 86,400 Class A ops/month → ~$0.43/month. Well inside $5 budget.
+
+**Emitter contract — 3 files written per cycle with state changes:**
+
+| GCS path | Source table | Key columns |
+|---|---|---|
+| `ticktick/v3/tasks.parquet` | `taskreplica` | `task_id, status, completed_time, project_id` |
+| `ticktick/v3/projects.parquet` | `projectreplica` | `project_id, name, group_id, closed` |
+| `ticktick/v3/groups.parquet` | `groupreplica` | `group_id, name, deleted` |
+
+**Integration point:** `service.py:run_once()` — fires after `repo.finish_cycle_success()` when `state_updated=True`. Errors are caught and logged; poller loop continues regardless.
+
+```python
+# service.py — hook added
+if state_updated and self.settings.gcs_emit_enabled:
+    emit_replica_to_gcs(
+        db_path=self.settings.db_path,
+        gcs_bucket=self.settings.gcs_bucket,
+        gcs_key=self.settings.gcs_key,
+        gcs_secret=self.settings.gcs_secret,
+        account_id=account_id,
+        gcs_prefix=self.settings.gcs_prefix,
+    )
+```
+
+**Off by default** (`TICKTICK_V3_GCS_EMIT_ENABLED=0`) — operator must explicitly enable.
+
+---
+
+#### Files Changed
+
+| File | Change |
+|---|---|
+| `poller/models.py` | Added `ensure_utc()` |
+| `poller/repository.py` | Import + apply `ensure_utc()` at lease comparison |
+| `poller/emitter.py` | **New** — DuckDB SQLite→GCS Parquet emitter |
+| `poller/config.py` | 5 new GCS settings |
+| `pyproject.toml` | Added `duckdb>=1.2.0` |
+| `docker/docker-compose.yml` | 5 new GCS env vars |
+
+---
+
+#### Citations
+
+- `EL/ticktick/v3/poller/repository.py:91` — crash site (lease comparison)
+- `EL/ticktick/v3/poller/repository.py:170` — `completed_time` already written from v3 payload
+- `EL/ticktick/v3/poller/models.py:14` — `ensure_utc()` fix location
+- `EL/ticktick/v3/poller/emitter.py` — new emitter module
+- `EL/ticktick/v3/poller/service.py` — hook location post `finish_cycle_success`
+- `tmp/branches/incremental_run_gha/profiles.yml` — legacy dual-target pipeline (now dead code)
+
+---
+
+📦 STATELESS HANDOFF
+**Layer 1 — Local Context:**
+→ Last action: LOG-017 — tz bug fixed, GCS Parquet emitter shipped + smoke tested end-to-end
+→ Dependency chain: LOG-017 ← LOG-016 ← LOG-015 ← LOG-014 ← LOG-013 ← LOG-012 ← LOG-010 ← LOG-006
+→ Next action: deploy updated v3 image to VM with GCS emitter enabled, then wire BQ external tables + dbt source YAML
+
+**Layer 2 — Global Context:**
+→ Architecture: v3 poller → SQLite replica → DuckDB emitter (on state change) → GCS `ticktick/v3/{tasks,projects,groups}.parquet` → BQ external table → dbt views → Lightdash
+→ Patterns: emitter is fire-and-forget, never crashes poller; completion is a first-class fact (status=2 + completed_time); SCD2 workaround obsolete
+
+**Fork paths:**
+- Deploy to VM → rebuild image, push, pull on VM, set env vars, docker compose up
+- Wire dbt first → draft BQ external table DDL + dbt source YAML + base model stubs
+
+### [LOG-018] - [DECISION+EXEC] - Auth failure hardening shipped with Prometheus state metric, ntfy auth alert, and operator-tuned long pause policy - Task: TASK-003
+**Timestamp:** 2026-02-19 19:05
+**Depends On:** LOG-017 (containerized v3 runtime + post-cycle robustness expectations), LOG-016 (VM deploy packaging and ops contract)
+
+---
+
+#### Executive Summary
+
+We closed the failure mode discussed after deployment: invalid/expired TickTick cookie should not crash-loop the poller or silently stall replication.
+
+What shipped:
+1. Poller now classifies failures and enters `auth_required` on `401/403`.
+2. Web operator app now exposes `/metrics` with `ticktick_poller_state` gauge for Prometheus.
+3. Prometheus now scrapes the poller and fires `TicktickPollerAuthRequired` to ntfy.
+4. Operator policy was tuned in discussion: keep fast first detection (2m rule), keep ntfy reminder at 4h, and run auth retry pause at 1 day in runtime env.
+
+---
+
+#### What Changed and Why
+
+Before this change, `run_loop()` crashed on first HTTP auth error because `run_once()` re-raised and loop had no classifier or pause branch. With Docker `restart: unless-stopped`, that can create noisy restart behavior against dead credentials.
+
+We changed the loop model to "pause + signal":
+- classify `401/403` as `auth_required`
+- persist status in checkpoint state
+- expose state as metric
+- alert operator via ntfy
+
+This preserves checkpoint safety while reducing ban-risk patterns from repeated bad-auth retries.
+
+---
+
+#### Step-by-Step Execution Walkthrough
+
+1. Added `auth_pause_seconds` configuration and env support.
+2. Added `classify_poll_error()` in poller service and routed auth errors to `auth_required`.
+3. Added repository helper to set checkpoint status without mutating checkpoint cursor.
+4. Updated `run_loop()` to keep process alive and sleep by state (`auth_pause_seconds` for auth failures).
+5. Updated web loop controller state context (`running/degraded/auth_required/stopped`).
+6. Added `/metrics` endpoint returning Prometheus gauge `ticktick_poller_state`.
+7. Wired remote Prometheus scrape target `ticktick:8000`.
+8. Added remote alert rule `TicktickPollerAuthRequired` when gauge equals `2` for 2m.
+9. Kept Alertmanager repeat interval at 4h; operator selected 1d auth pause as runtime policy for low noise while away from keyboard.
+
+---
+
+#### Raw Evidence
+
+Service-side error classification and pause branch:
+```python
+# service.py
+if status_code in (401, 403):
+    return "auth_required"
+...
+sleep_seconds = self.settings.auth_pause_seconds if status == "auth_required" else self.settings.poll_interval_seconds
+```
+
+Metrics exposition contract:
+```python
+# webapp.py
+@app.get("/metrics", response_class=PlainTextResponse)
+def metrics(account_id: str = "default") -> str:
+    payload = _build_status_payload(engine, account_id, loop_controller.status())
+    return _render_metrics(payload)
+
+# HELP ticktick_poller_state Poller state gauge. 0=running 1=degraded 2=auth_required 3=stopped
+```
+
+Prometheus + alert rule on remote:
+```yaml
+# monitoring/prometheus/prometheus.yml
+- job_name: 'ticktick-poller'
+  metrics_path: /metrics
+  static_configs:
+    - targets: ['ticktick:8000']
+
+# monitoring/prometheus/alerts.yml
+- alert: TicktickPollerAuthRequired
+  expr: ticktick_poller_state{job="ticktick-poller"} == 2
+  for: 2m
+```
+
+---
+
+#### Decision Record and Rejected Paths
+
+Chosen path:
+- Keep first alert fast (`for: 2m`), keep reminder frequency at 4h, and increase auth retry pause to 1 day at runtime.
+
+Rejected paths:
+- Keep 300s auth pause: rejected for this operator workflow because user may be away from PC and does not want repeated retries/noise.
+- Make global Alertmanager repeat 24h: rejected for now to avoid weakening reminders for non-TickTick incidents.
+- Implement full manual-resume-only hard pause in code: deferred; 1-day pause policy is sufficient immediate guardrail.
+
+---
+
+#### Integration Flow After Hardening
+
+```mermaid
+graph TD
+    A[TickTick API] --> B[v3 poller run_once]
+    B --> C{Error classifier}
+    C -->|401 or 403| D[auth_required state]
+    C -->|ok| E[running state]
+    D --> F[checkpoint status update]
+    D --> G[metrics endpoint]
+    G --> H[Prometheus scrape ticktick-poller]
+    H --> I[Alert rule TicktickPollerAuthRequired]
+    I --> J[Alertmanager]
+    J --> K[ntfy topic ken_hetzner]
+```
+
+---
+
+#### Citations
+
+- `EL/ticktick/v3/poller/config.py:32` - `auth_pause_seconds` setting bounds/default
+- `EL/ticktick/v3/poller/config.py:51` - env mapping `TICKTICK_V3_AUTH_PAUSE_SECONDS`
+- `EL/ticktick/v3/poller/service.py:24` - `classify_poll_error()`
+- `EL/ticktick/v3/poller/service.py:167` - `set_checkpoint_status(...)` call in loop exception path
+- `EL/ticktick/v3/poller/service.py:173` - auth pause sleep branch
+- `EL/ticktick/v3/poller/repository.py:265` - checkpoint status setter
+- `EL/ticktick/v3/poller/webapp.py:202` - `/metrics` endpoint
+- `EL/ticktick/v3/poller/webapp.py:182` - metrics HELP text with state enum
+- `/Users/luutuankiet/dev/remote_hetzner/monitoring/prometheus/prometheus.yml:29` - `ticktick-poller` scrape job
+- `/Users/luutuankiet/dev/remote_hetzner/monitoring/prometheus/alerts.yml:43` - `TicktickPollerAuthRequired` rule
+- `/Users/luutuankiet/dev/remote_hetzner/monitoring/alertmanager/config.yml:8` - repeat interval remains `4h`
+- `/Users/luutuankiet/dev/remote_hetzner/ticktick-poll/docker-compose.yaml:11` - auth pause env knob exposed for runtime tuning
+
+---
+
+📦 STATELESS HANDOFF
+**Layer 1 — Local Context:**
+→ Last action: LOG-018 recorded auth-failure hardening and alerting integration; operator policy finalized as long auth pause + 4h reminders
+→ Dependency chain: LOG-018 ← LOG-017 ← LOG-016 ← LOG-015 ← LOG-014 ← LOG-013 ← LOG-012 ← LOG-010 ← LOG-006
+→ Next action: verify runtime env is set to `TICKTICK_V3_AUTH_PAUSE_SECONDS=86400`, redeploy poller image, run bad-cookie drill, then confirm alert fire + resolve
+
+**Layer 2 — Global Context:**
+→ Architecture: container poller now emits internal state metric consumed by Prometheus/Alertmanager/ntfy notification chain
+→ Patterns: checkpoint safety preserved; auth failures move to pause-and-alert model instead of crash-and-restart model
+
+**Fork paths:**
+- Continue execution → perform live drill with synthetic bad cookie and capture evidence in next EXEC log
+- Discuss tuning → add per-alert Alertmanager route if later you want 24h repeat for auth-only alerts

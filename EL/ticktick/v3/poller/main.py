@@ -56,6 +56,15 @@ def cmd_poll_loop(args) -> None:
     service.run_loop(account_id=args.account, owner_id=args.owner)
 
 
+def cmd_serve_webapp(args) -> None:
+    import uvicorn
+
+    from .webapp import create_app
+
+    app = create_app()
+    uvicorn.run(app, host=args.host, port=args.port)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="TickTick v3 poller")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -78,6 +87,11 @@ def build_parser() -> argparse.ArgumentParser:
     loop_cmd.add_argument("--owner", default="local")
     loop_cmd.add_argument("--interval", type=int, default=None, help="Override poll interval seconds")
     loop_cmd.set_defaults(func=cmd_poll_loop)
+
+    web_cmd = subparsers.add_parser("serve-webapp", help="Run local operator webapp")
+    web_cmd.add_argument("--host", default="0.0.0.0")
+    web_cmd.add_argument("--port", type=int, default=8000)
+    web_cmd.set_defaults(func=cmd_serve_webapp)
 
     return parser
 

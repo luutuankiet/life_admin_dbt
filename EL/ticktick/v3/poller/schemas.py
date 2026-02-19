@@ -39,3 +39,13 @@ class PollSummary(BaseModel):
     projects_count: int | None
     groups_count: int | None
     state_updated: bool
+
+class ImportCurlRequest(BaseModel):
+    curl_text: str
+    account_id: str = Field(default="default")
+
+
+class PollControlRequest(BaseModel):
+    account_id: str = Field(default="default")
+    owner_id: str = Field(default="web")
+    interval_seconds: int | None = Field(default=None, ge=5, le=3600)

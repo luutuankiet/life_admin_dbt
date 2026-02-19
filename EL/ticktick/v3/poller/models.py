@@ -10,6 +10,13 @@ def utcnow() -> datetime:
     return datetime.now(timezone.utc)
 
 
+def ensure_utc(dt: datetime) -> datetime:
+    """Attach UTC to a naive datetime coming back from SQLite, or passthrough if already tz-aware."""
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt
+
+
 def make_pk(account_id: str, source_id: str) -> str:
     return f"{account_id}:{source_id}"
 

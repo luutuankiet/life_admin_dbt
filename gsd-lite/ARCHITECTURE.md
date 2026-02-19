@@ -14,6 +14,8 @@ life_admin_dbt/
 │
 ├── EL/                          # Extract-Load scripts (main branch)
 │   ├── ticktick/fetch_ticktick.py
+│   ├── ticktick/v3/             # v3 replica poller + operator webapp
+│   │   └── README.md            # Module-local architecture and runbook
 │   └── todoist/fetch_todoist.py
 │
 ├── models/                      # dbt models (main branch - BQ views)
@@ -171,6 +173,7 @@ Lightdash doesn't support lookahead queries natively. Workaround:
 |------|-------------------|
 | **Run TickTick extraction** | GHA: `serverless_snapshot.yml` (dispatches to `incremental_run_gha`) |
 | **Run Todoist extraction** | GHA: `todoist_EL.yml` or `python EL/todoist/fetch_todoist.py` |
+| **Operate TickTick v3 poller** | `python -m EL.ticktick.v3.poller.main serve-webapp` or see `EL/ticktick/v3/README.md` |
 | **Build BQ models locally** | `dbt build --target dev` |
 | **Stage external tables** | `dbt run-operation stage_external_sources --target stage_raw` |
 | **Sync Lightdash charts** | GHA: `LD_write_back.yml` or `lightdash deploy` |

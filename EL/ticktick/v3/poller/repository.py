@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from datetime import datetime, timezone
 
+from sqlalchemy import func
 from sqlmodel import Session, delete, select
 
 from .models import (
@@ -13,6 +14,7 @@ from .models import (
     PollerLease,
     ProjectReplica,
     TaskReplica,
+    ensure_utc,
     make_pk,
 )
 from .schemas import CredentialProfileCreate
@@ -87,7 +89,7 @@ class ReplicaRepository:
             self.session.commit()
             return True
 
-        if lease.owner_id == owner_id or lease.lease_until <= now:
+        if lease.owner_id == owner_id or ensure_utc(lease.lease_until) <= now:
             lease.owner_id = owner_id
             lease.heartbeat_at = now
             lease.lease_until = datetime.fromtimestamp(now.timestamp() + ttl_seconds, tz=timezone.utc)
@@ -259,6 +261,44 @@ class ReplicaRepository:
         state.updated_at = utcnow()
         self.session.add(state)
         self.session.commit()
+
+    def set_checkpoint_status(self, account_id: str, status: str, error: str | None = None) -> None:
+        state = self.get_or_create_checkpoint_state(account_id)
+        state.last_status = status
+        state.last_error = error
+        state.updated_at = utcnow()
+        self.session.add(state)
+        self.session.commit()
+
+    def get_checkpoint_state(self, account_id: str) -> CheckpointState:
+        return self.get_or_create_checkpoint_state(account_id)
+
+    def get_lease(self, account_id: str) -> PollerLease | None:
+        return self.session.get(PollerLease, account_id)
+
+    def get_row_counts(self, account_id: str) -> dict[str, int]:
+        tasks = self.session.exec(
+            select(func.count()).select_from(TaskReplica).where(TaskReplica.account_id == account_id)
+        ).one()
+        projects = self.session.exec(
+            select(func.count()).select_from(ProjectReplica).where(ProjectReplica.account_id == account_id)
+        ).one()
+        groups = self.session.exec(
+            select(func.count()).select_from(GroupReplica).where(GroupReplica.account_id == account_id)
+        ).one()
+        return {
+            "tasks": int(tasks),
+            "projects": int(projects),
+            "groups": int(groups),
+        }
+
+    def list_cycles(self, account_id: str, limit: int = 50) -> list[PollCycle]:
+        return self.session.exec(
+            select(PollCycle)
+            .where(PollCycle.account_id == account_id)
+            .order_by(PollCycle.started_at.desc())
+            .limit(limit)
+        ).all()
 
     def purge_account_replica(self, account_id: str) -> None:
         self.session.exec(delete(TaskReplica).where(TaskReplica.account_id == account_id))

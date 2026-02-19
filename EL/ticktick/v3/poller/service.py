@@ -5,12 +5,31 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
+import requests
 from sqlmodel import Session
 
 from .client import TickTickBatchClient
 from .config import PollerSettings
+from .emitter import emit_replica_to_gcs
 from .repository import ReplicaRepository
 from .schemas import PollSummary
+
+
+def _http_status_from_exception(exc: Exception) -> int | None:
+    if isinstance(exc, requests.HTTPError) and exc.response is not None:
+        return exc.response.status_code
+    return None
+
+
+def classify_poll_error(exc: Exception) -> str:
+    status_code = _http_status_from_exception(exc)
+    if status_code in (401, 403):
+        return "auth_required"
+    if status_code == 429 or (status_code is not None and 500 <= status_code < 600):
+        return "degraded"
+    if isinstance(exc, requests.RequestException):
+        return "degraded"
+    return "error"
 
 
 class PollerService:
@@ -25,6 +44,18 @@ class PollerService:
         ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
         out_path = Path(self.settings.raw_archive_dir) / f"{account_id}__cp_{checkpoint}__{ts}.json"
         out_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+
+    def _prune_raw_archive(self) -> None:
+        if not self.settings.archive_raw_payloads:
+            return
+        cutoff_epoch = datetime.now(timezone.utc).timestamp() - (self.settings.raw_retention_hours * 3600)
+        archive_dir = Path(self.settings.raw_archive_dir)
+        for file_path in archive_dir.glob("*.json"):
+            try:
+                if file_path.stat().st_mtime < cutoff_epoch:
+                    file_path.unlink()
+            except OSError:
+                continue
 
     def _read_checkpoint(self, repo: ReplicaRepository, account_id: str) -> int:
         state = repo.get_or_create_checkpoint_state(account_id)
@@ -48,6 +79,7 @@ class PollerService:
                 delta = client.fetch_delta(source_checkpoint)
                 payload = delta.model_dump()
                 self._archive_payload(account_id, delta.checkPoint, payload)
+                self._prune_raw_archive()
 
                 updates_count = 0
                 deletes_count = 0
@@ -93,6 +125,16 @@ class PollerService:
                     groups_count=groups_count,
                 )
 
+                if state_updated and self.settings.gcs_emit_enabled:
+                    emit_replica_to_gcs(
+                        db_path=self.settings.db_path,
+                        gcs_bucket=self.settings.gcs_bucket,
+                        gcs_key=self.settings.gcs_key,
+                        gcs_secret=self.settings.gcs_secret,
+                        account_id=account_id,
+                        gcs_prefix=self.settings.gcs_prefix,
+                    )
+
                 repo.heartbeat_lease(account_id, owner_id, self.settings.lease_ttl_seconds)
 
                 return PollSummary(
@@ -114,6 +156,31 @@ class PollerService:
 
     def run_loop(self, account_id: str = "default", owner_id: str = "local") -> None:
         while True:
-            summary = self.run_once(account_id=account_id, owner_id=owner_id)
-            print(summary.model_dump_json())
-            time.sleep(self.settings.poll_interval_seconds)
+            try:
+                summary = self.run_once(account_id=account_id, owner_id=owner_id)
+                print(summary.model_dump_json())
+                sleep_seconds = self.settings.poll_interval_seconds
+            except Exception as exc:  # noqa: BLE001
+                status = classify_poll_error(exc)
+                with Session(self.engine) as session:
+                    repo = ReplicaRepository(session)
+                    repo.set_checkpoint_status(account_id, status, str(exc))
+                    try:
+                        repo.heartbeat_lease(account_id, owner_id, self.settings.lease_ttl_seconds)
+                    except RuntimeError:
+                        pass
+
+                sleep_seconds = self.settings.auth_pause_seconds if status == "auth_required" else self.settings.poll_interval_seconds
+                print(
+                    json.dumps(
+                        {
+                            "account_id": account_id,
+                            "status": status,
+                            "error": str(exc),
+                            "sleep_seconds": sleep_seconds,
+                        },
+                        ensure_ascii=False,
+                    )
+                )
+
+            time.sleep(sleep_seconds)
