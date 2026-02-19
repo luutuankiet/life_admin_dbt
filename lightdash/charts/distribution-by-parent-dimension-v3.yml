@@ -1,7 +1,7 @@
 name: distribution by parent dimension v3
 description: ""
 tableName: fct_tasks_v3
-updatedAt: "2026-02-20T00:00:00.000Z"
+updatedAt: "2026-02-19T19:02:26.887Z"
 metricQuery:
   exploreName: fct_tasks_v3
   dimensions:
@@ -17,6 +17,7 @@ metricQuery:
       descending: true
   limit: 500
   metricOverrides: {}
+  dimensionOverrides: {}
   tableCalculations: []
   additionalMetrics: []
   customDimensions: []
@@ -293,4 +294,4 @@ tableConfig:
     - fct_tasks_v3_total_task_instances
 spaceSlug: shared
 version: 1
-downloadedAt: "2026-02-20T00:00:00.000Z"
+downloadedAt: "2026-02-19T19:02:38.530Z"

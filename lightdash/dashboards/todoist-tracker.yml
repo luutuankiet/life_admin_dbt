@@ -1,6 +1,6 @@
 name: todoist tracker
 description: ""
-updatedAt: "2025-12-06T06:54:55.464Z"
+updatedAt: "2026-02-19T19:02:34.191Z"
 tiles:
   - x: 0
     "y": 0
@@ -20,6 +20,7 @@ tiles:
         *Streak is available once the [habit tracker
         integration](https://www.todoist.com/integrations/apps/habit-tracker) is
         set up on desktop for the task.*
+      hideFrame: false
   - x: 0
     "y": 3
     h: 5
@@ -69,6 +70,7 @@ tiles:
         # Past days's number
         😤 Take a moment and be proud of what we've done. 
         Adjust the filter up top to preview more dates.
+      hideFrame: false
   - x: 0
     "y": 15
     h: 10
@@ -99,7 +101,6 @@ filters:
     - label: Past day's lookback window
       target:
         fieldId: fct_habit_completed_at_day
-        fieldName: completed_at_day
         tableName: fct_habit
       values:
         - 7
@@ -109,15 +110,15 @@ filters:
         completed: false
         unitOfTime: days
       tileTargets:
+        todoist-completed-today-v0-2: false
+        todoist-due-today: false
+        todoist-new-today-v0-2-1: false
         todoist-completed-tasks:
           fieldId: fct_habit_completed_at_day
           tableName: fct_habit
-        todoist-completed-today-v0-2: false
-        todoist-new-today-v0-2-1: false
-        todoist-due-today: false
   tableCalculations: []
 tabs: []
 slug: todoist-tracker
 spaceSlug: shared
 version: 1
-downloadedAt: "2025-12-07T03:49:14.076Z"
+downloadedAt: "2026-02-19T19:02:39.469Z"

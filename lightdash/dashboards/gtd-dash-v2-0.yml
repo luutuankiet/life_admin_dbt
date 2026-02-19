@@ -1,6 +1,6 @@
 name: gtd dash v2.0
 description: ""
-updatedAt: "2026-02-20T00:00:00.000Z"
+updatedAt: "2026-02-19T19:02:33.823Z"
 tiles:
   - x: 0
     "y": 0
@@ -56,7 +56,6 @@ filters:
     - label: Lookahead Date day
       target:
         fieldId: dim_date_spine_date_day
-        fieldName: date_day
         tableName: dim_date_spine
       values:
         - 5
@@ -72,21 +71,20 @@ filters:
           tableName: dim_date_spine
     - target:
         fieldId: fct_tasks_v3_status
-        fieldName: status
         tableName: fct_tasks_v3
       values:
         - "2"
       disabled: false
       operator: notEquals
       tileTargets:
+        what-did-you-do-v3: false
+        distribution-by-parent-dimension-v3:
+          fieldId: fct_tasks_v3_status
+          tableName: fct_tasks_v3
         tasks-drill-down-by-grain-v3:
           fieldId: fct_tasks_v3_status
           tableName: fct_tasks_v3
-        what-did-you-do-v3: false
         tasks-lookahead-v3:
-          fieldId: fct_tasks_v3_status
-          tableName: fct_tasks_v3
-        distribution-by-parent-dimension-v3:
           fieldId: fct_tasks_v3_status
           tableName: fct_tasks_v3
   tableCalculations: []
@@ -97,4 +95,4 @@ tabs:
 slug: gtd-dash-v2-0
 spaceSlug: shared
 version: 1
-downloadedAt: "2026-02-20T00:00:00.000Z"
+downloadedAt: "2026-02-19T19:02:39.469Z"
