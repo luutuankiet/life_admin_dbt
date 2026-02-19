@@ -20,3 +20,8 @@ tmp
 
 
 .opencode
+
+__pycache__
+*/**/raw_batches/**/*
+ticktick_replica.db
+ticktick_check.curl
