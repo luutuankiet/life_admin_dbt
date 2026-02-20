@@ -1,19 +1,19 @@
 name: drill down tasks by parent grain dimension v3
 description: ""
 tableName: fct_tasks_v3
-updatedAt: "2026-02-19T19:02:27.895Z"
+updatedAt: "2026-02-20T01:29:29.643Z"
 metricQuery:
   exploreName: fct_tasks_v3
   dimensions:
     - fct_tasks_v3_due_date_day_of_week_name
     - fct_tasks_v3_due_date_month_num
     - fct_tasks_v3_due_date_day_of_month_num
-    - fct_tasks_v3_parent_dimension_grain
     - fct_tasks_v3_due_date_day
     - dim_projects_v3_project_id
     - fct_tasks_v3_dimension_grain
     - fct_tasks_v3_dynamic_parent_grain_url
     - fct_tasks_v3_dynamic_grain_url
+    - fct_tasks_v3_formatted_parent_dimension_grain
   metrics: []
   filters:
     dimensions:
@@ -71,9 +71,6 @@ chartConfig:
         visible: false
       fct_tasks_v3_due_date_month_num:
         visible: false
-      fct_tasks_v3_parent_dimension_grain:
-        name: parent
-        frozen: true
       fct_tasks_v3_dynamic_parent_grain_url:
         visible: false
       fct_tasks_v3_due_date_day_of_month_num:
@@ -83,6 +80,9 @@ chartConfig:
         name: day
         frozen: true
         visible: true
+      fct_tasks_v3_formatted_parent_dimension_grain:
+        name: parent
+        frozen: true
     metricsAsRows: false
     showSubtotals: false
     hideRowNumbers: true
@@ -154,12 +154,12 @@ tableConfig:
     - concat_date
     - fct_tasks_v3_due_date_month_num
     - fct_tasks_v3_due_date_day_of_month_num
-    - fct_tasks_v3_parent_dimension_grain
     - fct_tasks_v3_due_date_day
     - dim_projects_v3_project_id
     - fct_tasks_v3_dimension_grain
     - fct_tasks_v3_dynamic_parent_grain_url
     - fct_tasks_v3_dynamic_grain_url
+    - fct_tasks_v3_formatted_parent_dimension_grain
 spaceSlug: shared
 version: 1
-downloadedAt: "2026-02-19T19:02:38.530Z"
+downloadedAt: "2026-02-20T01:30:57.949Z"

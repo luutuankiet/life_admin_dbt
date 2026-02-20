@@ -16,18 +16,6 @@ tiles:
     tileSlug: ticktick-inbox-distribution-1762589144902
   - x: 0
     "y": 0
-    h: 5
-    w: 9
-    tabUuid: 8cf3276e-4812-4a1d-bb70-a24dea637558
-    type: saved_chart
-    properties:
-      title: ""
-      hideTitle: false
-      chartSlug: todoist-new-today-v0-2-1
-      chartName: todoist new today v0.2
-    tileSlug: todoist-new-today-v0-2-1
-  - x: 0
-    "y": 0
     h: 7
     w: 18
     tabUuid: e9151f94-1c89-4600-b84a-9f22344194f8
@@ -38,6 +26,18 @@ tiles:
       chartSlug: tasks-lookahead-1
       chartName: tasks lookahead
     tileSlug: tasks-lookahead-1
+  - x: 0
+    "y": 0
+    h: 5
+    w: 9
+    tabUuid: 8cf3276e-4812-4a1d-bb70-a24dea637558
+    type: saved_chart
+    properties:
+      title: ""
+      hideTitle: false
+      chartSlug: todoist-new-today-v0-2-1
+      chartName: todoist new today v0.2
+    tileSlug: todoist-new-today-v0-2-1
   - x: 9
     "y": 0
     h: 14
@@ -250,4 +250,4 @@ tabs:
 slug: gtd-dash-v1-0
 spaceSlug: shared
 version: 1
-downloadedAt: "2026-02-19T19:02:39.469Z"
+downloadedAt: "2026-02-20T01:30:58.996Z"
