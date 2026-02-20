@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timezone
+from typing import Any
 
 from sqlalchemy import func
 from sqlmodel import Session, delete, select
@@ -142,34 +143,47 @@ class ReplicaRepository:
         self.session.add(cycle)
         self.session.commit()
 
-    def upsert_task_patch(self, account_id: str, patch: dict) -> None:
-        task_id = patch.get("id")
+    def upsert_task_patch(self, account_id: str, patch: Any) -> None:
+        if hasattr(patch, "model_dump"):
+            payload = patch.model_dump(exclude_unset=True)
+        elif isinstance(patch, dict):
+            payload = patch
+        else:
+            return
+
+        task_id = payload.get("id")
         if not task_id:
             return
 
         pk = make_pk(account_id, task_id)
         row = self.session.get(TaskReplica, pk)
 
-        if row:
-            current = json.loads(row.raw_json)
-            current.update(patch)
-        else:
-            current = patch
-
-        payload = current
         if row is None:
-            row = TaskReplica(pk=pk, account_id=account_id, task_id=task_id, raw_json=json.dumps(payload, ensure_ascii=False))
+            row = TaskReplica(pk=pk, account_id=account_id, task_id=task_id, raw_json="{}")
 
         row.project_id = payload.get("projectId")
+        row.sort_order = payload.get("sortOrder")
         row.title = payload.get("title")
         row.content = payload.get("content")
+        row.timezone = payload.get("timeZone")
+        row.is_floating = payload.get("isFloating")
+        row.is_all_day = payload.get("isAllDay")
+        row.reminder = payload.get("reminder")
+        row.priority = payload.get("priority")
         row.status = payload.get("status")
         row.deleted = payload.get("deleted")
+        row.progress = payload.get("progress")
         row.etag = payload.get("etag")
+        row.start_date = payload.get("startDate")
+        row.due_date = payload.get("dueDate")
+        row.repeat_flag = payload.get("repeatFlag")
+        row.repeat_first_date = payload.get("repeatFirstDate")
         row.modified_time = payload.get("modifiedTime")
         row.created_time = payload.get("createdTime")
         row.completed_time = payload.get("completedTime")
         row.completed_user_id = payload.get("completedUserId")
+        row.creator = payload.get("creator")
+        row.parent_id = payload.get("parentId")
         row.column_id = payload.get("columnId")
         row.kind = payload.get("kind")
         row.raw_json = json.dumps(payload, ensure_ascii=False)

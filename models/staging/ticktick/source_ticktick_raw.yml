@@ -352,17 +352,43 @@ sources:
             data_type: STRING
           - name: project_id
             data_type: STRING
+          - name: sort_order
+            data_type: INT64
           - name: title
             data_type: STRING
           - name: content
             data_type: STRING
+          - name: timezone
+            data_type: STRING
+          - name: is_floating
+            data_type: BOOLEAN
+          - name: is_all_day
+            data_type: BOOLEAN
+          - name: reminder
+            data_type: STRING
+          - name: priority
+            data_type: INT64
           - name: status
             data_type: INT64
           - name: deleted
             data_type: INT64
+          - name: progress
+            data_type: INT64
+          - name: start_date
+            data_type: TIMESTAMP
+          - name: due_date
+            data_type: TIMESTAMP
+          - name: repeat_flag
+            data_type: STRING
+          - name: repeat_first_date
+            data_type: TIMESTAMP
           - name: completed_time
             data_type: TIMESTAMP
           - name: completed_user_id
+            data_type: STRING
+          - name: creator
+            data_type: INT64
+          - name: parent_id
             data_type: STRING
           - name: created_time
             data_type: TIMESTAMP

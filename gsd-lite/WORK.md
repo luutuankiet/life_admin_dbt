@@ -9,7 +9,7 @@ execution
 </current_mode>
 
 <active_task>
-- Phase 4 Lightdash BI migration: clone GTD Dash v2.0 and repoint TickTick charts to v3 marts
+- TASK-003 hotfix: task upsert semantics now align to TickTick source-of-truth full payload replacement (omit means cleared)
 </active_task>
 
 <parked_tasks>
@@ -35,14 +35,15 @@ Personal data platform for GTD-driven life decisions. The goal is "perceptual re
 - DECISION-011: Legacy dual-target dbt pipeline (tmp/branches/incremental_run_gha) is dead code once v3 Parquet path is validated end-to-end.
 - DECISION-012: v3 folder dimension should source directly from `groups_v3`/`base__ticktick_v3__groups`, not from convention-based `folder_map - '...'` projects.
 - DECISION-013: Do not pursue TickTick v2 completed endpoint fan-out (`/api/v2/project/{ids}/completed`) for backfill; keep checkpoint endpoint as primary path and accept historical completion gap before poller start.
+- DECISION-014: `syncTaskBean.update[]` is treated as full source-of-truth task payload. Upsert must replace task state (including `raw_json`) instead of dict-merging patches; omitted fields represent cleared values.
 </decisions>
 
 <blockers>
-- Remaining capture gap (low-medium risk): tag add/remove lane variance still uncaptured.
+- No blocker for hotfix implementation. Follow-up risk remains: unofficial API may change payload shape without notice.
 </blockers>
 
 <next_action>
-Begin Phase 4: create GTD Dash v2.0 in Lightdash and repoint chart explores from legacy `fct_tasks`/`dim_projects`/`dim_folders` to v3 marts while preserving weekly-review UX.
+Document LOG-023 findings + rollout plan, then run migration path (re-init or ALTER table strategy) to ensure new `taskreplica` columns exist in production SQLite before next emit cycle.
 </next_action>
 
 ---
@@ -60,6 +61,7 @@ Begin Phase 4: create GTD Dash v2.0 in Lightdash and repoint chart explores from
 | LOG-015 | EXEC | TASK-003 | v3 poller + Pass A operator webapp implemented (disk replica, import-curl UI, status/control endpoints) |
 | LOG-016 | EXEC | TASK-003 | Bounded raw retention + isolated v3 packaging shipped and image published for VM deploy |
 | LOG-017 | DECISION+EXEC | TASK-004 | GCS Parquet emitter shipped; tz-naive lease bug fixed; SCD2 workaround declared obsolete; DuckDB httpfs path validated end-to-end |
+| LOG-023 | DISCOVERY+PLAN | TASK-003 | Task upsert semantics corrected to source-of-truth full replacement; omitted fields now treated as clears |
 
 ---
 
@@ -3382,7 +3384,9 @@ graph TD
 **Fork paths:**
 - Continue execution → implement v3 marts and parity pack from LOG-019 Phase 3
 - Fork new session → onboard via Section 1 + LOG-020, then continue Phase 3 immediately
-### [LOG-021] - [DECISION] [EXEC] - Phase 3 accepted with forward-parity semantics, NULL-closed patch shipped, and Lightdash BI phase started - Task: TASK-005
+
+
+### [LOG-021] - [DECISION] - Phase 3 accepted with forward-parity semantics, NULL-closed patch shipped, and Lightdash BI phase started - Task: TASK-005
 **Timestamp:** 2026-02-20 18:35
 **Depends On:** LOG-020 (v3 base+staging shipped), LOG-019 (Phase 3 parity gate plan)
 
@@ -3646,3 +3650,141 @@ graph TD
 **Fork paths:**
 - Continue execution → validate in dev preview and promote dashboard/charts to prod project
 - Pivot to hardening → add smoke checklist for filter-to-tile target correctness and broken-link checks
+
+### [LOG-023] - [DISCOVERY] - Upsert semantic correction: `syncTaskBean.update[]` is full task truth; omit means cleared - Task: TASK-003
+**Timestamp:** 2026-02-20 20:40
+**Depends On:** LOG-015 (initial upsert implementation), LOG-014 (prior parser assumptions), LOG-022 (current execution context)
+
+---
+
+#### Executive Summary
+
+A production-relevant replication bug was confirmed: when TickTick due date is cleared in UI, SQLite replica kept stale `dueDate` and `startDate`. Root cause was merge semantics in `upsert_task_patch()` (`current.update(patch)`), which preserved keys omitted by the API payload. New evidence shows `syncTaskBean.update[]` is a full task representation for this integration path. Therefore omitted fields are semantic clears, not "unchanged" patches.
+
+Decision locked: task upsert now treats incoming update payload as source-of-truth full replacement. We intentionally keep poller surface minimal and do not add `tagUpdate[]` lane handling in this hotfix.
+
+---
+
+#### What We Got Wrong (Explicit Pivot)
+
+- **Old assumption (LOG-014 parser note):** partial field absence in `update[]` should be merged into prior payload.
+- **New evidence-backed understanding:** `update[]` payload reflects current task state; absent keys (for example `dueDate`, `startDate`, `tags`) represent values removed from task state.
+- **Impact of old assumption:** stale fields persisted in `raw_json`, causing downstream dbt `JSON_VALUE(raw_json, '$.dueDate')` to remain non-null after due-date clear.
+
+---
+
+#### Raw Evidence (User Capture)
+
+Due date set (field present):
+```json
+{
+  "id": "6997aa102ea6e40fc21bc947",
+  "startDate": "2026-02-21T17:00:00.000+0000",
+  "dueDate": "2026-02-21T17:00:00.000+0000",
+  "etag": "vwwztqdq"
+}
+```
+
+Due date cleared (field omitted):
+```json
+{
+  "id": "6997aa102ea6e40fc21bc947",
+  "timeZone": "Asia/Ho_Chi_Minh",
+  "isAllDay": true,
+  "etag": "m2w1l81l"
+}
+```
+
+Tag clear showed same omission behavior (`tags` removed from `update[]` object), reinforcing source-of-truth replacement semantics.
+
+---
+
+#### Decision Record and Rejected Paths
+
+**Chosen path:** full replacement for task upsert payload.
+- Why: directly matches observed API semantics and fixes stale-clear bug class for all omitted attributes.
+
+**Chosen path:** expand typed task columns in replica + emitter + source contract + dbt base fallback.
+- Why: keeps schema explicit and reduces exclusive dependence on `raw_json` for core fields.
+
+**Rejected path A:** maintain merge semantics with clearable-field allowlist.
+- Why not: brittle and increases maintenance burden on unofficial API.
+
+**Rejected path B:** add `tagUpdate[]` lane processing now.
+- Why not: increases moving parts; tags remain derivable from task rows in dbt (v1 pattern), and user explicitly prioritized low-footprint resilience.
+
+---
+
+#### Implementation Scope Shipped
+
+1. Poller repository
+   - `upsert_task_patch()` now uses incoming payload as canonical state and writes `raw_json` from that payload (no prior-json merge).
+   - Added typed mappings for additional task attributes (`sort_order`, `timezone`, `is_all_day`, `start_date`, `due_date`, etc.).
+
+2. Poller schema/model surface
+   - Added `TaskSyncPayload` Pydantic model for `syncTaskBean.update[]` contract.
+   - Expanded `TaskReplica` SQLModel columns to mirror core task attributes.
+
+3. Emitter + dbt contract propagation
+   - `emitter.py` tasks COPY list now exports the expanded task columns.
+   - `source_ticktick_raw.yml` `tasks_v3` schema updated to include new columns.
+   - `base__ticktick_v3__tasks.sql` now prefers typed columns with `COALESCE(typed, JSON_VALUE(raw_json,...))` fallback.
+
+---
+
+#### Proposed Plan (Rollout)
+
+**Goal:** Safely deploy semantic fix without breaking running poller or dbt contract.
+
+**Tasks:**
+1. TASK-023A - Apply DB migration for existing SQLite (`taskreplica` new columns) - Complexity: Medium
+2. TASK-023B - Deploy poller and verify one cycle with due-date clear scenario - Complexity: Low
+3. TASK-023C - Emit to GCS and refresh external table metadata if needed - Complexity: Medium
+4. TASK-023D - Run dbt staging smoke checks for `base__ticktick_v3__tasks` date fields - Complexity: Low
+
+**Success checks:**
+- Clearing due date in TickTick results in `raw_json` with no `dueDate` key and dbt `due_date IS NULL` for that task.
+- No schema mismatch errors on emitter or external table reads.
+
+---
+
+#### System Interaction Diagram
+
+```mermaid
+graph TD
+    A[TickTick API<br/>syncTaskBean.update] --> B[Poller upsert_task_patch]
+    B --> C[SQLite taskreplica<br/>typed columns + raw_json]
+    C --> D[Emitter tasks.parquet]
+    D --> E[ticktick_raw.tasks_v3]
+    E --> F[base__ticktick_v3__tasks]
+    F --> G[stg__ticktick_v3__tasks]
+    G --> H[fct_tasks_v3]
+```
+
+---
+
+#### Citations
+
+- `EL/ticktick/v3/poller/repository.py:146` - `upsert_task_patch` replacement path and canonical payload write
+- `EL/ticktick/v3/poller/models.py:58` - expanded `TaskReplica` typed columns
+- `EL/ticktick/v3/poller/schemas.py:19` - `TaskSyncPayload` typed update contract
+- `EL/ticktick/v3/poller/emitter.py:58` - tasks parquet export includes expanded task columns
+- `models/staging/ticktick/source_ticktick_raw.yml:346` - `tasks_v3` source schema updated
+- `models/staging/ticktick/base/base__ticktick_v3__tasks.sql:12` - typed-first fallback pattern (`COALESCE(typed, JSON_VALUE(raw_json,...))`)
+- User debug capture (session 2026-02-20) - due-date clear omission evidence and tag omission evidence
+
+---
+
+📦 STATELESS HANDOFF
+**Layer 1 — Local Context:**
+→ Last action: LOG-023 documented root-cause pivot and locked rollout plan for full-replacement task upsert semantics
+→ Dependency chain: LOG-023 ← LOG-015 ← LOG-014 ← LOG-006
+→ Next action: execute TASK-023A migration path on live SQLite, then run due-date-clear validation cycle end-to-end
+
+**Layer 2 — Global Context:**
+→ Architecture: v3 poller remains checkpoint-based with SQLite replica and GCS parquet emitter feeding dbt/Lightdash
+→ Patterns: keep unofficial API integration minimal; prefer source-of-truth payload semantics over heuristic patch merging
+
+**Fork paths:**
+- Continue execution → run DB migration + one-cycle validation for due-date clear
+- Pivot back to BI track → resume dashboard parity work after replica contract smoke tests

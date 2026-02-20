@@ -61,15 +61,28 @@ class TaskReplica(SQLModel, table=True):
     task_id: str = Field(index=True)
 
     project_id: str | None = None
+    sort_order: int | None = None
     title: str | None = None
     content: str | None = None
+    timezone: str | None = None
+    is_floating: bool | None = None
+    is_all_day: bool | None = None
+    reminder: str | None = None
+    priority: int | None = None
     status: int | None = None
     deleted: int | None = None
+    progress: int | None = None
     etag: str | None = None
+    start_date: str | None = None
+    due_date: str | None = None
+    repeat_flag: str | None = None
+    repeat_first_date: str | None = None
     modified_time: str | None = None
     created_time: str | None = None
     completed_time: str | None = None
     completed_user_id: int | None = None
+    creator: int | None = None
+    parent_id: str | None = None
     column_id: str | None = None
     kind: str | None = None
 
