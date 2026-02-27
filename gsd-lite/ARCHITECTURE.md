@@ -202,3 +202,34 @@ Lightdash doesn't support lookahead queries natively. Workaround:
 ---
 
 *This document is the "how" — see PROJECT.md for the "why".*
+
+## 2026-02-22 Pivot Update - Operational Architecture (MCP-First)
+
+The active BI operating model has shifted from Lightdash-centric execution to **Grafana MCP-first dashboard lifecycle**.
+
+### Updated layer responsibilities
+
+| Layer | Owner | Responsibility |
+|-------|-------|----------------|
+| Semantic modeling | dbt | Joins, dimensions, business metrics, transformation logic |
+| Dashboard lifecycle | Grafana + MCP | Panel/layout creation, iteration, annotations, dashboard UX |
+| Artifact memory | Git (`grafana/dashboards/*.json`) | Read-only versioned dashboard shape for agent continuity |
+
+### Dashboard workflow runtime
+
+1. Pair program in Grafana via MCP write tools.
+2. Validate panel/query behavior live.
+3. Export dashboard JSON via `grafana/scripts/export_grafana_artifacts.py`.
+4. Commit exported artifacts to Git (manual or workflow-dispatch write-back).
+5. Next agent reads artifacts and continues MCP-driven iteration.
+
+### Repository components now relevant to this workflow
+
+- `grafana/dashboards/` — exported dashboard JSON artifacts
+- `grafana/scripts/export_grafana_artifacts.py` — API-based exporter (default dashboards-only)
+- `.github/workflows/grafana_write_back.yml` — optional manual write-back automation
+- `grafana/provisioning/` — optional path for future file-provisioning flows, not required for daily migration work
+
+### Current migration execution rule
+
+For PHASE-006, implement push-left dbt semantics first on the Lightdash `main tasks` tab scope, then keep Grafana queries thin by consuming those dbt semantic marts.

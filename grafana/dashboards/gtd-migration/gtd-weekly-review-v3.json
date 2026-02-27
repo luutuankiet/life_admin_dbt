@@ -1,0 +1,125 @@
+{
+  "id": null,
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana-bigquery-datasource",
+        "uid": "cfdykvp3d8n40c"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true
+      },
+      "pluginVersion": "12.3.3",
+      "targets": [
+        {
+          "dataset": "ticktick_dbt_dev",
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "cfdykvp3d8n40c"
+          },
+          "editorMode": "builder",
+          "format": 1,
+          "location": "asia-southeast1",
+          "project": "airbyte-468412",
+          "rawSql": "SELECT\n  f.folder_name,\n  p.project_name,\n  p.project_id,\n  CONCAT(CODE_POINTS_TO_STRING([127812 + MOD(ABS(FARM_FINGERPRINT(p.project_name)), 50)]), ' ', p.project_name) AS project_name_formatted,\n  COUNT(t.task_id) AS total_loops\nFROM `airbyte-468412.ticktick_dbt_dev.fct_tasks_v3` t\nJOIN `airbyte-468412.ticktick_dbt_dev.dim_projects_v3` p\n  ON t.project_id = p.project_id\nJOIN `airbyte-468412.ticktick_dbt_dev.dim_folders_v3` f\n  ON f.folder_id = p.group_id\nWHERE t.status = 0\n  AND COALESCE(p.closed, FALSE) = FALSE\n  AND t.kind = 'TASK'\n  AND f.folder_name NOT IN ('💤on hold lists', '🚀SOMEDAY lists', '🛩️Horizon of focus')\n  AND p.project_name != '📍ref - tickler notes for the day'\nGROUP BY 1,2,3,4\nORDER BY 1 ASC, 5 DESC\nLIMIT 500",
+          "refId": "A"
+        }
+      ],
+      "title": "Loops Distribution (Open TASK items)",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-bigquery-datasource",
+        "uid": "cfdykvp3d8n40c"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 9
+      },
+      "id": 2,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true
+      },
+      "pluginVersion": "12.3.3",
+      "targets": [
+        {
+          "dataset": "ticktick_dbt_dev",
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "cfdykvp3d8n40c"
+          },
+          "editorMode": "builder",
+          "format": 1,
+          "location": "asia-southeast1",
+          "project": "airbyte-468412",
+          "rawSql": "SELECT\n  f.folder_name,\n  p.project_name,\n  p.project_id,\n  COUNT(t.task_id) AS tasks\nFROM `airbyte-468412.ticktick_dbt_dev.dim_projects_v3` p\nJOIN `airbyte-468412.ticktick_dbt_dev.dim_folders_v3` f\n  ON f.folder_id = p.group_id\nLEFT JOIN `airbyte-468412.ticktick_dbt_dev.fct_tasks_v3` t\n  ON t.project_id = p.project_id\nWHERE COALESCE(p.closed, FALSE) = FALSE\n  AND f.folder_name NOT IN ('🚀SOMEDAY lists', '🛩️Horizon of focus', 'default', '💤on hold lists')\nGROUP BY 1,2,3\nHAVING COUNT(t.task_id) = 0\nORDER BY 1 ASC, 4 ASC\nLIMIT 500",
+          "refId": "A"
+        }
+      ],
+      "title": "Empty Projects To Clean",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-bigquery-datasource",
+        "uid": "cfdykvp3d8n40c"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 9
+      },
+      "id": 3,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true
+      },
+      "pluginVersion": "12.3.3",
+      "targets": [
+        {
+          "dataset": "ticktick_dbt_dev",
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "cfdykvp3d8n40c"
+          },
+          "editorMode": "builder",
+          "format": 1,
+          "location": "asia-southeast1",
+          "project": "airbyte-468412",
+          "rawSql": "SELECT\n  f.folder_name,\n  p.project_name,\n  p.project_id,\n  p.last_pulse,\n  DATE_DIFF(CURRENT_DATE(), DATE(p.last_pulse), DAY) AS days_last_active,\n  COUNTIF(t.status = 0 AND t.kind = 'TASK') AS open_tasks\nFROM `airbyte-468412.ticktick_dbt_dev.dim_projects_v3` p\nJOIN `airbyte-468412.ticktick_dbt_dev.dim_folders_v3` f\n  ON f.folder_id = p.group_id\nLEFT JOIN `airbyte-468412.ticktick_dbt_dev.fct_tasks_v3` t\n  ON t.project_id = p.project_id\nWHERE COALESCE(p.closed, FALSE) = FALSE\n  AND f.folder_name NOT IN ('🚀SOMEDAY lists', '🛩️Horizon of focus', 'default', '💤on hold lists')\nGROUP BY 1,2,3,4\nHAVING DATE_DIFF(CURRENT_DATE(), DATE(p.last_pulse), DAY) > 5\nORDER BY days_last_active DESC, f.folder_name ASC, open_tasks ASC\nLIMIT 500",
+          "refId": "A"
+        }
+      ],
+      "title": "Project Pulse (Inactive > 5 days)",
+      "type": "table"
+    }
+  ],
+  "schemaVersion": 42,
+  "tags": [
+    "mcp",
+    "parity-slice",
+    "weekly-review",
+    "validated-write-path"
+  ],
+  "time": {
+    "from": "now-30d",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "GTD Weekly Review v3 (MCP Slice 1)",
+  "uid": "gtd-weekly-review-v3",
+  "version": 1
+}

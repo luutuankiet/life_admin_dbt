@@ -97,3 +97,27 @@ TickTick API does not expose task completion metadata. Completed tasks simply di
 ---
 
 *This document is the "why" — see ARCHITECTURE.md for the "how".*
+
+
+## 2026-02-22 Pivot Update - dbt + Grafana, Agent-First Dashboard Workflow
+
+The project direction is now operationally centered on **dbt for semantic logic** and **Grafana for dashboard interaction**, with MCP write capability as a first-class requirement for human+agent pair programming.
+
+### What changed
+
+- Lightdash is no longer the primary dashboard execution layer for ongoing migration work.
+- Dashboard development now happens live in Grafana through MCP-assisted iteration.
+- Dashboard JSON is exported to Git as read-only artifact memory so future agents can reconstruct intent and continue safely.
+
+### Why this matters
+
+- Preserves fast feedback loops during planning sessions while enabling agent collaboration on dashboard lifecycle.
+- Prevents semantic drift by moving joins/fields/metrics logic into dbt models and keeping BI queries thin.
+- Gives deterministic handoff context without requiring UI archaeology.
+
+### Updated success criteria for migration phase
+
+- [ ] Agents can create/update dashboard slices via Grafana MCP with user-guided pair workflow.
+- [ ] Dashboard artifacts are exported and committed to Git after meaningful dashboard changes.
+- [ ] First MVP migration for Lightdash `main tasks` tab is implemented with dbt semantic push-left.
+- [ ] Grafana panels read thin dbt semantic marts rather than embedding heavy business logic.

@@ -5,16 +5,16 @@
 ## 1. Current Understanding (Read First)
 
 <current_mode>
-execution
+execution / hardening
 </current_mode>
 
 <active_task>
-- Phase 4 Lightdash BI migration: clone GTD Dash v2.0 and repoint TickTick charts to v3 marts
+- PHASE-006 UX refinement checkpoint: click actions and emoji-readable grain labels are shipped on `gtd-main-tasks-v3`; next execution focus is lookahead chart redesign for nested week/day readability.
 </active_task>
 
 <parked_tasks>
-- Dashboard hosting location (EU vs Asia/Homelab)
 - Snapshot pipeline refactor
+- Evidence.dev as periodic static report layer (hybrid option, low priority)
 </parked_tasks>
 
 <vision>
@@ -35,6 +35,10 @@ Personal data platform for GTD-driven life decisions. The goal is "perceptual re
 - DECISION-011: Legacy dual-target dbt pipeline (tmp/branches/incremental_run_gha) is dead code once v3 Parquet path is validated end-to-end.
 - DECISION-012: v3 folder dimension should source directly from `groups_v3`/`base__ticktick_v3__groups`, not from convention-based `folder_map - '...'` projects.
 - DECISION-013: Do not pursue TickTick v2 completed endpoint fan-out (`/api/v2/project/{ids}/completed`) for backfill; keep checkpoint endpoint as primary path and accept historical completion gap before poller start.
+- DECISION-014: Pause Phase 4 Lightdash migration. Research BI alternatives before investing further. Criteria: self-hostable, free, agent write access, metrics not buried in dbt YAML.
+- DECISION-015: Adopt dbt x Grafana target architecture. Semantic modeling (fct<>dim joins, metrics, custom SQL) shifts to dbt as source of truth; Grafana becomes visualization/annotation/exploration layer with MCP write as first-class requirement.
+- DECISION-016: Bind mounts are the persistence standard for migration-first Grafana operations in PHASE-005.
+- DECISION-017: Dashboard workflow standard is MCP-first live authoring + API export to Git for read-only artifact memory; file provisioning is optional and not required for day-to-day migration execution.
 </decisions>
 
 <blockers>
@@ -42,7 +46,7 @@ Personal data platform for GTD-driven life decisions. The goal is "perceptual re
 </blockers>
 
 <next_action>
-Begin Phase 4: create GTD Dash v2.0 in Lightdash and repoint chart explores from legacy `fct_tasks`/`dim_projects`/`dim_folders` to v3 marts while preserving weekly-review UX.
+Execute TASK-006C lookahead redesign on `gtd-main-tasks-v3`: render upcoming 5 buckets with nested day-of-week grouping and consistent day color coding, then validate readability parity against Lightdash intent.
 </next_action>
 
 ---
@@ -60,6 +64,13 @@ Begin Phase 4: create GTD Dash v2.0 in Lightdash and repoint chart explores from
 | LOG-015 | EXEC | TASK-003 | v3 poller + Pass A operator webapp implemented (disk replica, import-curl UI, status/control endpoints) |
 | LOG-016 | EXEC | TASK-003 | Bounded raw retention + isolated v3 packaging shipped and image published for VM deploy |
 | LOG-017 | DECISION+EXEC | TASK-004 | GCS Parquet emitter shipped; tz-naive lease bug fixed; SCD2 workaround declared obsolete; DuckDB httpfs path validated end-to-end |
+| LOG-025 | DECISION | PHASE-004 | BI platform finalized as dbt semantics + Grafana visualization with MCP write first-class |
+| LOG-026 | DECISION | PHASE-005 | Persistence strategy locked: bind mounts over named volumes for migration-first operations |
+| LOG-029 | EXEC | PHASE-005 | MCP write path verified and first parity dashboard slice user-validated |
+| LOG-030 | DECISION+EXEC | PHASE-006 | Grafana setup closure; MCP-first + read-only Git export workflow standardized; dbt push-left kickoff on main-tasks MVP |
+| LOG-032 | DISCOVERY+PLAN | PHASE-006 | Lookahead cockpit requirements crystallized with chart contract and onboarding map for semantic push-left execution |
+| LOG-033 | BREAKTHROUGH+EXEC+DECISION | PHASE-006 | Foundational migration pattern locked: dbt semantic marts plus invariant tests plus regex-safe dependent Grafana filters |
+| LOG-034 | DISCOVERY+PLAN | PHASE-006 | Dashboard UX baseline logged: dual open actions, emoji readability, reset control shipped; next task scoped for nested 5-bucket lookahead and weekday color contract |
 
 ---
 
@@ -3382,7 +3393,7 @@ graph TD
 **Fork paths:**
 - Continue execution → implement v3 marts and parity pack from LOG-019 Phase 3
 - Fork new session → onboard via Section 1 + LOG-020, then continue Phase 3 immediately
-### [LOG-021] - [DECISION] [EXEC] - Phase 3 accepted with forward-parity semantics, NULL-closed patch shipped, and Lightdash BI phase started - Task: TASK-005
+### [LOG-021] - [EXEC] - Phase 3 accepted with forward-parity semantics, NULL-closed patch shipped, and Lightdash BI phase started - Task: TASK-005
 **Timestamp:** 2026-02-20 18:35
 **Depends On:** LOG-020 (v3 base+staging shipped), LOG-019 (Phase 3 parity gate plan)
 
@@ -3646,3 +3657,2237 @@ graph TD
 **Fork paths:**
 - Continue execution → validate in dev preview and promote dashboard/charts to prod project
 - Pivot to hardening → add smoke checklist for filter-to-tile target correctness and broken-link checks
+
+### [LOG-023] - [RETROSPECTIVE] - Lightdash semantic layer audit: marts.yml anti-patterns catalogued, BI tooling pivot initiated - Task: PHASE-004
+**Timestamp:** 2026-02-20 22:50
+**Depends On:** LOG-022 (v2.0 dashboard shipped), LOG-019 (v3 modeling plan)
+
+---
+
+#### Executive Summary
+
+Pair-programming session surfaced a fundamental maintainability crisis in `models/marts/marts.yml` (1,800 lines / ~15k tokens). The file is ~80% Lightdash semantic layer config masquerading as dbt modeling. Nine anti-patterns identified; ~61% of the file is estimated waste (boilerplate, duplication, workarounds). Combined with a confirmed read-only Lightdash MCP (zero write operations), the decision is to **pause Phase 4 Lightdash migration** and research alternative BI tools.
+
+#### The Trigger
+
+During Phase 4 chart migration, attempting to onboard an agent to pair-program dashboard work revealed two compounding blockers:
+
+1. **`marts.yml` is too large for agents to hold in context** — at 15k tokens, agents that touch it tend to add more duplicate metrics rather than consolidate, because the relationship between metrics and charts is opaque.
+2. **Lightdash MCP is read-only** — agents can read charts-as-code (193k chars JSON export) and the semantic layer, but cannot create/update/delete charts or dashboards. "Pair program the dashboard" is structurally impossible in the current stack.
+
+#### Anti-Pattern Catalogue
+
+##### AP-1: The Monolith — single file, 11 models, 3 concerns
+
+Everything lives in one `marts.yml`: column definitions, Lightdash semantic config (joins/metrics/parameters/URLs/additional_dimensions), and dbt tests. No separation by domain (TickTick vs Todoist) or by concern (schema vs semantic).
+
+- `fct_tasks` (v1): L3–L476 (~473 lines, ~70% Lightdash-specific)
+- `fct_tasks_v3`: L1282–L1628 (~346 lines, ~70% Lightdash-specific)
+- `fct_habit`: L739–L1102 (~363 lines, ~15% Lightdash-specific)
+- Others: ~400 lines combined
+
+##### AP-2: The time_intervals Shotgun — 20 identical 15-element arrays (~300 lines)
+
+The same 15-element `time_intervals` list (`[RAW, DAY, HOUR, MINUTE, WEEK, MONTH, QUARTER, YEAR, DAY_OF_WEEK_INDEX, DAY_OF_WEEK_NAME, DAY_OF_MONTH_NUM, WEEK_NUM, MONTH_NUM, QUARTER_NUM, YEAR_NUM]`) appears 20 times. Every date column gets the full list — even columns never sliced by `DAY_OF_WEEK_NAME`. Lightdash has no default `time_intervals` config; repetition is forced by the tool.
+
+**Citation:** `models/marts/marts.yml` lines 27, 53, 148, 342, 502, 546, 721, 821, 881, 1025, 1079, 1137, 1256, 1302, 1311, 1378, 1535, 1650, 1671 (and one on `dim_date_spine` L721)
+
+##### AP-3: The Copy-Paste v3 Migration — v1 and v3 near-identical (~350 lines duplicated)
+
+`fct_tasks` and `fct_tasks_v3` are structurally identical with `_v3` suffix changes. Same `url_metadata`, `dynamic_grain_url`, `dynamic_parent_grain_url`, `dimension_grain`, `formatted_dimension_grain`, `parent_dimension_grain`, `formatted_parent_dimension_grain` additional_dimensions blocks. Same metrics (`total_task_instances`, `completed_tasks`, `count`, `overdue_tasks`, `completion_rate`). Same parameters (`count_grain`, `folder_name`, `project_name`). Only substantive difference: v3 drops the tags join.
+
+Same duplication pattern in `dim_projects` vs `dim_projects_v3` and `dim_folders` vs `dim_folders_v3`.
+
+**Citation:** Compare `models/marts/marts.yml` L187–L335 (v1 additional_dims) with L1402–L1531 (v3 additional_dims)
+
+##### AP-4: The CASE WHEN Default Hack — BI filter logic in join predicates (5 instances)
+
+```yaml
+sql_on: |
+  ${fct_tasks.project_id} = ${dim_projects.project_id}
+  AND
+  CASE 
+    WHEN 'default_ld_param_value' in (${ld.parameters.fct_tasks.project_name}) then 1=1
+    ELSE ${dim_projects.project_name} IN (${ld.parameters.fct_tasks.project_name})
+  END
+```
+
+Workaround for Lightdash not supporting optional join-level parameter filtering. The magic sentinel `default_ld_param_value` appears 10 times (5 in join SQL, 5 in parameter defaults). Couples join semantics to BI tool behavior. The `INNER` join type means if the CASE logic breaks, rows silently disappear.
+
+**Citation:** `models/marts/marts.yml` L371, L386, L396 (v1) and L1549, L1559 (v3)
+
+##### AP-5: The URL Template Explosion — 34 URL definitions (~150 lines)
+
+34 instances of `label: open in ticktick (mac/web)` URL templates. Always in pairs (mac deep link + web link). Attached to every dimension that needs a clickable link: `title`, `project_name`, `folder_name`, `dimension_grain`, `formatted_dimension_grain`, `parent_dimension_grain`, `formatted_parent_dimension_grain`. Lightdash doesn't support model-level URL templating, so each dimension gets its own copy.
+
+**Citation:** `models/marts/marts.yml` — 34 occurrences of `label: open in ticktick`
+
+##### AP-6: The FARM_FINGERPRINT Emoji Factory — 6 identical SQL blocks (~50 lines)
+
+```sql
+CONCAT(
+  CODE_POINTS_TO_STRING([
+    127812 + MOD(ABS(FARM_FINGERPRINT(${dimension_name})), 50)
+  ]),
+  ' ',
+  ${dimension_name}
+)
+```
+
+Appears 6 times for: `formatted_dimension_grain` (v1+v3), `formatted_parent_dimension_grain` (v1+v3), `project_name_formatted` (v1+v3). Can't be extracted to a macro — it's Lightdash `additional_dimensions` SQL, not dbt SQL.
+
+**Citation:** `models/marts/marts.yml` L282, L319, L603, L1478, L1515, L1707
+
+##### AP-7: The Passthrough Mart — SQL models that do nothing
+
+All 6 TickTick mart SQL files are `SELECT * FROM staging`:
+
+```sql
+-- fct_tasks_v3.sql
+with source as (select * from {{ ref('stg__ticktick_v3__tasks') }})
+select * from source
+```
+
+The "mart" layer exists solely as an anchor for Lightdash semantic config. Adds an extra BQ view layer for no analytical reason.
+
+**Citation:** `models/marts/fct_tasks.sql`, `fct_tasks_v3.sql`, `dim_projects.sql`, `dim_projects_v3.sql`, `dim_folders.sql`, `dim_folders_v3.sql`
+
+##### AP-8: The Dead Weight Columns — columns nobody queries (~200 lines)
+
+`fct_habit` defines 31 columns with full Todoist API doc descriptions. Only ~5-6 are referenced in any Lightdash chart (`cleaned_content`, `completed_at`, `due_date`, `project_id`, `scheduled_date`, `is_completed`). The other 25 have `meta: {}` — documentation for documentation's sake.
+
+Similarly `dim_project_todoist` has 20+ columns, most unused.
+
+##### AP-9: The Inconsistent Meta Placement — abandoned tooling artifacts
+
+Some `dim_projects` v1 columns carry `dbt-osmosis-force-inherit-descriptions: true` at a sibling level to `config.meta`, others don't. Suggests a partially-applied dbt-osmosis run that was tried and abandoned, leaving ghost config.
+
+**Citation:** `models/marts/marts.yml` L520 (`completed_time`), L542 (`kind`), L573 (`project_id`), L618 (`sort_order`)
+
+#### Quantitative Summary
+
+| Anti-Pattern | Est. Wasted Lines | Root Cause |
+|---|---|---|
+| AP-2: time_intervals boilerplate | ~300 | LD has no default config |
+| AP-3: v1/v3 duplication | ~350 | Copy-paste migration |
+| AP-5: URL template explosion | ~150 | LD has no model-level URL templating |
+| AP-8: Dead weight columns | ~200 | Completionist documentation habit |
+| AP-4: CASE WHEN default hack | ~60 | LD parameter filtering workaround |
+| AP-6: FARM_FINGERPRINT copies | ~50 | additional_dimensions can't call macros |
+| **Total estimated waste** | **~1,100 of 1,800 lines (~61%)** | |
+
+#### Lightdash MCP Audit
+
+| Capability | Available | Write? |
+|---|---|---|
+| List projects/charts/dashboards/spaces | Yes | No |
+| Get dashboards/charts as code | Yes (export only) | No |
+| Get catalog/metadata/metrics | Yes | No |
+| Create/update/delete chart | **No** | **No** |
+| Create/update/delete dashboard | **No** | **No** |
+
+#### Decision: Pause Phase 4, Research Alternatives
+
+**DECISION-014:** Pause Lightdash migration. Research alternative BI/metrics tools before investing further in a stack that blocks agent collaboration.
+
+**Research criteria:**
+- Self-hostable, free or <$10/month
+- Agent access: MCP server or write API (create/update charts programmatically)
+- Metrics management as first-class citizen (not buried in dbt YAML)
+- Custom visualization support
+- dbt integration optional (nice-to-have, not required)
+
+**Candidates:** Cube.js (user-nominated), plus others surfaced during research.
+
+**Rejected alternative: "Just restructure marts.yml"** — Splitting into per-model files would reduce immediate pain but doesn't solve the core problem: Lightdash's semantic layer lives in dbt YAML, agents can't interact with the chart/dashboard layer, and the maintenance tax is structural, not organizational.
+
+---
+
+📦 STATELESS HANDOFF
+
+**Layer 1 — Local Context:**
+→ Last action: LOG-023 (RETROSPECTIVE: 9 anti-patterns catalogued, DECISION-014 to pause Phase 4 and research BI alternatives)
+→ Dependency chain: LOG-023 ← LOG-022 ← LOG-019
+→ Next action: Fork to deep-dive research on BI tool alternatives (Cube.js + others matching criteria)
+
+**Layer 2 — Global Context:**
+→ Architecture: dbt-BQ views → Lightdash (EU VM), v3 poller active, v3 marts shipped
+→ Patterns: DECISION-011 (legacy pipeline dead), DECISION-012 (v3 folder sourcing), DECISION-014 (BI tool pivot)
+
+**Fork paths:**
+- Research BI alternatives → evaluate Cube.js, Metabase, Superset, Evidence, others
+- If research concludes "keep Lightdash" → return to Phase 4 with restructured marts.yml
+- If research finds viable replacement → new phase: migrate from Lightdash
+### [LOG-024] - [RESEARCH] - BI tool alternative evaluation: Metabase emerges as clear winner over Cube.js, Evidence, Rill, Superset - Task: PHASE-004
+**Timestamp:** 2026-02-20 23:30
+**Depends On:** LOG-023 (DECISION-014: pause Phase 4, research BI alternatives)
+
+---
+
+#### Executive Summary
+
+Full evaluation of 5 self-hosted BI alternatives against DECISION-014 criteria (solo developer, free self-host, agent write access, metrics as first-class, BigQuery native). **Metabase is the clear winner.** Cube.js — despite strong community reputation — is eliminated as a category mismatch: it is a headless semantic layer API, not a dashboard tool, and would require building a custom React frontend. Evidence is compelling for static reports but structurally incompatible with the real-time GTD review goal.
+
+---
+
+#### Research Sources
+
+- GitHub: `cube-js/cube` (19.5k stars, Rust), `easecloudio/mcp-metabase-server` (70+ tools), `isaacwasserman/mcp_cube_server` (read-only, 2 tools)
+- Google Grounding: Cube.js docs, Metabase REST API docs, Evidence.dev changelog (Jun 2025 BigQuery update), Rill Data 2025 release notes
+- GitHub search: Metabase MCP ecosystem (5+ active repos, most with write capabilities)
+- Metabase version verified: v58 (Jan 2026), active release cadence
+
+---
+
+#### Why Cube.js Is the Wrong Tool Here
+
+The "good things" about Cube.js are real but solve a different problem. Cube.js is a **headless semantic layer API** — it sits between your database and a frontend you build yourself. There is no built-in visualization, no dashboard UI, no chart creation. The self-hosted Cube product delivers:
+
+- REST / GraphQL / SQL query APIs
+- JS/YAML schema files defining metrics and dimensions
+- Pre-aggregations and caching via Cube Store
+- Zero visualization layer
+
+The only MCP server found (`isaacwasserman/mcp_cube_server`, 9 stars) has exactly 2 tools: `read_data` and `describe_data` — both read-only. This is not a limitation of the MCP server; it reflects what Cube.js actually is. There are no dashboards to create.
+
+**Cube Cloud** (the paid managed product, launched ~2023) adds a visualization layer, but that is not self-hosted OSS.
+
+**Verdict:** Cube.js is for companies building embedded analytics products in their own applications. For a solo dev who needs a GTD review dashboard they can use during active planning sessions, adopting Cube.js means building and maintaining a custom React/Vue frontend. That inverts the maintenance goal.
+
+---
+
+#### Candidate Assessment
+
+| Candidate | Verdict | Key Reason |
+|---|---|---|
+| **Metabase** | **Recommended** | Full write API + 70-tool MCP + single Docker container |
+| **Evidence** | Defer | Static build-time queries incompatible with real-time goal |
+| **Cube.js** | Eliminated | Headless API, no dashboards, would require custom frontend |
+| **Rill Data** | Defer | BQ not primary path, GPL-3.0, smaller ecosystem |
+| **Apache Superset** | Eliminated | 5+ containers, heavy maintenance, no MCP ecosystem |
+
+---
+
+#### Metabase: Detailed Assessment
+
+**Self-hosting:** Single Docker container or JAR. Embedded H2 metadata store (or external Postgres for prod). No Cube Store, no Redis, no workers — just one process.
+
+**Write API (confirmed from official docs):**
+```
+POST /api/dashboard/           → create dashboard
+POST /api/card                 → create question/card (with SQL or visual query)
+POST /api/dashboard/:id/cards  → add existing card to dashboard with position
+PUT  /api/dashboard/:id/cards  → update card size/position
+DELETE /api/dashboard/:id/cards/:cardId → remove card
+```
+
+All endpoints accept API key via `x-api-key` header (no session cookie needed).
+
+**MCP ecosystem (Feb 2026 state):**
+
+| Repo | Stars | Write? | Notable tools |
+|---|---|---|---|
+| `easecloudio/mcp-metabase-server` | 46 | **Yes** | 70+ tools: full CRUD on dashboards, cards, collections, users, DB connections, analytics |
+| `imlewc/metabase-server` | 118 | Yes | Older, simpler |
+| `jerichosequitin/metabase-mcp` | 42 | Yes | Featured on Claude |
+| `hluaguo/metabase-mcp` | 36 | Yes | Python, FastMCP |
+| `CognitionAI/metabase-mcp-server` | 34 | Yes | TypeScript |
+
+Best candidate: `easecloudio/mcp-metabase-server` — full CRUD including:
+- `create_dashboard`, `update_dashboard`, `delete_dashboard`
+- `create_card`, `update_card`, `delete_card`, `execute_card`
+- `add_card_to_dashboard`, `remove_card_from_dashboard`, `update_dashboard_card` (position+size)
+- `create_dashboard_subscription`, `create_public_link`
+- `list_databases`, `execute_query`, `get_database_schema`
+
+**Metrics approach:** Metrics defined in Metabase's own layer (GUI or API), not in dbt YAML. The AP-1 through AP-9 anti-patterns from LOG-023 are structurally eliminated — no `marts.yml` involvement.
+
+**BigQuery:** Native connector. Points at existing BQ external tables/views. No change to dbt pipeline.
+
+**Version:** v58 (Jan 2026) — dark mode, Remote sync (Git integration for versioning analytics), Metabot AI (cloud add-on), AWS IAM Auth.
+
+**Latency alignment:** Queries run at view time against BQ. When the v3 poller updates BQ, the next dashboard refresh reflects it. Aligns with "perceptual real-time" goal from PROJECT.md.
+
+---
+
+#### Evidence: Why It's Interesting But Wrong for This Use Case
+
+Evidence generates static HTML from Markdown+SQL at build time. Queries run during `npm run build`, not at dashboard view time. This makes it:
+
+- **Great for:** periodic reports, data-driven documents, Git-diffable analytics, agent collaboration via file writes
+- **Wrong for:** the "extension of your task manager" goal where dashboard queries must reflect current state during active GTD sessions
+
+BigQuery integration is confirmed active (`@evidence-dev/bigquery` v2.0.12, Feb 2026).
+
+**Possible hybrid use:** Evidence for weekly review static reports (run build on schedule), Metabase for live operational dashboards. Park for later.
+
+---
+
+#### Architecture Implication: Metabase Replaces Lightdash
+
+```mermaid
+graph TD
+    A[v3 Poller on VM] --> B[GCS Parquet]
+    B --> C[BigQuery external tables]
+    C --> D[dbt marts - v3]
+    D --> E[Metabase on homelab]
+    E --> F[User - GTD Review]
+
+    G[Metabase MCP Server] --> E
+    H[Agent] --> G
+```
+
+Key change from current state: Lightdash EU VM → Metabase homelab. This also resolves the EU→Asia latency blocker from `parked_tasks`.
+
+---
+
+#### Open Questions Before Migration
+
+1. **Does Metabase OSS support BQ service account auth?** (Needed for homelab — no gcloud CLI)
+2. **What's the resource footprint?** Metabase JVM — RAM requirements on homelab hardware?
+3. **Remote sync feature (v57+):** Does Git-backed analytics versioning replace the need for charts-as-code?
+4. **Migration scope:** Can existing Lightdash chart logic (CASE WHEN filters, URL templates, grain params) map to Metabase questions without full rewrite?
+
+---
+
+📦 STATELESS HANDOFF
+
+**Layer 1 — Local Context:**
+→ Last action: LOG-024 (RESEARCH: 5 BI tools evaluated, Metabase recommended, Cube.js eliminated as category mismatch)
+→ Dependency chain: LOG-024 ← LOG-023 (DECISION-014) ← LOG-022
+→ Next action: User decision on Metabase → if approved, plan Phase 5 migration (homelab deploy + BQ connect + chart migration)
+
+**Layer 2 — Global Context:**
+→ Architecture: dbt-BQ views → Lightdash (EU VM), v3 poller active, v3 marts shipped
+→ Patterns: DECISION-014 (BI tool pivot), LOG-019 (v3 modeling plan), LOG-017 (GCS Parquet emitter)
+
+**Fork paths:**
+- Approve Metabase → write DECISION-015, plan Phase 5 homelab deploy
+- Explore Metabase + Evidence hybrid → park Evidence as periodic report layer
+- More research needed → specify which tool or question to dig deeper
+
+### [LOG-025] - [DECISION] - BI platform direction finalized: dbt semantic layer + Grafana visualization layer - Task: PHASE-004
+**Timestamp:** 2026-02-21 09:20
+**Depends On:** LOG-024 (BI alternatives research), LOG-023 (DECISION-014 BI pivot)
+
+---
+
+#### Decision Context
+
+We revisited the BI decision after LOG-024 because the requirement changed from "choose a replacement dashboard tool" to "choose a platform that supports human+agent pair programming with MCP write as first-class".
+
+Raw user evidence from this session:
+
+```text
+"right now the BI tool is where the fct <> dim joins are created and metrics maintained. are we saying that we push left to dbt... should we add cube js back to the equation"
+
+"approved let's log this down. The future is dbt x grafana!"
+```
+
+This clarified that semantic ownership and visualization ownership must be separated intentionally.
+
+---
+
+#### DECISION-015
+
+Adopt **dbt x Grafana** as target architecture.
+
+- dbt is the semantic source of truth for joins, metrics, measures, and custom SQL.
+- Grafana is the BI interaction layer for dashboards, annotations, thresholds, and visual exploration.
+- Agents operate across both layers: filesystem+git for dbt semantics, Grafana MCP for dashboard lifecycle.
+
+Citations:
+- Existing dbt-first architecture and BI placement: `gsd-lite/ARCHITECTURE.md:1`
+- Current BI pivot criteria emphasizing agent write access: `gsd-lite/WORK.md:40`
+- Prior recommendation now superseded by this decision: `gsd-lite/WORK.md:3813`
+
+---
+
+#### Rejected Paths And Why
+
+1. Metabase-as-primary now
+   - Rejected in this round because requirement prioritizes MCP-write-first and higher visualization flexibility under agent collaboration.
+2. Cube.js now
+   - Deferred because it introduces another control plane before proving a multi-consumer semantic API requirement.
+3. BI-native semantic ownership
+   - Rejected to avoid metric/logic lock-in inside BI and to keep semantic versioning in dbt code review flow.
+
+---
+
+#### Operating Model
+
+```mermaid
+graph TD
+    A[Agent and User] --> B[dbt semantic layer<br/>joins metrics custom SQL]
+    A --> C[Grafana MCP<br/>dashboard and panel writes]
+    B --> D[BigQuery marts and views]
+    D --> E[Grafana BigQuery datasource]
+    C --> F[Grafana dashboards<br/>annotations thresholds]
+    E --> F
+```
+
+Execution rule: semantics evolve in dbt PRs, visualization evolves in Grafana via MCP, and major decisions are logged in WORK artifacts.
+
+---
+
+📦 STATELESS HANDOFF
+
+**Layer 1 — Local Context:**
+→ Last action: LOG-025 (DECISION-015 approved: dbt semantic layer + Grafana visualization layer)
+→ Dependency chain: LOG-025 ← LOG-024 ← LOG-023
+→ Next action: Draft PHASE-005 plan with risk gate for BigQuery datasource plugin and first dashboard parity slice.
+
+**Layer 2 — Global Context:**
+→ Architecture: v3 poller feeds BigQuery and dbt marts; BI layer pivot is now formalized toward Grafana.
+→ Patterns: DECISION-009 (v3 completion facts), DECISION-014 (BI pivot), DECISION-015 (dbt x Grafana separation of concerns).
+
+**Fork paths:**
+- Continue execution → produce PHASE-005 task list and acceptance criteria
+- Discuss architecture depth → decide if Cube.js trigger conditions should be documented in INBOX
+
+### [LOG-026] - [DECISION] - Persistence strategy locked for PHASE-005: bind mounts over named volumes for migration-first operations - Task: PHASE-005
+**Timestamp:** 2026-02-22 00:00
+**Depends On:** LOG-025 (DECISION-015 dbt x Grafana architecture), LOG-024 (research-driven BI decision discipline)
+
+---
+
+#### Why This Log Exists
+
+We paused implementation because a contradiction appeared: Docker docs generally recommend named volumes, while our operator workflow prioritizes host-to-host migration by copying one persistent folder tree.
+
+This log captures the research, quotes, and decision so a zero-context agent can continue without replaying chat.
+
+Local context that this decision must satisfy:
+- Active architecture: `DECISION-015` in `gsd-lite/WORK.md:12` and `gsd-lite/WORK.md:41`
+- Execution lane: PHASE-005 next step in `gsd-lite/WORK.md:49`
+
+---
+
+#### Step-by-Step Research Walkthrough
+
+1. Re-validated Grafana image direction from official docs in repository source.
+2. Re-validated Grafana persistence guidance for Docker (volumes and bind mounts both supported).
+3. Re-validated Docker storage guidance for migration and portability tradeoffs.
+4. Mapped those findings against explicit operator priority from session evidence.
+5. Locked persistence decision and recorded rejected paths.
+
+---
+
+#### Inline Source Evidence With Quotes
+
+1) Grafana image repository change (official)
+
+> "Starting with Grafana release `12.4.0`, the `grafana/grafana-oss` Docker Hub repository will no longer be updated. Instead, we encourage you to use the `grafana/grafana` Docker Hub repository."
+
+Context: this removes ambiguity on image choice for PHASE-005 compose.
+Citation: https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/setup-grafana/installation/docker/index.md (accessed 2026-02-22)
+
+2) Grafana persistence options and intent split (official)
+
+> "To avoid losing your data, you can set up persistent storage using Docker volumes or bind mounts for your container."
+
+> "If you want your storage to be fully managed by Docker... choose persistent storage. However, if you need full control of the storage and want to allow other processes besides Docker to access or modify the storage layer, then bind mounts is the right choice for your environment."
+
+Context: Grafana explicitly allows either model; selection is environment/ops-goal dependent, not a correctness binary.
+Citation: https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/setup-grafana/installation/docker/index.md (accessed 2026-02-22)
+
+3) Docker generalized recommendation (official)
+
+> "Volumes are the preferred mechanism for persisting data generated by and used by Docker containers."
+
+> "Volumes are easier to back up or migrate than bind mounts."
+
+Context: Docker default recommendation optimizes for Docker-managed lifecycle and broad portability across environments.
+Citation: https://raw.githubusercontent.com/docker/docs/main/content/manuals/engine/storage/volumes.md (accessed 2026-02-22)
+
+4) Docker bind-mount tradeoff (official)
+
+> "Containers with bind mounts are strongly tied to the host."
+
+Context: bind mounts require consistent host directory layout and permission discipline.
+Citation: https://raw.githubusercontent.com/docker/docs/main/content/manuals/engine/storage/bind-mounts.md (accessed 2026-02-22)
+
+5) Grafana backup specifics for rollback and migration safety (official)
+
+> "The default Grafana database is SQLite... copy [grafana.db] to your backup repository."
+
+> "To ensure data integrity, shut down your Grafana service before backing up the SQLite database."
+
+Context: regardless of mount model, safe backup behavior requires quiescing service before SQLite copy.
+Citation: https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/shared/back-up/back-up-grafana.md (accessed 2026-02-22)
+
+---
+
+#### What We Corrected
+
+Initial assumption under review: "Docker recommends volumes, so volumes are probably right here."
+
+Correction after evidence + user intent:
+- User priority was explicit: "number one priority is to being able to migrate with ease."
+- Final operator decision was explicit: "okay bind mount it is!"
+
+This is not a standards violation; it is a goal-specific choice where migration-by-folder-copy is the dominant objective.
+
+---
+
+#### DECISION-016
+
+Choose **bind mounts** for Grafana persistence in PHASE-005.
+
+Rationale:
+- Matches operator muscle memory and migration workflow (copy `./persistent/...` tree to new host).
+- Keeps state visible and directly transferable without volume export/import choreography.
+- Compatible with official Grafana image behavior.
+
+Hard constraints for implementation:
+- Use `grafana/grafana` image lineage (12.4.0+ guidance).
+- Persist `/var/lib/grafana` via bind mount.
+- Keep provisioning and secrets under host-managed paths where appropriate.
+- Enforce host permissions suitable for Grafana container runtime user.
+
+---
+
+#### Rejected Paths And Why
+
+1. Named volumes as default now
+   - Rejected for this phase because our top priority is migration by direct filesystem transfer, not Docker-managed abstraction.
+
+2. Hybrid model now (volume for data, bind for config)
+   - Deferred. It can be revisited later if we need stricter operational separation, but it adds complexity before first PHASE-005 bring-up.
+
+---
+
+#### System Interaction Map
+
+```mermaid
+graph TD
+    A[Host persistent tree<br/>./persistent/grafana] --> B[Bind mount]
+    B --> C[Grafana container<br/>grafana/grafana]
+    C --> D["/var/lib/grafana"<br/>sqlite plugins state]
+    A --> E[Provisioning files<br/>datasource and dashboards]
+    E --> C
+    F[Target server] --> G[Folder sync copy]
+    G --> A
+```
+
+---
+
+📦 STATELESS HANDOFF
+
+**Layer 1 — Local Context:**
+→ Last action: LOG-026 (DECISION-016: bind mounts selected for migration-first PHASE-005)
+→ Dependency chain: LOG-026 ← LOG-025 ← LOG-024
+→ Next action: implement `docker-compose.yaml` using `./persistent` bind mounts and `grafana/grafana` image, then run first bring-up and persistence validation.
+
+**Layer 2 — Global Context:**
+→ Architecture: DECISION-015 remains authoritative: dbt owns semantic logic, Grafana owns visualization/annotation.
+→ Patterns: research-first decisioning, explicit tradeoff logging, and operator-priority selection under PHASE-005.
+
+**Fork paths:**
+- Continue execution → compose implementation + migration run validation (cold copy to second host path)
+- Discuss hardening → decide when to introduce hybrid/volume strategy and backup cadence policy
+
+### [LOG-027] - [EXEC] - PHASE-005 gate checks passed: Grafana auth, BigQuery query path, and bind-mount persistence verified - Task: PHASE-005
+**Timestamp:** 2026-02-22 00:35
+**Depends On:** LOG-026 (DECISION-016 bind-mount persistence), LOG-025 (DECISION-015 dbt x Grafana architecture)
+
+---
+
+#### Execution Narrative
+
+This log records concrete execution after LOG-026 planning. The objective from `gsd-lite/WORK.md:49` was to validate three risk gates before MCP workflow setup:
+1) homelab Grafana bring-up,
+2) BigQuery plugin and datasource query path,
+3) persistence behavior under container teardown.
+
+All three gates were completed in the running Grafana workspace.
+
+Citations:
+- Planned PHASE-005 next action: `gsd-lite/WORK.md:49`
+- Persistence decision baseline: `gsd-lite/WORK.md:4126`
+- Compose image and data bind mount in workspace: `/home/ubuntu/dev/grafana_docker/docker-compose.yaml:3`, `/home/ubuntu/dev/grafana_docker/docker-compose.yaml:13`
+
+---
+
+#### Raw Evidence
+
+Operator confirmation from session transcript (2026-02-22):
+
+```text
+#1 password changed
+#2 installed
+#3 configured the connection grafana confirmed can query my BQ project.
+#4 confirmed bind mount work dashboard persist after docker compose down -v
+```
+
+This evidence closes the execution gates requested by PHASE-005 planning.
+
+---
+
+#### What Changed From Prior Expectation
+
+Prior expectation: we still needed to run persistence validation as a separate upcoming step.
+
+Correction: operator already executed a stronger persistence test (`docker compose down -v` then recovery) and confirmed dashboards persisted through bind mounts. This exceeds a simple restart smoke test.
+
+---
+
+#### Decision Record For This Execution Slice
+
+Chosen path:
+- Keep the deployment path simple and verified in UI first, then codify MCP and provisioning automation.
+
+Rejected alternatives:
+1. Jump directly to MCP authoring before datasource validation
+   - Rejected because it hides plugin and auth failures behind automation noise.
+2. Add reverse proxy and TLS now
+   - Rejected because it expands scope before we complete single-node MCP integration.
+
+---
+
+#### Verified System Path
+
+```mermaid
+graph TD
+    A[Operator] --> B[Grafana UI<br/>local homelab]
+    B --> C[BigQuery datasource plugin]
+    C --> D[BigQuery project query ok]
+    E[Host bind mount<br/>persistent grafana data] --> F[Grafana container]
+    F --> B
+    G[Compose teardown<br/>down -v] --> F
+    E --> H[Dashboard state persists]
+```
+
+---
+
+📦 STATELESS HANDOFF
+
+**Layer 1 — Local Context:**
+→ Last action: LOG-027 (execution gates passed for PHASE-005 baseline)
+→ Dependency chain: LOG-027 ← LOG-026 ← LOG-025
+→ Next action: set up Grafana MCP workflow and codify datasource/dashboard provisioning files under `persistent/grafana/provisioning`.
+
+**Layer 2 — Global Context:**
+→ Architecture: DECISION-015 remains active — dbt owns semantic logic, Grafana owns visualization and annotation.
+→ Patterns: DECISION-016 bind-mount persistence remains the migration-first operating standard.
+
+**Fork paths:**
+- Continue execution → configure MCP access and create first MCP-authored dashboard update.
+- Discuss hardening → define backup cadence and decide when to add reverse proxy and TLS.
+### [LOG-028] - [RESEARCH] - Official Grafana MCP capability audit completed; fork-ready integration contract for PHASE-005 - Task: PHASE-005
+**Timestamp:** 2026-02-22 01:20
+**Depends On:** LOG-027 (PHASE-005 baseline gate checks complete), LOG-025 (DECISION-015 dbt x Grafana architecture)
+
+---
+
+#### Why This Log Exists
+
+User pointed to the official maintained repository (`https://github.com/grafana/mcp-grafana`) and asked to capture research before forking. This log records exactly what was verified, what changed from prior uncertainty, and the fork-ready integration contract.
+
+Local context this log must satisfy:
+- PHASE-005 next action is MCP setup + provisioning + first parity slice (`gsd-lite/WORK.md:49`)
+- Architecture boundary remains dbt semantics + Grafana visualization (`gsd-lite/WORK.md:41`)
+- Baseline gates already passed in execution (`gsd-lite/WORK.md:4183`)
+
+---
+
+#### Step-by-Step Verification Walkthrough
+
+1. Verified repository health and ownership for `grafana/mcp-grafana` (official Grafana org, active release cadence).
+2. Verified dashboard write path exists (`update_dashboard`, `patch_dashboard`) and is not read-only by default.
+3. Verified auth contract: service account token is preferred; `GRAFANA_API_KEY` is deprecated.
+4. Verified transport nuance: Docker image defaults to SSE, but stdio clients must force `-t stdio` and keep stdin open.
+5. Verified permissions model and required write scopes for dashboard lifecycle.
+6. Verified datasource query-tool coverage and checked implication for BigQuery-backed dashboards.
+7. Verified upstream integration tests include write operation usage for dashboard updates.
+
+---
+
+#### Raw Evidence Snippets
+
+1) Dashboard write tools exist (official README)
+
+```text
+- Update or create a dashboard
+- Patch dashboard
+```
+
+Citation: https://raw.githubusercontent.com/grafana/mcp-grafana/d19174af7eff75a29f90e3bd7caab8358a88d1b1/README.md (accessed 2026-02-22)
+
+2) Read-only mode is opt-in, not default
+
+```text
+The --disable-write flag provides a way to run the MCP server in read-only mode
+```
+
+Citation: https://raw.githubusercontent.com/grafana/mcp-grafana/d19174af7eff75a29f90e3bd7caab8358a88d1b1/README.md (accessed 2026-02-22)
+
+3) Service account token is the forward auth path
+
+```text
+The environment variable GRAFANA_API_KEY is deprecated ... Please migrate to using GRAFANA_SERVICE_ACCOUNT_TOKEN instead.
+```
+
+Citation: https://raw.githubusercontent.com/grafana/mcp-grafana/d19174af7eff75a29f90e3bd7caab8358a88d1b1/README.md (accessed 2026-02-22)
+
+4) Docker stdio override is required for MCP client embedding
+
+```text
+for stdio mode you must explicitly override the default with -t stdio and include the -i flag
+```
+
+Citation: https://raw.githubusercontent.com/grafana/mcp-grafana/d19174af7eff75a29f90e3bd7caab8358a88d1b1/README.md (accessed 2026-02-22)
+
+5) RBAC requirement confirms dashboard write permissions
+
+```text
+update_dashboard ... Required RBAC Permissions: dashboards:create, dashboards:write
+```
+
+Citation: https://raw.githubusercontent.com/grafana/mcp-grafana/d19174af7eff75a29f90e3bd7caab8358a88d1b1/README.md (accessed 2026-02-22)
+
+6) Upstream test confirms tool-level write workflow is exercised
+
+```python
+create_result = await mcp_client.call_tool("update_dashboard", {"dashboard": dashboard_json, ...})
+```
+
+Citation: https://raw.githubusercontent.com/grafana/mcp-grafana/d19174af7eff75a29f90e3bd7caab8358a88d1b1/tests/dashboards_test.py (accessed 2026-02-22)
+
+7) Recent release activity (maintenance signal)
+
+```text
+## [0.11.0] - 2026-02-19
+## [0.10.0] - 2026-02-12
+```
+
+Citation: https://raw.githubusercontent.com/grafana/mcp-grafana/d19174af7eff75a29f90e3bd7caab8358a88d1b1/CHANGELOG.md (accessed 2026-02-22)
+
+---
+
+#### What We Corrected
+
+- Prior uncertainty: Grafana MCP write capability was assumed but not yet hard-verified from official source.
+- Correction: official `grafana/mcp-grafana` provides explicit dashboard write tools and permission model, and upstream tests exercise `update_dashboard`.
+
+- Prior risk concern: no BigQuery-specific MCP query helper might block dashboard migration.
+- Correction: this is not blocking for PHASE-005 because migration scope is dashboard lifecycle via MCP against an already-configured BigQuery datasource (validated in LOG-027).
+
+---
+
+#### Decision Record and Rejected Paths
+
+Chosen path for fork execution:
+- Fork `grafana/mcp-grafana`, run it in stdio for local MCP client workflows, keep write tools enabled, and apply least-privilege service-account scopes sufficient for dashboard CRUD.
+
+Rejected alternatives:
+1. Continue with unofficial third-party Grafana MCP servers first
+   - Rejected because official maintained upstream now exists and reduces drift risk.
+2. Run in read-only mode initially
+   - Rejected for PHASE-005 because first parity slice requires create/update dashboard operations.
+3. Skip MCP and script Grafana HTTP API directly
+   - Rejected because it breaks the pair-programming MCP contract and duplicates tooling already provided upstream.
+
+---
+
+#### Fork-Ready Execution Contract
+
+Minimal launch profile for local MCP client:
+
+```bash
+docker run --rm -i \
+  -e GRAFANA_URL=http://localhost:3000 \
+  -e GRAFANA_SERVICE_ACCOUNT_TOKEN=<token> \
+  grafana/mcp-grafana -t stdio
+```
+
+Required PHASE-005 capability checks after fork wiring:
+1. `search_dashboards` returns known dashboard.
+2. `update_dashboard` can create a throwaway dashboard in target folder.
+3. `patch_dashboard` can apply targeted panel/title change without full JSON rewrite.
+4. Existing BigQuery datasource UID remains stable for panel references.
+
+---
+
+#### System Interaction Map
+
+```mermaid
+graph TD
+    A[Agent and User] --> B[MCP client<br/>stdio transport]
+    B --> C[mcp-grafana fork]
+    C --> D[Grafana API]
+    D --> E[Dashboards and folders]
+    D --> F[BigQuery datasource]
+    F --> G[dbt marts in BigQuery]
+```
+
+---
+
+📦 STATELESS HANDOFF
+
+**Layer 1 - Local Context:**
+→ Last action: LOG-028 (official Grafana MCP audit captured, fork-ready contract documented)
+→ Dependency chain: LOG-028 <- LOG-027 <- LOG-025
+→ Next action: fork `grafana/mcp-grafana`, run stdio smoke tests for `search_dashboards` + `update_dashboard`, then execute first parity slice migration.
+
+**Layer 2 - Global Context:**
+→ Architecture: DECISION-015 remains active - dbt owns semantic logic, Grafana owns visualization lifecycle.
+→ Patterns: DECISION-016 bind-mount persistence and PHASE-005 migration-first execution remain governing constraints.
+
+**Fork paths:**
+- Continue execution -> MCP fork wiring, auth token scoping, and first dashboard parity slice.
+- Discuss hardening -> decide TLS transport mode, org scoping strategy, and backup cadence before broader rollout.
+
+### [LOG-029] - [EXEC] - PHASE-005 verification closed: MCP write path proven, first Grafana parity slice user-validated, transition to dbt push-left prep - Task: PHASE-005
+**Timestamp:** 2026-02-22 01:24
+**Depends On:** LOG-028 (official MCP capability audit), LOG-027 (Grafana baseline gate checks), LOG-025 (dbt x Grafana architecture decision)
+
+---
+
+#### Why This Log Exists
+
+User asked to execute two concrete gates: (1) validate Grafana MCP write path in the live environment and (2) migrate a first parity slice. After execution, user explicitly confirmed correctness of `Empty Projects To Clean`, then asked whether Grafana discovery is done and whether to switch to dbt push-left refactor planning.
+
+This log records the execution evidence, what changed versus prior plan, and the decision boundary for next phase.
+
+---
+
+#### Step-by-Step Walkthrough
+
+1. Pulled baseline dashboard to confirm datasource wiring and query shape (`demo`, UID `ad2lhm6`).
+2. Built write-path smoke artifact using MCP:
+   - created dashboard `mcp-smoke-20260222`
+   - patched title/tags via `tmp_update_dashboard` operations mode
+   - read back dashboard version/tags to prove persistence and mutability
+3. Extracted parity intent from prior Lightdash chart definitions:
+   - inbox distribution v3
+   - empty projects v3
+   - project pulse v3
+4. Created migration folder `gtd-migration` and new dashboard `gtd-weekly-review-v3`.
+5. Implemented three BigQuery-backed table panels with equivalent filters/joins/derived fields.
+6. Patched the parity dashboard tags after create to prove write path also holds for the migration artifact.
+7. Attempted panel image render for runtime verification; renderer plugin missing in Grafana instance.
+8. User validated correctness of `Empty Projects To Clean`; this closed functional parity gate for first slice.
+
+---
+
+#### Raw Evidence Snippets
+
+1) Datasource discovery succeeded via MCP
+
+```json
+{"datasources":[{"id":1,"uid":"cfdykvp3d8n40c","name":"grafana-bigquery-datasource","type":"grafana-bigquery-datasource","isDefault":true}],"total":1,"hasMore":false}
+```
+
+2) Write create succeeded
+
+```json
+{"id":2,"status":"success","uid":"mcp-smoke-20260222","url":"/d/mcp-smoke-20260222/mcp-write-smoke","version":1}
+```
+
+3) Write patch succeeded
+
+```json
+{"id":2,"status":"success","uid":"mcp-smoke-20260222","url":"/d/mcp-smoke-20260222/mcp-write-smoke-patched","version":2}
+```
+
+4) Readback confirms patched state
+
+```json
+{"dashboard":{"uid":"mcp-smoke-20260222","title":"MCP Write Smoke Patched","tags":["mcp","smoke","patched"],"version":2}}
+```
+
+5) Migration folder create succeeded
+
+```json
+{"id":3,"title":"GTD Migration","uid":"gtd-migration","url":"/dashboards/f/gtd-migration/gtd-migration","version":1}
+```
+
+6) Parity dashboard create succeeded
+
+```json
+{"id":4,"status":"success","uid":"gtd-weekly-review-v3","url":"/d/gtd-weekly-review-v3/gtd-weekly-review-v3-mcp-slice-1","version":1}
+```
+
+7) Parity dashboard patch succeeded
+
+```json
+{"id":4,"status":"success","uid":"gtd-weekly-review-v3","url":"/d/gtd-weekly-review-v3/gtd-weekly-review-v3-mcp-slice-1","version":2}
+```
+
+8) Render attempt surfaced explicit infra gap
+
+```text
+No image renderer available/installed
+For Grafana to be able to generate an image you need to install the Grafana Image Renderer plugin.
+```
+
+9) Human acceptance gate
+
+```text
+User confirmation: "confirmed this dashboard chart `Empty Projects To Clean` has correct data"
+```
+
+---
+
+#### What Changed and Why
+
+- Previous plan in LOG-028: fork/setup hardening path first, then smoke tests.
+- What actually happened: live `tmp` MCP endpoint was already connected and healthy, so we executed smoke tests and parity slice immediately.
+- Why this is better: it reduced uncertainty faster by validating real write lifecycle in the target environment before additional scaffolding work.
+
+---
+
+#### Decision Record and Rejected Paths
+
+**Decision:** Treat Grafana discovery for PHASE-005 as complete and shift to TASK-006 prep: research + design for migration-first artifacts-as-code and dbt push-left semantics.
+
+Rejected alternatives:
+1. Continue discovery-only validation in Grafana
+   - Rejected because create/patch/readback + user data acceptance already proved the critical path.
+2. Start broad dbt mart refactor immediately without artifacts-as-code research
+   - Rejected because migration-first philosophy needs deterministic dashboard/datasource commit path for agent-safe iteration and rollback.
+3. Keep BI-layer SQL logic in panels while refactoring incrementally
+   - Rejected because it preserves semantic drift risk and blocks single source of truth in dbt.
+
+---
+
+#### Citations
+
+- Active phase intent and updated next action context: `gsd-lite/WORK.md:11`, `gsd-lite/WORK.md:48`
+- Prior MCP capability contract baseline: `gsd-lite/WORK.md:4270`
+- Source parity definitions used for migration mapping:
+  - `lightdash/charts/ticktick-count-of-inbox-v3.yml:1`
+  - `lightdash/charts/ticktick-empty-projects-to-be-cleaned-v3.yml:1`
+  - `lightdash/charts/tmp-v3.yml:1`
+
+---
+
+#### System Interaction Map
+
+```mermaid
+graph TD
+    A[Agent and User] --> B[tmp MCP tools]
+    B --> C[Grafana API]
+    C --> D[Dashboard mcp-smoke-20260222]
+    C --> E[Dashboard gtd-weekly-review-v3]
+    E --> F[Panel Empty Projects To Clean]
+    E --> G[Panel Loops Distribution]
+    E --> H[Panel Project Pulse]
+    G --> I[BigQuery dataset ticktick_dbt_dev]
+    F --> I
+    H --> I
+```
+
+---
+
+📦 STATELESS HANDOFF
+
+**Layer 1 — Local Context:**
+→ Last action: LOG-029 (MCP write path and first parity slice verified; user accepted one panel correctness)
+→ Dependency chain: LOG-029 <- LOG-028 <- LOG-027 <- LOG-025
+→ Next action: research and lock Grafana artifacts-as-code workflow, then start dbt push-left weekly-review marts refactor.
+
+**Layer 2 — Global Context:**
+→ Architecture: DECISION-015 remains governing - dbt owns semantic logic; Grafana owns visualization lifecycle.
+→ Patterns: migration-first execution with agent-write MCP tooling is now validated in a live target Grafana.
+
+**Fork paths:**
+- Continue execution -> design commit/export/import contract for dashboards + datasource provisioning, then repoint panels to thin dbt marts.
+- Discuss strategy -> decide GitOps granularity (dashboard JSON vs targeted patch ops), promotion model (dev/stage/prod), and rollback unit.
+
+### [LOG-030] - [DECISION+EXEC] - Grafana setup finalized; MCP-first dashboard workflow documented; pivot locked to dbt push-left MVP on main-tasks tab - Task: PHASE-006
+**Timestamp:** 2026-02-22 02:10
+**Depends On:** LOG-029 (Grafana write-path + parity verification), LOG-028 (MCP capability contract), LOG-025 (dbt x Grafana architecture)
+
+---
+
+#### Executive Summary
+
+We closed Grafana setup and standardized the operating model: dashboards are authored live through Grafana MCP, then exported to Git as read-only artifacts for agent continuity. During discussion, we initially leaned too far into provisioning/GitOps complexity; user clarified the real need is versioned dashboard shape in Git, not mandatory programmatic apply-back into Grafana.
+
+This log captures that correction and the phase transition to dbt push-left work.
+
+---
+
+#### Step-by-Step Walkthrough
+
+1. Confirmed remote Docker-host Grafana pathing via fs1 and validated that `provisioning` exists but can be optional for daily migration execution.
+2. Implemented nested tooling under `grafana/scripts/`:
+   - `pyproject.toml` for isolated script runtime
+   - `export_grafana_artifacts.py` for API export
+   - `README.md` with runtime/usage docs
+3. Validated exporter output in runtime (user run): dashboard/provider/datasource artifacts were dumped successfully.
+4. User clarified desired operating model: read-only Git memory is enough; apply-to-Grafana automation is optional.
+5. Refactored exporter behavior to match that model:
+   - default = dashboards only
+   - optional flags for providers/datasources
+6. Added GitHub workflow `grafana_write_back.yml` (manual dispatch) to export and commit artifacts.
+7. Rewrote `grafana/README.md` with canonical MCP-first pair workflow and lifecycle diagrams.
+8. Updated Section 1 state in WORK to move from Grafana setup to dbt push-left kickoff, with first MVP scope set to Lightdash `main tasks` tab mapping.
+
+---
+
+#### Raw Evidence Snippets
+
+Exporter run result confirmed by user:
+
+```text
+uv run export_grafana_artifacts.py
+export complete:
+- dashboards: 3
+- providers: 2
+- datasources: 1
+output root: /home/ubuntu/dev/ticktick_dbt/grafana
+```
+
+Post-refactor exporter mode contract:
+
+```text
+Default mode: dashboard JSON export only
+Optional flags: --include-providers, --include-datasources
+```
+
+---
+
+#### What We Got Wrong and Correction
+
+- Initial direction: heavy provisioning-first framing (operate both runtime apply and artifact export simultaneously).
+- Why it was wrong for this phase: it added process overhead without improving the immediate migration requirement.
+- Corrected direction: MCP-first live authoring + API export to Git as read-only memory; keep provisioning artifacts optional.
+
+---
+
+#### Decision Record and Rejected Paths
+
+**Decision (DECISION-017):** Adopt MCP-first dashboard lifecycle with read-only Git artifact export as the default operating model for migration.
+
+Rejected alternatives:
+1. Provisioning/GitOps as mandatory path for every dashboard change
+   - Rejected for now due unnecessary complexity versus current objective.
+2. Manual MCP copy/paste dump workflow
+   - Rejected because API script is repeatable, less error-prone, and automation-ready.
+3. No artifact export, rely only on live Grafana state
+   - Rejected because future agents would lose deterministic context/history.
+
+---
+
+#### Citations
+
+- Export tool implementation: `grafana/scripts/export_grafana_artifacts.py:1`
+- Export runtime documentation: `grafana/scripts/README.md:1`
+- Write-back workflow scaffold: `.github/workflows/grafana_write_back.yml:1`
+- Canonical MCP-first process and lifecycle diagrams: `grafana/README.md:1`
+- Updated phase state and next action: `gsd-lite/WORK.md:11`, `gsd-lite/WORK.md:49`
+- Main-tasks tab scope source: `lightdash/dashboards/gtd-dash-v2-0.yml:246`
+
+---
+
+#### PHASE-006 Plan Context Seed (Declared for Restart)
+
+**Planning status:** Declared but not executed.
+
+**MVP boundary (first slice):** Lightdash dashboard `gtd-dash-v2-0`, tab `main tasks` (uuid `39a6f194-6bb1-4f15-ac03-8f49a0a6d602`).
+
+**Chart scope for first push-left cycle:**
+1. `tasks-lookahead-v3`
+2. `tasks-drill-down-by-grain-v3`
+3. `distribution-by-parent-dimension-v3`
+4. `what-did-you-do-v3`
+
+**TASK declarations:**
+- `TASK-006A` - Source mapping and semantic extraction
+  - map chart-level logic + dashboard-level filters from `lightdash/dashboards/gtd-dash-v2-0.yml`
+  - identify reusable dimensions/metrics currently embedded in BI layer
+- `TASK-006B` - dbt semantic push-left implementation
+  - create/refactor dbt marts so joins, derived fields, and metrics move out of panel SQL
+  - keep Grafana queries thin (`SELECT` from semantic marts)
+- `TASK-006C` - Grafana parity rebuild and validation
+  - recreate main-tasks slice in Grafana via MCP
+  - verify metric parity versus Lightdash outputs for selected charts
+
+**Acceptance criteria for PHASE-006 MVP start gate:**
+- TASK-006A mapping table committed in WORK log (chart -> model -> metric ownership)
+- TASK-006B models compile + run in dev target
+- TASK-006C panels point to thin dbt marts and match expected output shape
+
+---
+
+#### Workflow Interaction Map
+
+```mermaid
+graph TD
+    A[User and Agent pair planning] --> B[Grafana MCP write operations]
+    B --> C[Live Grafana dashboards]
+    C --> D[Export script via Grafana API]
+    D --> E[grafana/dashboards JSON artifacts]
+    E --> F[Git history]
+    F --> G[Next agent onboarding context]
+    G --> B
+```
+
+#### README for grafana
+##### Directory Layout
+
+- `dashboards/`: exported dashboard JSON artifacts (source of history for dashboard shape)
+- `scripts/`: exporter script and local tooling docs
+- `provisioning/`: optional files for file-provisioning/GitOps apply flows (not required for day-to-day migration work)
+
+##### Canonical Workflow (Current)
+
+1. Pair on dashboard changes in Grafana via MCP tools.
+2. Validate panel correctness in Grafana.
+3. Export dashboard JSON to this repo (`grafana/dashboards/...`).
+4. Commit artifacts so future agents can read shape/history.
+5. Next agent reads artifacts and continues building via MCP.
+
+```mermaid
+graph TD
+    A[User and Agent pair on slice goal] --> B[MCP writes dashboard in Grafana]
+    B --> C[Validate data and panel behavior]
+    C --> D[Run exporter script]
+    D --> E[grafana/dashboards JSON in Git]
+    E --> F[Future agent reads artifacts]
+    F --> B
+```
+
+##### Artifact Lifecycle
+
+- Live dashboard is the execution surface.
+- Exported JSON is the memory surface.
+- MCP is the mutation path.
+- Git is the audit path.
+
+```mermaid
+graph LR
+    A[Grafana live dashboard state] --> B[API export script]
+    B --> C[grafana/dashboards UID JSON]
+    C --> D[Git history and PR review]
+    D --> E[Agent context for next edit]
+    E --> F[MCP update operations]
+    F --> A
+```
+
+##### How Artifacts Work Together
+
+- `dashboards/*.json`
+  - Captures structure, queries, panels, and layout by UID.
+  - Used by agents to reconstruct intent and avoid starting blind.
+- `scripts/export_grafana_artifacts.py`
+  - Pulls dashboard definitions from Grafana API.
+  - Normalizes volatile fields for stable diffs.
+- `provisioning/*` (optional)
+  - Only needed if you also want file-provisioned apply behavior.
+  - Not required for MCP-first migration execution.
+
+```mermaid
+graph TD
+    A[MCP toolset] --> B[Grafana API]
+    B --> C[Dashboard runtime state]
+    C --> D[Exporter script]
+    D --> E[dashboards JSON artifacts]
+    E --> F[Git commits]
+    F --> G[Next agent onboarding context]
+```
+
+##### Runtime Options
+
+###### Option 1 (Recommended now): MCP-first + Read-only Git Export
+
+- Write path: MCP
+- Record path: exporter script -> `grafana/dashboards`
+- Apply-from-Git: not required
+
+###### Option 2 (Optional later): Provisioning/GitOps Apply
+
+- Write path: JSON/provisioning files
+- Apply path: Grafana file provisioning
+- Record path: same Git repo
+
+```mermaid
+graph TD
+    A[Option 1 MCP-first] --> B[Fast iteration]
+    A --> C[Read-only versioned artifacts]
+    D[Option 2 provisioning apply] --> E[Deterministic bootstraps]
+    D --> F[More operational overhead]
+```
+
+##### Export Commands
+
+From `grafana/scripts`:
+
+```bash
+uv run python export_grafana_artifacts.py
+```
+
+Export selected dashboards only:
+
+```bash
+uv run python export_grafana_artifacts.py --dashboard-uids gtd-weekly-review-v3
+```
+
+Include optional provisioning snapshots:
+
+```bash
+uv run python export_grafana_artifacts.py --include-providers --include-datasources
+```
+
+##### Practical Rules
+
+- Treat `grafana/dashboards` as the canonical artifact history for dashboard shape.
+- Use stable dashboard UIDs to keep continuity across edits.
+- Avoid manual JSON edits unless necessary; prefer MCP updates then export.
+- Keep temporary smoke/demo dashboards out of committed artifacts unless intentionally preserved.
+
+---
+
+📦 STATELESS HANDOFF
+
+**Layer 1 — Local Context:**
+→ Last action: LOG-030 (Grafana setup closure + MCP-first export contract finalized + PHASE-006 kickoff state updated)
+→ Dependency chain: LOG-030 <- LOG-029 <- LOG-028 <- LOG-025
+→ Next action: begin dbt push-left implementation for first MVP mapped from Lightdash `main tasks` tab (`lightdash/dashboards/gtd-dash-v2-0.yml`).
+
+**Layer 2 — Global Context:**
+→ Architecture: DECISION-015 remains core boundary (dbt semantics, Grafana visualization lifecycle).
+→ Patterns: DECISION-016 bind mounts for migration-first persistence; DECISION-017 MCP-first + read-only Git dashboard artifacts.
+
+**Fork paths:**
+- Continue execution -> implement TASK-006 dbt semantic marts for first MVP charts, then repoint Grafana queries.
+- Discuss scope -> lock exact first MVP chart subset and acceptance metrics before SQL refactor.
+
+
+### [LOG-031] - [RESEARCH] - Asia container hosting evaluation: Grafana Cloud MCP compatibility confirmed, zero-infrastructure path validated - Task: INFRASTRUCTURE-DETOUR
+
+**Timestamp:** 2026-02-27 22:30
+**Depends On:** LOG-030 (Grafana MCP workflow established), DECISION-015 (dbt+Grafana architecture), DECISION-017 (MCP-first workflow)
+
+---
+
+#### Executive Summary
+
+Investigated Asia-based container hosting options for Grafana deployment to reduce latency from Vietnam (currently Hetzner EU). **Critical finding:** Grafana Cloud fully supports MCP with identical API to self-hosted, enabling zero-infrastructure migration while preserving agent-first dashboard workflow. Research confirms $0/month solution exists that satisfies all requirements.
+
+#### Research Context
+
+**Trigger:** User initiated infrastructure optimization review for Grafana deployment:
+- **Current state:** Hetzner EU VM with Traefik reverse proxy + Cloudflare DDNS
+- **Pain point:** ~200-300ms latency from Vietnam
+- **Requirements:** 
+  - Network: <50ms from Vietnam
+  - Power: Sufficient for single-user dashboard viewing
+  - Budget: <$5/month
+  - **Critical dependency:** MCP write capability for agent pair programming (DECISION-017)
+
+**Research question:** Does managed Grafana Cloud support Model Context Protocol, or must we self-host containers?
+
+#### Evidence A: Grafana Cloud MCP Architecture
+
+**Source:** Official Grafana documentation ([grafana.com/docs/grafana-cloud/](https://grafana.com/docs/grafana-cloud/)), GitHub `grafana/mcp-grafana`
+
+**Key finding:** MCP integration uses standalone `grafana/mcp-grafana` server as middleware:
+
+```mermaid
+graph LR
+    A[Claude Desktop/Agent] --> B[grafana/mcp-grafana<br/>Docker container]
+    B --> C[Grafana HTTP API]
+    C --> D[Self-hosted OR Cloud]
+```
+
+**Compatibility statement from research:**
+> "The Grafana MCP server... works with **both local Grafana instances and Grafana Cloud**. Only remote MCP servers are supported."
+
+**Authentication:** Uses standard Grafana Service Account Token (same for self-hosted and Cloud).
+
+**Configuration example (Cloud):**
+```bash
+docker run --rm -i \
+  -e GRAFANA_URL="https://yourinstance.grafana.net" \
+  -e GRAFANA_SERVICE_ACCOUNT_TOKEN="<token>" \
+  grafana/mcp-grafana \
+  -t stdio
+```
+
+**Verdict:** MCP works identically for Grafana Cloud. No workflow changes required.
+
+#### Evidence B: MCP Feature Parity Matrix
+
+Research confirmed API endpoint consistency across deployment models:
+
+| MCP Tool | Self-Hosted | Grafana Cloud | Workflow Impact |
+|----------|-------------|---------------|-----------------|
+| Dashboard CRUD | ✅ `/api/dashboards` | ✅ Same endpoint | Agent can create/update panels |
+| Get panel queries | ✅ | ✅ | Inspect existing logic |
+| Datasource config | ✅ | ✅ | BigQuery connection management |
+| Export dashboard JSON | ✅ | ✅ | `export_grafana_artifacts.py` unchanged |
+| Service account auth | ✅ | ✅ | Token-based (no difference) |
+
+**Critical validation:** Grafana Cloud API = Standard Grafana HTTP API + Cloud-specific stack management API. Core dashboard operations use standard API.
+
+#### Evidence C: Hosting Options Comparison
+
+Researched 8 container hosting platforms in Asia:
+
+| Provider | Region | Monthly Cost | Managed HTTPS | Cold Start | MCP Notes |
+|----------|--------|--------------|---------------|------------|-----------|
+| **Grafana Cloud** | Global CDN | **$0** | ✅ Built-in `*.grafana.net` | None | ✅ MCP identical to self-hosted |
+| Render.com | Singapore | $0 (750hrs) | ✅ Auto TLS | 60s after 15min idle | Self-host required |
+| Fly.io | Singapore | ~$1.94/mo | ✅ Auto TLS | None (if min_instances=1) | Self-host required |
+| Koyeb | Singapore | $0 (needs CC) | ✅ Auto TLS | Variable | Self-host required |
+| Railway | US only (free) | $1 credit | ✅ Auto TLS | Scale to zero | ❌ No Asia free tier |
+| Azure Container Apps | Singapore | Free tier exists | ✅ Auto TLS | Scale to zero | Overkill for use case |
+| GCP Cloud Run | Asia regions | **Not in free tier** | ✅ Auto TLS | Fast | ❌ Asia incurs costs |
+| Oracle Cloud | Singapore | $0 (always free) | ⚠️ Manual LB config | None | Requires VM management |
+
+**Self-hosted tradeoffs:**
+- **Render:** Free but 60s cold start after idle → poor UX for ad-hoc dashboard access
+- **Fly.io:** Always-on costs ~$2/mo → within budget but unnecessary if Cloud works
+- **Oracle:** Free but requires managing VM + Load Balancer → operational overhead
+
+#### Evidence D: Grafana Cloud Free Tier Limits
+
+**Monthly allowances (Feb 2026):**
+- Metrics: 10,000 active series
+- Logs: 50 GB ingested
+- Traces: 50 GB ingested
+- Users: 3 active
+- Retention: 14 days
+- Dashboards: **Unlimited**
+- Data Sources: **Unlimited**
+
+**Our usage profile:**
+- Data source: BigQuery (query on-demand, no ingestion to Grafana metrics)
+- Dashboard count: ~2-5 GTD dashboards
+- Users: 1 (single developer)
+- Metrics/logs: None (dashboard-only use case)
+
+**Verdict:** Well within free tier limits. Only consuming dashboard hosting + BigQuery plugin.
+
+#### Migration Path Analysis
+
+**Option A: Grafana Cloud (Recommended)**
+
+**Migration steps:**
+1. Sign up → grafana.com (free tier)
+2. Create service account → generate token
+3. Update MCP config → Change `GRAFANA_URL` env var
+4. Add BigQuery datasource → UI 2-click process
+5. Continue MCP workflow → No code changes
+
+**Cost:** $0/month
+**Latency:** ~30-50ms (global CDN)
+**Maintenance:** Zero (managed by Grafana Labs)
+**MCP compatibility:** ✅ Identical to self-hosted
+**Infrastructure eliminated:** Traefik, Cloudflare DDNS, VM management
+
+**Option B: Self-Hosted (Render Singapore)**
+
+**Setup:**
+- Push Grafana Docker image to Render
+- Auto-provision TLS via Render
+- `grafana-yourname.onrender.com` domain
+
+**Cost:** $0 (750 free hours/month)
+**Latency:** ~30ms from Vietnam
+**Maintenance:** Low (managed container platform)
+**Tradeoff:** 60s cold start after 15min idle
+
+**Option C: Self-Hosted (Fly.io Singapore)**
+
+**Setup:**
+```toml
+# fly.toml
+app = "grafana-vn"
+primary_region = "sin"
+[http_service]
+  internal_port = 3000
+  force_https = true
+  min_machines_running = 1
+[[vm]]
+  memory = "256mb"
+```
+
+**Cost:** ~$1.94/month
+**Latency:** ~25ms from Vietnam
+**Maintenance:** Low
+**Tradeoff:** Paid for always-on (no cold start)
+
+#### Decision Framework
+
+**When to choose Grafana Cloud:**
+- ✅ MCP workflow is primary requirement (DECISION-017)
+- ✅ Budget constraint (<$5/month)
+- ✅ Zero maintenance preferred
+- ✅ Dashboard-only use case (no custom plugins)
+
+**When to self-host:**
+- Need custom Grafana plugins not in Cloud marketplace
+- Require on-premises data residency
+- Want full Grafana instance control
+
+**Our scenario:** All checkboxes point to Grafana Cloud.
+
+#### Rejected Alternatives
+
+| Alternative | Rejection Reason |
+|-------------|------------------|
+| Oracle Cloud Free Tier | Requires VM + Load Balancer management; defeats "zero infrastructure" goal |
+| GCP Cloud Run | Asia regions not in free tier; would incur costs |
+| Railway | No free Asia region; only US/EU on free tier |
+| Azure Container Apps | Overkill; free tier exists but simpler options available |
+| Keep Hetzner EU | Latency remains issue; still managing VM + reverse proxy |
+
+#### Implementation Recommendation
+
+**Recommended:** Migrate to Grafana Cloud.
+
+**Rationale:**
+1. **MCP compatibility:** Proven identical to self-hosted (Evidence A)
+2. **Cost:** $0 vs $2-7/month for alternatives
+3. **Maintenance:** Zero vs managing containers/VMs/reverse proxy
+4. **Latency:** Acceptable (~30-50ms global CDN vs ~25-30ms Singapore VMs)
+5. **Workflow preservation:** `export_grafana_artifacts.py` + MCP unchanged
+6. **BigQuery support:** Native plugin, 2-click setup
+
+**Migration risk:** Low. Rollback = redeploy self-hosted container (already have Docker setup).
+
+**Validation plan:**
+1. Create test Grafana Cloud instance
+2. Verify MCP dashboard CRUD operations
+3. Test BigQuery datasource connection
+4. Measure query latency from Vietnam
+5. If acceptable → migrate production dashboards
+6. If issues → deploy Render/Fly.io fallback
+
+#### Open Questions
+
+| Question | Priority | Status |
+|----------|----------|--------|
+| Actual latency from Vietnam to Grafana Cloud? | Medium | Test during validation |
+| BigQuery query performance via Cloud? | Medium | Test with actual mart queries |
+| Export script compatibility with Cloud API? | Low | API identical per research |
+
+---
+
+📦 **STATELESS HANDOFF**
+
+**Layer 1 — Local Context:**
+→ Last action: LOG-031 (researched Asia hosting, validated Grafana Cloud MCP compatibility)
+→ Dependency chain: LOG-031 ← LOG-030 (MCP workflow) ← LOG-025 (dbt+Grafana decision)
+→ Next action: User decision on hosting platform; then return to TASK-006A (main tasks semantic mapping)
+
+**Layer 2 — Global Context:**
+→ Architecture: dbt semantic layer + Grafana visualization (DECISION-015)
+→ Patterns: MCP-first dashboard workflow (DECISION-017), BigQuery data source
+
+**Fork paths:**
+- **Migrate to Grafana Cloud** → Validation plan (test latency/MCP), then production cutover
+- **Deploy self-hosted** → Render Singapore (free, cold start) or Fly.io (~$2/mo, always-on)
+- **Park decision** → Capture as LOOP, continue with PHASE-006 dbt push-left work
+- **Return to PHASE-006** → Begin TASK-006A (Lightdash main tasks tab semantic mapping)
+
+
+### [LOG-032] - [DISCOVERY] [PLAN] - PHASE-006 lookahead cockpit requirements captured with dbt semantic onboarding map - Task: PHASE-006
+**Timestamp:** 2026-02-27 23:45
+**Depends On:** LOG-030 (PHASE-006 kickoff scope), LOG-029 (Grafana MCP write-path parity), LOG-025 (dbt plus Grafana architecture), LOG-031 (Grafana Cloud context)
+
+---
+
+#### Executive Summary
+
+This checkpoint captures the full discussion before implementation so a fresh agent can resume without chat history. We validated the current semantic state in dbt and Lightdash, translated user intent into explicit requirements, compared cockpit interaction patterns, and produced a surgical onboarding map for the growing dbt project.
+
+Key outcomes:
+- Requirement lock for this slice: count-based workload balancing, due-date anchored, next-horizon comparison, Joons vs rest toggle, and drill table with deep links.
+- Current semantic logic is still heavily encoded in `marts.yml` metadata and Lightdash chart configs, while `fct_tasks_v3` SQL remains pass-through.
+- Proposed cockpit direction is a linked analysis surface: balance chart plus drill table, with day-level decomposition preserved for weekly rebalance decisions.
+
+---
+
+#### Evidence A - Current dbt and Lightdash State
+
+**A1. Fact model remains pass-through SQL**
+
+```sql
+with source as (
+    select *
+    from {{ ref('stg__ticktick_v3__tasks') }}
+)
+
+select *
+from source
+```
+
+Citation: `models/marts/fct_tasks_v3.sql:1`
+
+**A2. Count and drill logic currently live in semantic YAML metadata**
+- Dynamic count metric by grain lives in metadata, not SQL.
+- Dynamic URL fields for click-through also live in metadata.
+- Date spine right-join drives lookahead continuity.
+
+Raw evidence pointers:
+- `total_task_instances` metric: `models/marts/marts.yml:1568`
+- Dynamic `count` metric by parameterized grain: `models/marts/marts.yml:1578`
+- `count_grain` parameter options task project folder: `models/marts/marts.yml:1606`
+- Date spine right join: `models/marts/marts.yml:1563`
+- `dynamic_grain_url`: `models/marts/marts.yml:1419`
+- `dynamic_parent_grain_url`: `models/marts/marts.yml:1426`
+- Dynamic grain dimensions: `models/marts/marts.yml:1454`, `models/marts/marts.yml:1490`
+
+**A3. Main tasks scope currently wired in dashboard YAML**
+- Main tab UUID and the four MVP charts are confirmed in dashboard config.
+- Dashboard-level lookahead and open-task filters are globalized there.
+
+Raw evidence pointers:
+- Main tab UUID: `lightdash/dashboards/gtd-dash-v2-0.yml:247`
+- Chart slugs in tab: `lightdash/dashboards/gtd-dash-v2-0.yml:14`, `lightdash/dashboards/gtd-dash-v2-0.yml:26`, `lightdash/dashboards/gtd-dash-v2-0.yml:38`, `lightdash/dashboards/gtd-dash-v2-0.yml:50`
+- Lookahead filter in next 5 weeks: `lightdash/dashboards/gtd-dash-v2-0.yml:190`, `lightdash/dashboards/gtd-dash-v2-0.yml:196`
+- Status not equals completed: `lightdash/dashboards/gtd-dash-v2-0.yml:219`, `lightdash/dashboards/gtd-dash-v2-0.yml:225`
+
+**A4. Existing chart contracts used as migration references**
+- Lookahead day and week pivot pattern: `lightdash/charts/tasks-lookahead-v3.yml:8`, `lightdash/charts/tasks-lookahead-v3.yml:12`, `lightdash/charts/tasks-lookahead-v3.yml:236`
+- Drill table custom count and grain fields: `lightdash/charts/tasks-drill-down-by-grain-v3.yml:49`, `lightdash/charts/tasks-drill-down-by-grain-v3.yml:54`, `lightdash/charts/tasks-drill-down-by-grain-v3.yml:11`, `lightdash/charts/tasks-drill-down-by-grain-v3.yml:15`
+
+---
+
+#### Evidence B - Production Data Checks on BigQuery
+
+Data source used: `airbyte-468412.ticktick_dbt_prod`
+
+**B1. Next-horizon weekly distribution confirms rebalance signal exists**
+
+```text
+week_start  week_tasks  avg_5w  delta_vs_5w
+2026-02-22  9           5.4     +3.6
+2026-03-01  7           5.4     +1.6
+2026-03-08  5           5.4     -0.4
+2026-03-15  5           5.4     -0.4
+2026-03-22  1           5.4     -4.4
+```
+
+**B2. Joons vs rest binary split is materially informative**
+
+```text
+week_start   scope   tasks
+2026-02-22   joons   4
+2026-02-22   rest    5
+2026-03-01   joons   4
+2026-03-01   rest    3
+2026-03-08   joons   4
+2026-03-08   rest    1
+2026-03-15   joons   1
+2026-03-15   rest    4
+2026-03-22   rest    1
+```
+
+**B3. Folder filter UX hiccup source is real**
+
+```text
+folder_name=default appears with folder_id=0 and folder_id=default
+```
+
+This supports normalization in semantic layer to avoid duplicate logical filter values.
+
+---
+
+#### Requirement Capture - Exact Understanding and User Value
+
+| Requirement | Captured behavior | User value |
+|-------------|-------------------|------------|
+| Metric now is strict count | Distinct count by selected grain only for this phase | Keeps scheduling decisions fast and legible |
+| Time anchor is due date | All horizon and bucket logic uses due date | Aligns with planning and rescheduling workflow |
+| Compare next horizon internally | Show bucket totals and baseline in same view | Immediate overload detection without context switching |
+| Add per parent-group average and global baseline | Support period average by month or quarter and horizon-wide average | Better rebalance decisions with clear above below signals |
+| Fast binary scope Joons vs rest | Single click scope toggle as first-class control | Rapid professional vs personal planning flow |
+| Keep multi-filter flexibility | Dynamic folder and project multi-selects populated from data | No typing overhead when slicing into specific domains |
+| Preserve drill detail with links | Click from aggregate to row-level tasks and open TickTick links | Action from insight in one interaction chain |
+| Keep day-level visibility | Weekly overload can be explained by weekday concentration | Supports moving tasks from overloaded Friday to lighter slots |
+
+User quote evidence from session:
+- "strictly item count for now"
+- "due date for now"
+- "binary switch" plus separate multi-value filters
+- Need to answer "how much work do i have in hand compared to other periods"
+- Need day-level causality like overloaded Friday in one week and zero Friday in another week
+
+#### Critical UX Requirement - Hyperlinkable Cells and URL Contract (MUST KEEP)
+
+This requirement is explicitly critical and non-negotiable for the Grafana migration.
+
+Required behavior:
+- Any clickable grain cell in drill context must open TickTick via deep link.
+- Both web and native protocol links must be supported.
+- URL generation must work for task-level rows and higher-level dynamic grain rows.
+
+Canonical URL contract for task-level rows:
+
+```text
+web concrete example:
+https://ticktick.com/webapp/#p/6889b8b1e3add155c1111936/tasks/695fbb5d1b07d19f5524e1d7
+
+web template:
+https://ticktick.com/webapp/#p/${row.dim_projects_v3.project_id.raw}/tasks/${row.fct_tasks_v3.task_id.raw}
+
+native template:
+ticktick://ticktick.com/webapp/#p/${row.dim_projects_v3.project_id.raw}/tasks/${row.fct_tasks_v3.task_id.raw}
+```
+
+Dynamic grain URL contract for non-task grouping:
+- `${row.fct_tasks_v3.dynamic_grain_url.raw | prepend: 'https://'}`
+- `${row.fct_tasks_v3.dynamic_grain_url.raw | prepend: 'ticktick://'}`
+- `${row.fct_tasks_v3.dynamic_parent_grain_url.raw | prepend: 'https://'}`
+- `${row.fct_tasks_v3.dynamic_parent_grain_url.raw | prepend: 'ticktick://'}`
+
+Citations for existing working contract in semantic metadata:
+- Task URL templates: `models/marts/marts.yml:1450`, `models/marts/marts.yml:1452`
+- Dynamic URL dimensions: `models/marts/marts.yml:1419`, `models/marts/marts.yml:1426`
+- Dynamic URL usage in dimensions: `models/marts/marts.yml:1467`, `models/marts/marts.yml:1470`, `models/marts/marts.yml:1503`, `models/marts/marts.yml:1506`
+
+Acceptance checks for PHASE-006 cockpit:
+1. Click on task row opens correct task in TickTick web.
+2. Click on task row opens correct task in TickTick native protocol.
+3. Click on project or folder grain opens correct parent destination.
+4. URL behavior remains correct under Joons/rest binary toggle and multi-folder filters.
+
+---
+
+#### Mockups and Manifestation vs Current Lightdash
+
+##### Proposed cockpit layout mockup
+
+```text
+LOOKAHEAD COCKPIT
+Scope [All Joons Rest]  Folder [multi]  Project [multi]  Grain [task project folder]
+
+Top band weekly totals
+W35  35  delta +8
+W36  19  delta -8
+W37  24  delta +1
+baseline and parent-group average overlays
+
+Bottom band day decomposition inside week
+W35 Mon Tue Wed Thu Fri Sat Sun
+W36 Mon Tue Wed Thu Fri Sat Sun
+
+Click a bucket or day cell to drive drill table
+```
+
+##### Interaction flow mockup
+
+```mermaid
+graph TD
+    A[Control bar<br/>Scope and filters<br/>Bucket and grain] --> B[Panel A balance view<br/>Weekly totals with overlays<br/>Day decomposition]
+    B --> C[Panel B drill table<br/>Day color coding<br/>Task project folder links]
+    C --> D[TickTick open action<br/>native and web]
+```
+
+##### How this maps to current Lightdash assets
+
+| Current chart | Current role | Cockpit mapping |
+|---------------|--------------|-----------------|
+| `tasks-lookahead-v3` | Horizon distribution signal by day with week pivots | Becomes top balance band plus day decomposition within one custom panel |
+| `tasks-drill-down-by-grain-v3` | Detailed line items and links for selected grain | Remains drill panel, now event-linked from custom panel clicks |
+| `distribution-by-parent-dimension-v3` | Parent-level distribution context | Feeds optional split dimension in balance view |
+| `what-did-you-do-v3` | Completion retrospective table | Out of primary planning cockpit, kept as adjacent retrospective slice |
+
+---
+
+#### Decision Record and Tradeoffs
+
+**Working recommendation:** Keep a linked two-panel cockpit instead of one mega-visual.
+
+Reasons:
+1. One mega-chart tends to become high-density and interaction-heavy with lower scan speed.
+2. A linked pair keeps summary and action chain tight while preserving detail readability.
+3. Supports the exact scheduling loop: detect overload, identify day cause, open specific task.
+
+**Alternatives discussed and status:**
+- Single mega-chart only: not preferred for readability and interaction complexity.
+- Separate disconnected charts: rejected because cross-filter context is lost.
+- Horizon coupling to bucket change always: valid strategic mode but can confound tactical comparisons.
+- Fixed horizon regardless of bucket: strong tactical clarity but less natural for long-term planning.
+
+**Current status:** Dual-mode concept remains open for final lock in implementation spec.
+
+---
+
+#### Open Questions and Status
+
+| Question | Priority | Status |
+|----------|----------|--------|
+| Default mode should be tactical fixed horizon or strategic coupled horizon | High | OPEN |
+| Exact Grafana custom viz encoding choice heatmap style or combo bar line | Medium | OPEN |
+| Scope control precedence when binary scope and multi-folder filter are both set | Medium | OPEN |
+
+---
+
+#### Curated Dependent Logs for Fast Onboarding
+
+Read in this order:
+
+| Order | Log | Why it matters for this task |
+|------:|-----|-------------------------------|
+| 1 | `LOG-025` | Project-level architecture lock: dbt semantic layer plus Grafana visualization |
+| 2 | `LOG-029` | MCP write path validated, proving operational workflow |
+| 3 | `LOG-030` | PHASE-006 kickoff and main-tasks MVP boundary with target charts |
+| 4 | `LOG-031` | Infra detour closure so context does not re-open irrelevant hosting debate |
+| 5 | `LOG-032` | This checkpoint: requirements, evidence, mockups, and surgical read map |
+
+---
+
+#### Surgical Read Mapping - dbt and YAML Files
+
+Use grep-first then surgical read to avoid full-file context sprawl.
+
+| Purpose | File | Grep pattern | Surgical read target |
+|---------|------|--------------|----------------------|
+| Confirm PHASE-006 state and next action | `gsd-lite/WORK.md` | `PHASE-006` and `TASK-006B` | Section 1 current understanding and LOG-030 plus LOG-032 headers |
+| Confirm main tasks chart scope and dashboard filters | `lightdash/dashboards/gtd-dash-v2-0.yml` | `39a6f194-6bb1-4f15-ac03-8f49a0a6d602` and `inTheNext` and `fct_tasks_v3_status` | Tab and tile declarations plus filters block |
+| Confirm lookahead chart day and week pivot contract | `lightdash/charts/tasks-lookahead-v3.yml` | `dim_date_spine_date_day_day` and `fct_tasks_v3_count` and `pivotConfig` | metricQuery and pivotConfig sections |
+| Confirm drill table custom count and dynamic grain fields | `lightdash/charts/tasks-drill-down-by-grain-v3.yml` | `customDimensions` and `count` and `parent_dimension_grain` | metricQuery customDimensions and table columns |
+| Confirm fct model SQL state | `models/marts/fct_tasks_v3.sql` | `ref('stg__ticktick_v3__tasks')` | full file |
+| Confirm semantic metadata currently carrying business logic | `models/marts/marts.yml` | `name: fct_tasks_v3` and `count_grain` and `dynamic_grain_url` and `join: dim_date_spine` | fct_tasks_v3 model block only |
+| Confirm staging completion logic | `models/staging/ticktick/stg__ticktick_v3__tasks.sql` | `status = 2` and `completed_time` and `where deleted = 0` | source and add_gtd_work_type CTEs |
+| Confirm folder default injection behavior | `models/staging/ticktick/stg__ticktick_v3__project_folder.sql` | `inject_defaults` and `folder_id` | inject_defaults CTE |
+
+##### Curated grep/read pattern for `models/marts/marts.yml` (v3 logic)
+
+Use this exact sequence to avoid grabbing legacy/irrelevant blocks in a large YAML file.
+
+1. Anchor the v3 fact model block first.
+
+```text
+grep_content(
+  pattern="^\\s*- name: fct_tasks_v3$",
+  search_path="models/marts/marts.yml"
+)
+```
+
+Expected anchor: `models/marts/marts.yml:1282`
+
+2. Find the next model boundary.
+
+```text
+grep_content(
+  pattern="^\\s*- name: dim_projects_v3$",
+  search_path="models/marts/marts.yml"
+)
+```
+
+Expected boundary: `models/marts/marts.yml:1629`
+
+3. Surgical read only the fct block.
+
+```text
+read_files(
+  files=[{
+    path: "models/marts/marts.yml",
+    start_line: 1282,
+    end_line: 1628
+  }],
+  large_file_passthrough=True
+)
+```
+
+4. Within that block, locate the exact semantic logic anchors.
+
+```text
+grep_content(pattern="^\\s*dynamic_grain_url:\\s*$", search_path="models/marts/marts.yml")
+grep_content(pattern="^\\s*dynamic_parent_grain_url:\\s*$", search_path="models/marts/marts.yml")
+grep_content(pattern="^\\s*dimension_grain:\\s*$", search_path="models/marts/marts.yml")
+grep_content(pattern="^\\s*parent_dimension_grain:\\s*$", search_path="models/marts/marts.yml")
+grep_content(pattern="^\\s*- join: dim_projects_v3$", search_path="models/marts/marts.yml")
+grep_content(pattern="^\\s*- join: dim_folders_v3$", search_path="models/marts/marts.yml")
+grep_content(pattern="^\\s*- join: dim_date_spine$", search_path="models/marts/marts.yml")
+grep_content(pattern="^\\s*total_task_instances:\\s*$", search_path="models/marts/marts.yml")
+grep_content(pattern="^\\s*count:\\s*$", search_path="models/marts/marts.yml")
+grep_content(pattern="^\\s*count_grain:\\s*$", search_path="models/marts/marts.yml")
+```
+
+Expected v3 hits to trust:
+- `dynamic_grain_url`: `models/marts/marts.yml:1419`
+- `dynamic_parent_grain_url`: `models/marts/marts.yml:1426`
+- `dimension_grain`: `models/marts/marts.yml:1454`
+- `parent_dimension_grain`: `models/marts/marts.yml:1490`
+- joins: `models/marts/marts.yml:1543`, `models/marts/marts.yml:1553`, `models/marts/marts.yml:1563`
+- `total_task_instances`: `models/marts/marts.yml:1568`
+- `count`: `models/marts/marts.yml:1578`
+- `count_grain`: `models/marts/marts.yml:1606`
+
+5. Disambiguation guardrail for fresh agents.
+- This file contains earlier similarly named blocks at lower line numbers.
+- Only trust semantic hits that fall inside the anchored `fct_tasks_v3` range 1282 to 1628 for PHASE-006 work.
+
+Recommended operator sequence for fresh agent:
+1. Read LOG-030 then LOG-032 in full.
+2. Execute the surgical reads above.
+3. Draft semantic model contract before writing SQL.
+4. Implement dbt marts and only then rebuild panels in Grafana.
+
+---
+
+📦 STATELESS HANDOFF
+
+**Layer 1 — Local Context:**
+→ Last action: LOG-032 captured the full PHASE-006 cockpit discussion with evidence and onboarding map.
+→ Dependency chain: LOG-032 <- LOG-030 <- LOG-029 <- LOG-025
+→ Next action: Lock open control semantics then implement TASK-006B semantic marts for cockpit queries.
+
+**Layer 2 — Global Context:**
+→ Architecture: dbt is semantic source of truth and Grafana is interactive visualization surface from DECISION-015.
+→ Patterns: MCP-first dashboard workflow with read-only artifact export from DECISION-017.
+
+**Fork paths:**
+- Continue execution -> define final control contract then build semantic marts and thin Grafana queries.
+- Discuss design -> resolve horizon coupling default and custom viz encoding before SQL changes.
+
+### [LOG-033] - [BREAKTHROUGH] [EXEC] [DECISION] - PHASE-006 semantic push-left stabilized with production-safe Grafana variable contract - Task: PHASE-006
+**Timestamp:** 2026-02-27 21:30
+**Depends On:** LOG-032 (cockpit contract and onboarding map), LOG-030 (PHASE-006 kickoff), LOG-029 (Grafana MCP write path), LOG-025 (dbt plus Grafana architecture)
+
+---
+
+#### Executive Summary
+
+We completed the PHASE-006 execution loop from contract to production and locked the core pattern that actually works under real data shape and real Grafana interpolation behavior.
+
+What is now true:
+- dbt semantic marts carry cockpit logic in SQL, not hidden YAML metrics.
+- P0 tests now cover semantic invariants and URL contracts, not only shape checks.
+- Grafana filters are stable with multi-select and dependency binding using regex interpolation.
+- Production dashboard is live on `gtd-main-tasks-v3` and no longer throwing query parser errors.
+
+---
+
+#### Narrative Arc and Pivots
+
+We hit three concrete failures and corrected each with evidence-driven pivots.
+
+1) **First failure:** manual quote-wrapping around query variables generated `''__all''` and BigQuery syntax errors.
+2) **Second failure:** variable model encoded query variables as plain strings, which caused `Required parameter is missing: query` for folder and project pickers.
+3) **Third failure:** long project selections expanded into concatenated string literals in SQL equality checks and broke parser boundaries.
+
+Final stabilized approach:
+- query variables stay as datasource-native query objects.
+- filter predicates use `REGEXP_CONTAINS(... r'^${var:regex}$')` for multi-select safety.
+- project variable query is explicitly bounded by selected folder.
+- default dashboard window includes future time so lookahead panels never appear empty by default.
+
+---
+
+#### Evidence A - Semantic Logic Is Push-Left in dbt SQL
+
+**A1. Scope split and deep-link contract are now in mart SQL**
+
+```sql
+case
+    when regexp_contains(
+        lower(concat(folder_name, ' ', project_name)),
+        r'(^|[^a-z0-9])joons([^a-z0-9]|$)'
+    ) then 'joons'
+    else 'rest'
+end as scope_bucket
+```
+
+Citation: `models/marts/fct_tasks_v3_semantic_base.sql:96`
+
+```sql
+format('https://ticktick.com/webapp/#p/%s/tasks/%s', ...) as task_url_web,
+format('ticktick://ticktick.com/webapp/#p/%s/tasks/%s', ...) as task_url_native,
+format('https://ticktick.com/webapp/#g/%s', ...) as folder_url_web,
+format('ticktick://ticktick.com/webapp/#g/%s', ...) as folder_url_native
+```
+
+Citations: `models/marts/fct_tasks_v3_semantic_base.sql:137`, `models/marts/fct_tasks_v3_semantic_base.sql:142`, `models/marts/fct_tasks_v3_semantic_base.sql:154`, `models/marts/fct_tasks_v3_semantic_base.sql:158`
+
+**A2. Lookahead workload is date-spine continuous and count-based**
+
+```sql
+from date_spine
+cross join project_catalog_scoped
+...
+count(distinct task_id) as open_task_count
+```
+
+Citations: `models/marts/fct_tasks_v3_due_workload_daily.sql:61`, `models/marts/fct_tasks_v3_due_workload_daily.sql:68`
+
+**A3. Grain rollup is explicit, no hidden semantic parameter branching**
+
+```sql
+'task' as grain_level
+...
+union all
+select * from project_level
+union all
+select * from folder_level
+```
+
+Citations: `models/marts/fct_tasks_v3_grain_rollup.sql:41`, `models/marts/fct_tasks_v3_grain_rollup.sql:160`, `models/marts/fct_tasks_v3_grain_rollup.sql:162`
+
+---
+
+#### Evidence B - Test Strategy Upgraded to Semantic Invariants
+
+**B1. Reconciliation tests assert mart-to-mart truth, not just null checks**
+
+```sql
+where actual.open_task_count != coalesce(expected.expected_open_task_count, 0)
+```
+
+Citation: `tests/marts/test_fct_tasks_v3_due_workload_daily_reconciles_open_counts.sql:29`
+
+```sql
+where actual.actual_open_task_count != coalesce(expected.expected_open_task_count, 0)
+```
+
+Citation: `tests/marts/test_fct_tasks_v3_grain_rollup_conserves_open_counts.sql:32`
+
+**B2. Known extraction gap was codified as warn-level telemetry, not ignored**
+
+```sql
+{{ config(severity='warn') }}
+...
+and projects.project_id is null
+```
+
+Citations: `tests/marts/test_fct_tasks_v3_orphan_project_ids_known_gap.sql:1`, `tests/marts/test_fct_tasks_v3_orphan_project_ids_known_gap.sql:13`
+
+**B3. Relationship strictness adjusted to match known deleted-project gap**
+- `project_id` relationships on semantic base and downstream marts are warn-level.
+
+Citations: `models/marts/semantic_marts.yml:22`, `models/marts/semantic_marts.yml:122`, `models/marts/semantic_marts.yml:175`
+
+---
+
+#### Evidence C - Grafana Runtime Contract That Finally Held
+
+**C1. Folder filter variable query excludes closed projects and builds legal option set**
+
+```sql
+SELECT DISTINCT w.folder_name
+FROM `airbyte-468412.ticktick_dbt_prod.fct_tasks_v3_due_workload_daily` w
+JOIN `airbyte-468412.ticktick_dbt_prod.dim_projects_v3` p
+  ON w.project_id = p.project_id
+WHERE COALESCE(p.closed, FALSE) = FALSE
+ORDER BY 1
+```
+
+Source: Grafana API dashboard property `$.templating.list[4].query.rawSql` for `gtd-main-tasks-v3` accessed 2026-02-27.
+
+**C2. Project filter is folder-bound and excludes closed projects**
+
+```sql
+... WHERE COALESCE(p.closed, FALSE) = FALSE
+  AND REGEXP_CONTAINS(w.folder_name, r'^${folder_name:regex}$')
+```
+
+Source: Grafana API dashboard property `$.templating.list[5].query.rawSql` for `gtd-main-tasks-v3` accessed 2026-02-27.
+
+**C3. Panel filter predicate is regex-safe under single, multi, and all modes**
+
+```sql
+AND REGEXP_CONTAINS(folder_name, r'^${folder_name:regex}$')
+AND (${grain_level:singlequote} = 'folder' OR REGEXP_CONTAINS(project_name, r'^${project_name:regex}$'))
+```
+
+Source: Grafana API dashboard property `$.panels[2].targets[0].rawSql` for `gtd-main-tasks-v3` accessed 2026-02-27.
+
+**C4. Future-aware default dashboard range is now compatible with lookahead**
+- `from: now/y`
+- `to: now+90d`
+
+Source: Grafana API dashboard property `$.time` for `gtd-main-tasks-v3` accessed 2026-02-27.
+
+---
+
+#### Hypothesis Tracking During Failure Investigation
+
+| Hypothesis | Likelihood | Test | Status |
+|------------|------------|------|--------|
+| A) Quote formatter is double-wrapping `__all` | High | Inspect failed SQL payloads showing `''__all''` | ✅ CONFIRMED |
+| B) Variable definition object is malformed for BigQuery plugin | High | Observe `Required parameter is missing: query` on variable fetch | ✅ CONFIRMED |
+| C) Equality-based filtering cannot survive long multi-select interpolation | High | Reproduce concatenated string-literal parser error in live query | ✅ CONFIRMED |
+| D) Regex interpolation with datasource-native variable query model is stable | Medium | Patch dashboard to regex filters plus query-object variables and retest | ✅ CONFIRMED |
+
+---
+
+#### Mermaid - Final Interaction Contract
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant G as Grafana Dashboard
+    participant V as Variable Engine
+    participant B as BigQuery
+    participant M as dbt Semantic Marts
+
+    U->>G: select folder and project and grain
+    G->>V: resolve folder_name and project_name
+    V->>B: run variable SQL queries
+    B-->>V: return option sets
+    V->>G: interpolate regex filters
+    G->>B: run panel SQL with regex predicates
+    B->>M: query semantic marts
+    M-->>B: aggregated and drill rows
+    B-->>G: panel result frames
+    G-->>U: lookahead and drill views
+```
+
+---
+
+#### Decision Record - Core Pattern Locked
+
+**Chosen pattern (FOUNDATIONAL):**
+1. Keep semantics in dbt marts.
+2. Guard semantics with invariant and contract tests.
+3. In Grafana use query variables with datasource-native query objects.
+4. For string filters use regex predicates with `${var:regex}`.
+5. Use dependent variable query for child pickers.
+6. Use future-aware default time range for lookahead dashboards.
+
+**Rejected alternatives:**
+- Manual quote wrapping around variables.
+  - Rejected because it created invalid SQL under all-state interpolation.
+- Sentinel literal row approach with strict equality checks.
+  - Rejected because multi-select expansion can concatenate literals and break parser rules.
+- Static project list without folder dependency.
+  - Rejected because UX requirement explicitly needs bounded project options by folder.
+
+---
+
+#### Reusable Playbook for Future Grafana x dbt Migrations
+
+| Step | Action | Verification | Status |
+|------|--------|--------------|--------|
+| 1 | Model semantic outputs in dbt marts | SQL expresses scope and URL logic directly | ✅ |
+| 2 | Add P0 invariants in tests | Reconciliation tests return zero rows | ✅ |
+| 3 | Encode known upstream gaps as warn-level tests | Orphan diagnostics visible without blocking pipeline | ✅ |
+| 4 | Build Grafana query variables as datasource query objects | Variable dropdowns load without missing query errors | ✅ |
+| 5 | Use regex interpolation for string filters | Single, multi, all states compile to legal SQL | ✅ |
+| 6 | Bind child variable to parent selection | Project options shrink correctly when folder changes | ✅ |
+| 7 | Default dashboard time includes future horizon | Lookahead panel is populated on first load | ✅ |
+| 8 | Validate in prod dataset before parity sign-off | User confirmed no more runtime query errors | ✅ |
+
+---
+
+#### Source Citations
+
+| Source | Location | Key Finding |
+|--------|----------|-------------|
+| Semantic base SQL | `models/marts/fct_tasks_v3_semantic_base.sql:96` | Scope bucket classification is SQL-native |
+| Semantic base SQL | `models/marts/fct_tasks_v3_semantic_base.sql:137` | Web task URL contract is SQL-native |
+| Due workload SQL | `models/marts/fct_tasks_v3_due_workload_daily.sql:61` | Date spine continuity via cross join |
+| Grain rollup SQL | `models/marts/fct_tasks_v3_grain_rollup.sql:160` | Explicit union by grain levels |
+| Invariant test | `tests/marts/test_fct_tasks_v3_due_workload_daily_reconciles_open_counts.sql:29` | Count reconciliation enforced |
+| Invariant test | `tests/marts/test_fct_tasks_v3_grain_rollup_conserves_open_counts.sql:32` | Cross-grain count conservation enforced |
+| Gap monitor test | `tests/marts/test_fct_tasks_v3_orphan_project_ids_known_gap.sql:1` | Deleted-project gap tracked as warn |
+| Schema test config | `models/marts/semantic_marts.yml:22` | Project relationship severity set to warn |
+| Grafana dashboard API | `gtd-main-tasks-v3` JSONPath `$.templating.list[5].query.rawSql` accessed 2026-02-27 | Project variable is folder-bound and excludes closed projects |
+| Grafana dashboard API | `gtd-main-tasks-v3` JSONPath `$.time` accessed 2026-02-27 | Dashboard defaults to `now/y` through `now+90d` |
+
+---
+
+#### Open Questions
+
+| Question | Priority | Status |
+|----------|----------|--------|
+| When extractor gap closes should project relationships return to error severity | Medium | OPEN |
+| Should we convert all generic test argument blocks to dbt `arguments` style to remove deprecation warnings | Low | OPEN |
+
+---
+
+📦 STATELESS HANDOFF
+
+**Layer 1 — Local Context:**
+→ Last action: LOG-033 captured the production-proven migration pattern for PHASE-006 and codified the Grafana variable contract that resolved runtime failures.
+→ Dependency chain: LOG-033 ← LOG-032 ← LOG-030 ← LOG-029 ← LOG-025
+→ Next action: Execute TASK-006C parity polish and finalize sign-off criteria on `gtd-main-tasks-v3`.
+
+**Layer 2 — Global Context:**
+→ Architecture: dbt semantic marts are the only source of business logic and Grafana remains a thin interactive rendering surface.
+→ Patterns: Use invariant tests plus regex-safe dependent query variables as the default migration template for dashboard slices.
+
+**Fork paths:**
+- Continue execution → polish panel UX and lock parity acceptance checklist for PHASE-006 completion.
+- Pivot to next slice → reuse LOG-033 playbook and apply same dbt plus Grafana contract to new dashboard domains.
+
+### [LOG-034] - [DISCOVERY] [PLAN] - TASK-006C lookahead redesign scoped after UX baseline stabilization - Task: PHASE-006
+**Timestamp:** 2026-02-27 22:10
+**Depends On:** LOG-033 (foundational migration pattern), LOG-032 (cockpit contract), LOG-030 (PHASE-006 kickoff)
+
+---
+
+#### Executive Summary
+
+We locked the current dashboard UX baseline and scoped the next execution target.
+
+Current baseline on `gtd-main-tasks-v3`:
+- dual click actions are live for web and TickTick Mac URI.
+- emoji-formatted grain labels are live for readability.
+- reset control exists to clear slice-and-dice state.
+- filters are stable with multi-select and folder to project dependency.
+
+New user-prioritized gap:
+- lookahead panel is visually congested when sparse data appears across a long horizon.
+- next implementation must render nested bucket structure: if bucket is week, show upcoming 5 weeks, each week split by weekday with consistent weekday colors.
+- day cells in drill contexts should use consistent weekday color coding (for What Did You Do, Drill Down by Grain, and future day-grain tables).
+
+---
+
+#### What Is Working Right Now (Evidence)
+
+**A. Dashboard structure and controls are stable**
+- Dashboard has 5 panels and 6 variables with future-aware default range.
+
+Raw evidence:
+- `panelCount=5`, panel titles include `Reset Filters`, `Tasks Lookahead`, `Drill Down by Grain`, `Distribution by Parent Dimension`, `What Did You Do`.
+- time range is `from: now/y` and `to: now+90d`.
+- variable names: `scope_bucket`, `grain_level`, `lookahead_days`, `completed_days`, `folder_name`, `project_name`.
+
+Source: Grafana API `get_dashboard_summary(uid='gtd-main-tasks-v3')`, accessed 2026-02-27.
+
+**B. Link interaction contract is implemented with two actions**
+
+Drill table link evidence:
+```text
+Open parent in TickTick web -> ${__data.fields["parent_grain_url_web"]}
+Open parent in TickTick Mac -> ${__data.fields["parent_grain_url_native"]}
+Open grain in TickTick web -> ${__data.fields["grain_url_web"]}
+Open grain in TickTick Mac -> ${__data.fields["grain_url_native"]}
+```
+
+Source: Grafana API property `$.panels[2].fieldConfig.overrides` on `gtd-main-tasks-v3`, accessed 2026-02-27.
+
+What-did-you-do link evidence:
+```text
+Open project in TickTick web and Mac
+Open task in TickTick web and Mac
+```
+
+Source: Grafana API property `$.panels[4].fieldConfig.overrides` on `gtd-main-tasks-v3`, accessed 2026-02-27.
+
+**C. Emoji readability is live in grain queries**
+
+```sql
+CONCAT(
+  CODE_POINTS_TO_STRING([
+    127812 + MOD(ABS(FARM_FINGERPRINT(parent_grain_label)), 50)
+  ]),
+  ' ',
+  parent_grain_label
+) AS parent
+```
+
+Citation: Grafana API property `$.panels[2].targets[0].rawSql` on `gtd-main-tasks-v3`, accessed 2026-02-27.
+
+**D. Reset control exists**
+
+```markdown
+[Clear all filters and reset view](https://kenluu.grafana.net/d/gtd-main-tasks-v3?from=now%2Fy&to=now%2B90d)
+```
+
+Source: Grafana API property `$.panels[0].options.content` on `gtd-main-tasks-v3`, accessed 2026-02-27.
+
+---
+
+#### Live Gap Analysis - Why Lookahead Still Feels Wrong
+
+Current lookahead SQL uses day-level time plus stacked week label:
+
+```sql
+SELECT
+  TIMESTAMP(due_date_day) AS time,
+  FORMAT_DATE('W%V', due_date_week) AS week_bucket,
+  SUM(open_task_count) AS open_tasks
+...
+GROUP BY 1, 2
+```
+
+Source: Grafana API property `$.panels[1].targets[0].rawSql` on `gtd-main-tasks-v3`, accessed 2026-02-27.
+
+Why this is visually congested under sparse data:
+- x-axis spans long horizon while non-zero points exist in few days.
+- stacked area fills become tiny and hard to read.
+- week grouping is present as series label but not presented as explicit nested group blocks of 5 future periods.
+
+---
+
+#### Decision Record for Next Task
+
+**Decision:** Next execution is a targeted redesign of the lookahead visual contract, not another semantic schema rewrite.
+
+**Chosen direction:**
+1. Add explicit bucket mode for lookahead (week first).
+2. Restrict default rendered horizon to exactly next 5 buckets when bucket mode is week.
+3. Render nested weekday inside each bucket with consistent weekday color mapping.
+4. Apply weekday color contract to drill-style day tables for scan speed consistency.
+
+**Rejected now:**
+- Keep current long-horizon stacked line and only tweak opacity.
+  - Rejected because it does not address bucket-within-bucket readability.
+- Solve purely with dashboard time picker defaults.
+  - Rejected because shape problem is in chart encoding, not only time range.
+
+---
+
+#### Implementation Checklist - TASK-006C (Lookahead Redesign)
+
+| Step | Action | Verification | Status |
+|------|--------|--------------|--------|
+| 1 | Add lookahead bucket control (week mode first) | Variable appears and drives query branch | 🔲 |
+| 2 | Query next exactly 5 upcoming buckets | Result set has 5 distinct week buckets | 🔲 |
+| 3 | Emit weekday ordinal and label for each bucket | Mon to Sun ordering is deterministic | 🔲 |
+| 4 | Encode weekday fixed colors (Mon blue, Tue green, etc) | Same day uses same color across panels | 🔲 |
+| 5 | Reduce empty horizon noise in lookahead panel | Sparse-data weeks remain legible | 🔲 |
+| 6 | Apply weekday color coding in `Drill Down by Grain` and `What Did You Do` day cells | Day cells show consistent fill color | 🔲 |
+| 7 | Re-validate link actions remain intact after panel refactor | Web and Mac links still open correctly | 🔲 |
+
+---
+
+#### Curated Recommended Read for Future Agent
+
+Read in this exact order to onboard chart logic and UX pillars quickly.
+
+| Order | Artifact | Why it matters |
+|------:|----------|----------------|
+| 1 | `gsd-lite/WORK.md` LOG-032 | Original lookahead cockpit contract and target behaviors |
+| 2 | `gsd-lite/WORK.md` LOG-033 | Foundational migration pattern that stabilized variable and filter contract |
+| 3 | Grafana dashboard `gtd-main-tasks-v3` summary | Current panel layout, variable set, and active version snapshot |
+| 4 | Grafana property `$.panels[1].targets[0].rawSql` | Current lookahead query that must be redesigned |
+| 5 | Grafana property `$.panels[2].targets[0].rawSql` and overrides | Current drill UX, emoji formatting, and click actions |
+| 6 | Grafana property `$.panels[4].targets[0].rawSql` and overrides | Current retrospective table UX and click actions |
+| 7 | `lightdash/charts/tasks-lookahead-v3.yml` | Reference intent for legacy lookahead feel and stacking behavior |
+| 8 | `models/marts/fct_tasks_v3_due_workload_daily.sql` | Semantic source for due-date workload data feeding lookahead |
+| 9 | `models/marts/fct_tasks_v3_grain_rollup.sql` | Semantic source for drill and parent distribution interactions |
+
+---
+
+#### Source Citations
+
+| Source | Location | Key Finding |
+|--------|----------|-------------|
+| Grafana dashboard summary | `gtd-main-tasks-v3` summary API, accessed 2026-02-27 | Baseline has 5 panels and default future-aware range |
+| Grafana lookahead SQL | `gtd-main-tasks-v3` JSONPath `$.panels[1].targets[0].rawSql`, accessed 2026-02-27 | Current encoding uses day time plus week series |
+| Grafana drill SQL | `gtd-main-tasks-v3` JSONPath `$.panels[2].targets[0].rawSql`, accessed 2026-02-27 | Emoji formatting already present for parent and project/folder grain |
+| Grafana drill links | `gtd-main-tasks-v3` JSONPath `$.panels[2].fieldConfig.overrides`, accessed 2026-02-27 | Dual web and Mac link actions are active |
+| Grafana retrospective SQL | `gtd-main-tasks-v3` JSONPath `$.panels[4].targets[0].rawSql`, accessed 2026-02-27 | Table still day-grain without weekday color mapping |
+| Grafana reset control | `gtd-main-tasks-v3` JSONPath `$.panels[0].options.content`, accessed 2026-02-27 | Clear-all action is present |
+| Legacy lookahead reference | `lightdash/charts/tasks-lookahead-v3.yml:1` | Legacy chart contract for comparison |
+| Semantic workload mart | `models/marts/fct_tasks_v3_due_workload_daily.sql:61` | Date-spine continuity supports bucket redesign |
+
+---
+
+📦 STATELESS HANDOFF
+
+**Layer 1 — Local Context:**
+→ Last action: LOG-034 captured current dashboard UX baseline and scoped the next execution task for lookahead nested bucket redesign plus weekday color contract.
+→ Dependency chain: LOG-034 ← LOG-033 ← LOG-032 ← LOG-030
+→ Next action: Implement lookahead 5-bucket nested week-day rendering and consistent weekday cell colors in drill tables.
+
+**Layer 2 — Global Context:**
+→ Architecture: dbt semantic marts remain source-of-truth; Grafana handles interaction encoding and readability affordances.
+→ Patterns: Keep variable contract regex-safe and preserve dual web/Mac click actions while iterating visual encodings.
+
+**Fork paths:**
+- Continue execution → implement TASK-006C lookahead redesign and weekday color mapping.
+- Pivot to other dashboard slices → reuse LOG-033 and LOG-034 as migration plus UX playbook.

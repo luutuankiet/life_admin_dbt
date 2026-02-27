@@ -1,0 +1,107 @@
+name: Export Grafana artifacts
+
+on:
+  workflow_dispatch:
+    inputs:
+      dashboard_uids:
+        description: Optional space/comma-separated dashboard UIDs. Empty exports all dashboards.
+        required: false
+        type: string
+      include_providers:
+        description: Also export provisioning dashboard provider YAML files.
+        required: false
+        default: false
+        type: boolean
+      include_datasources:
+        description: Also export datasource snapshot YAML.
+        required: false
+        default: false
+        type: boolean
+
+env:
+  GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
+  GRAFANA_SERVICE_ACCOUNT_TOKEN: ${{ secrets.GRAFANA_SERVICE_ACCOUNT_TOKEN }}
+
+permissions:
+  contents: write
+
+jobs:
+  export_grafana:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Export Grafana artifacts
+        env:
+          DASHBOARD_UIDS: ${{ github.event.inputs.dashboard_uids || '' }}
+          INCLUDE_PROVIDERS: ${{ github.event.inputs.include_providers || 'false' }}
+          INCLUDE_DATASOURCES: ${{ github.event.inputs.include_datasources || 'false' }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${GRAFANA_URL:-}" ]; then
+            echo "Missing required secret: GRAFANA_URL" >&2
+            exit 1
+          fi
+
+          if [ -z "${GRAFANA_SERVICE_ACCOUNT_TOKEN:-}" ]; then
+            echo "Missing required secret: GRAFANA_SERVICE_ACCOUNT_TOKEN" >&2
+            exit 1
+          fi
+
+          cd grafana/scripts
+
+          cmd=(uv run python export_grafana_artifacts.py)
+
+          if [ "${INCLUDE_PROVIDERS}" = "true" ]; then
+            cmd+=(--include-providers)
+          fi
+
+          if [ "${INCLUDE_DATASOURCES}" = "true" ]; then
+            cmd+=(--include-datasources)
+          fi
+
+          if [ -n "${DASHBOARD_UIDS}" ]; then
+            normalized_uids=$(echo "${DASHBOARD_UIDS}" | tr ',' ' ')
+            cmd+=(--dashboard-uids)
+            for uid in ${normalized_uids}; do
+              cmd+=("${uid}")
+            done
+          fi
+
+          "${cmd[@]}"
+
+      - name: Commit exported Grafana artifacts
+        env:
+          INCLUDE_PROVIDERS: ${{ github.event.inputs.include_providers || 'false' }}
+          INCLUDE_DATASOURCES: ${{ github.event.inputs.include_datasources || 'false' }}
+        run: |
+          set -euo pipefail
+
+          git config user.name "GitHub Actions Bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add grafana/dashboards
+
+          if [ "${INCLUDE_PROVIDERS}" = "true" ]; then
+            git add grafana/provisioning/dashboards
+          fi
+
+          if [ "${INCLUDE_DATASOURCES}" = "true" ]; then
+            git add grafana/provisioning/datasources
+          fi
+
+          if git diff --staged --quiet; then
+            echo "No artifact changes to commit"
+            exit 0
+          fi
+
+          git commit -m "chore: Export Grafana artifacts [skip ci]"
+          git push
