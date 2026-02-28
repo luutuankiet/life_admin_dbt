@@ -1,0 +1,33 @@
+name: Grafana Contract CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "grafana/contracts/**"
+      - "grafana/dashboards/**"
+      - "tests/grafana/**"
+      - "docs/grafana/**"
+      - ".github/workflows/grafana_contract_ci.yml"
+
+jobs:
+  validate_grafana_contracts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install contract test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest pyyaml
+
+      - name: Run Grafana contract tests
+        run: |
+          python -m pytest tests/grafana -q

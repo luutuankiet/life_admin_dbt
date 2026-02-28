@@ -9,7 +9,7 @@ execution / hardening
 </current_mode>
 
 <active_task>
-- PHASE-006 UX refinement checkpoint: click actions and emoji-readable grain labels are shipped on `gtd-main-tasks-v3`; next execution focus is lookahead chart redesign for nested week/day readability.
+- PHASE-006 hardening checkpoint: executable Grafana contract baseline is now implemented for `gtd-main-tasks-v3` using registry + reusable packs + generic pytest runner + CI workflow; next execution focus is artifact pruning and expanding contract coverage to additional dashboards.
 </active_task>
 
 <parked_tasks>
@@ -39,6 +39,9 @@ Personal data platform for GTD-driven life decisions. The goal is "perceptual re
 - DECISION-015: Adopt dbt x Grafana target architecture. Semantic modeling (fct<>dim joins, metrics, custom SQL) shifts to dbt as source of truth; Grafana becomes visualization/annotation/exploration layer with MCP write as first-class requirement.
 - DECISION-016: Bind mounts are the persistence standard for migration-first Grafana operations in PHASE-005.
 - DECISION-017: Dashboard workflow standard is MCP-first live authoring + API export to Git for read-only artifact memory; file provisioning is optional and not required for day-to-day migration execution.
+- DECISION-018: Grafana regression prevention will use declarative contract-as-data with reusable packs and a single generic pytest runner; MCP remains interactive authoring QA, not merge-gate enforcement.
+- DECISION-019: Lookahead chart semantics are week-color anchored (one color per week bucket), compact window `now` to `now+5w/w`, minimal x-axis labels with tooltip-first detail, and integer-rounded average signals; this supersedes LOG-034 checklist item that assumed weekday-fixed colors.
+- DECISION-020: Grafana executable contract framework is standardized as registry-driven dashboard ownership (`grafana/contracts/registry.yaml`), reusable packs (`grafana/contracts/packs/*.yaml`), dashboard contract composition (`grafana/contracts/dashboards/*.yaml`), and a single generic pytest runner (`tests/grafana/test_contracts.py`) enforced by CI workflow (`.github/workflows/grafana_contract_ci.yml`).
 </decisions>
 
 <blockers>
@@ -46,7 +49,7 @@ Personal data platform for GTD-driven life decisions. The goal is "perceptual re
 </blockers>
 
 <next_action>
-Execute TASK-006C lookahead redesign on `gtd-main-tasks-v3`: render upcoming 5 buckets with nested day-of-week grouping and consistent day color coding, then validate readability parity against Lightdash intent.
+Run and harden the new contract framework: validate current artifacts against `grafana/contracts/registry.yaml`, decide prune policy for archived dashboards, then expand packs and dashboard contracts beyond `gtd-main-tasks-v3`.
 </next_action>
 
 ---
@@ -5891,3 +5894,823 @@ Read in this exact order to onboard chart logic and UX pillars quickly.
 **Fork paths:**
 - Continue execution → implement TASK-006C lookahead redesign and weekday color mapping.
 - Pivot to other dashboard slices → reuse LOG-033 and LOG-034 as migration plus UX playbook.
+### [LOG-035] - [DISCOVERY] [PLAN] [EXEC] - Grafana guardrail strategy formalized and promoted to public docs - Task: PHASE-006
+**Timestamp:** 2026-02-28 23:40
+**Depends On:** LOG-034 (lookahead redesign scope), LOG-033 (variable and filter stabilization), LOG-030 (MCP-first dashboard workflow)
+
+---
+
+#### Executive Summary
+
+User requested a scalable non-regression system for Grafana that avoids one-off validation scripts and supports a one-command runner similar to `pytest`.
+
+This log captures:
+- what exists today in export and artifact lifecycle,
+- what risk remains (stale artifact accumulation),
+- a reusable contract architecture for dashboards,
+- rollback policy and lifecycle ownership,
+- promotion of the strategy to public docs.
+
+Executed output in this session:
+- created `docs/grafana-guardrails-contracts.md` as self-contained promoted documentation with lifecycle and contract diagrams.
+- updated Section 1 current state to reflect TASK-006C completion and guardrail hardening focus.
+
+---
+
+#### What Changed in Understanding
+
+**Initial concern:** Artifact export might append indefinitely and create uncontrolled repo gunk.
+
+**Corrected understanding:** Export is deterministic per dashboard UID path and overwrites the same target file. Real gunk risk is stale files from dashboards that are renamed, retired, or no longer tracked, because no prune phase currently exists.
+
+This correction changes the design from "rewrite exporter" to "add registry plus prune contract."
+
+---
+
+#### Evidence A - Current Exporter Behavior Is Deterministic
+
+Raw code evidence:
+
+```python
+def normalize_dashboard_json(dashboard: dict[str, Any]) -> dict[str, Any]:
+    data = json.loads(json.dumps(dashboard))
+    data["id"] = None
+    if "version" in data:
+        data["version"] = 1
+    data.pop("iteration", None)
+    return data
+```
+
+```python
+if explicit_uids:
+    dashboard_refs = [{"uid": uid} for uid in explicit_uids]
+else:
+    dashboard_refs = client.list_dashboards(dashboard_limit)
+...
+out_path = dashboards_root / dir_name / f"{uid}.json"
+write_json(out_path, normalize_dashboard_json(dashboard))
+```
+
+Implication:
+- same UID writes to same artifact path,
+- volatile fields are normalized for stable diffs,
+- targeted export already exists via explicit UID input.
+
+Citations:
+- `grafana/scripts/export_grafana_artifacts.py:126`
+- `grafana/scripts/export_grafana_artifacts.py:128`
+- `grafana/scripts/export_grafana_artifacts.py:180`
+- `grafana/scripts/export_grafana_artifacts.py:206`
+- `grafana/scripts/export_grafana_artifacts.py:207`
+
+---
+
+#### Evidence B - Workflow Supports Targeted Export and Commit-on-Change
+
+Raw workflow evidence:
+
+```yaml
+workflow_dispatch:
+  inputs:
+    dashboard_uids:
+      description: Optional space/comma-separated dashboard UIDs. Empty exports all dashboards.
+```
+
+```bash
+git add grafana/dashboards
+...
+if git diff --staged --quiet; then
+  echo "No artifact changes to commit"
+  exit 0
+fi
+```
+
+Implication:
+- export can be scoped by UID,
+- write-back only commits actual changes,
+- no built-in stale artifact pruning step yet.
+
+Citations:
+- `.github/workflows/grafana_write_back.yml:4`
+- `.github/workflows/grafana_write_back.yml:6`
+- `.github/workflows/grafana_write_back.yml:43`
+- `.github/workflows/grafana_write_back.yml:91`
+- `.github/workflows/grafana_write_back.yml:101`
+
+---
+
+#### Evidence C - Live Lookahead Contract Anchors That Must Not Regress
+
+Live dashboard state captured from Grafana API on 2026-02-28:
+- dashboard time window is compact: `from=now`, `to=now+5w/w`.
+- panel 1 is `timeseries`.
+- panel SQL enforces 5-week bounds and includes `W1..W5`, `Week Avg`, `Global Avg`.
+- panel overrides define week colors and dedicated average styles.
+
+Representative SQL snippet:
+
+```sql
+WITH bounds AS (
+  SELECT
+    CURRENT_DATE() AS start_date,
+    DATE_ADD(DATE_TRUNC(CURRENT_DATE(), WEEK(MONDAY)), INTERVAL 5 WEEK) AS end_date_exclusive
+),
+...
+SELECT
+  TIMESTAMP(r.due_date_day) AS time,
+  CASE WHEN r.week_num = 1 THEN r.daily_tasks END AS W1,
+  ...
+  ws.week_avg AS `Week Avg`,
+  gs.global_avg AS `Global Avg`
+```
+
+Citations:
+- Grafana API property `$.time` on `gtd-main-tasks-v3`, accessed 2026-02-28.
+- Grafana API property `$.panels[1].type` on `gtd-main-tasks-v3`, accessed 2026-02-28.
+- Grafana API property `$.panels[1].targets[0].rawSql` on `gtd-main-tasks-v3`, accessed 2026-02-28.
+- Grafana API property `$.panels[1].fieldConfig.overrides` on `gtd-main-tasks-v3`, accessed 2026-02-28.
+
+---
+
+#### Decision Record
+
+**Chosen approach:** Declarative contract-as-data with reusable packs and one generic pytest runner.
+
+Key parts:
+1. Reusable contract packs for shared UX and query invariants.
+2. Dashboard-level contracts that compose packs and add local rationale annotations.
+3. Single runner command for local and CI validation.
+4. Registry plus prune to prevent stale artifact accumulation.
+5. Rollback strategy using Git artifact checkpoints as deterministic source of truth.
+
+**Rejected alternatives and why:**
+- Manual checklist only
+  - Rejected: cannot scale and is easy to skip under iteration pressure.
+- One Python script per chart
+  - Rejected: high maintenance burden and duplicated logic.
+- MCP-only enforcement
+  - Rejected: strong for authoring, weak for deterministic merge gate behavior.
+- Visual screenshot diff only
+  - Rejected: useful smoke signal but insufficient for semantic and query invariants.
+
+---
+
+#### Guardrail Architecture
+
+```mermaid
+graph TD
+    A[User and Agent iterate<br/>via MCP] --> B[Grafana live dashboard]
+    B --> C[Export artifacts script]
+    C --> D[Normalized JSON artifacts<br/>in repo]
+    D --> E[Contract packs and dashboard contracts]
+    E --> F[Generic pytest runner]
+    F --> G[CI status check]
+    G --> H[Merge or block]
+    H --> I[Git checkpoint tag]
+    I --> J[Rollback source]
+```
+
+```mermaid
+flowchart TD
+    A[Contract registry<br/>tracked UIDs] --> B[Export tracked dashboards]
+    B --> C[Write normalized artifacts]
+    C --> D[Prune unmanaged artifacts]
+    D --> E[Run pytest contracts]
+    E --> F[Commit checkpoint]
+```
+
+---
+
+#### Promoted Documentation Output
+
+Created:
+- `docs/grafana-guardrails-contracts.md`
+
+This promoted doc includes:
+- philosophy and roles,
+- entity synergy model,
+- contract semantics with rationale annotations,
+- reusable pack model,
+- one-command execution model,
+- artifact lifecycle and prune strategy,
+- rollback and backup strategy,
+- maintainer playbook and glossary.
+
+Citations:
+- `docs/grafana-guardrails-contracts.md:1`
+- `docs/grafana-guardrails-contracts.md:91`
+- `docs/grafana-guardrails-contracts.md:225`
+- `docs/grafana-guardrails-contracts.md:251`
+- `docs/grafana-guardrails-contracts.md:277`
+
+---
+
+#### Implementation Checklist - Next Execution Slice
+
+| Step | Action | Verification | Status |
+|------|--------|--------------|--------|
+| 1 | Create `grafana/contracts/registry.yaml` for managed dashboard UIDs | Registry exists and includes `gtd-main-tasks-v3` | 🔲 |
+| 2 | Create reusable pack files under `grafana/contracts/packs/` | Pack names are composable and versioned | 🔲 |
+| 3 | Implement generic pytest contract runner | One command validates all contract files | 🔲 |
+| 4 | Add prune phase to export workflow | Unmanaged artifacts removed or CI-failed | 🔲 |
+| 5 | Add rollback apply script with dry-run | Known-good artifact can be restored safely | 🔲 |
+| 6 | Add CI gate workflow job | Pull request fails on contract violation | 🔲 |
+
+---
+
+#### Source Citations Table
+
+| Source | Location | Key Finding |
+|--------|----------|-------------|
+| Export script | `grafana/scripts/export_grafana_artifacts.py:126` | Normalizes volatile fields for stable diffs |
+| Export script | `grafana/scripts/export_grafana_artifacts.py:180` | Supports explicit UID-scoped export |
+| Export script | `grafana/scripts/export_grafana_artifacts.py:206` | Writes deterministic UID-based artifact path |
+| Export README | `grafana/scripts/README.md:38` | Artifacts stored at deterministic dashboard path |
+| Export README | `grafana/scripts/README.md:49` | Confirms normalize id/version/iteration behavior |
+| Write-back workflow | `.github/workflows/grafana_write_back.yml:6` | `dashboard_uids` input supports targeted export |
+| Write-back workflow | `.github/workflows/grafana_write_back.yml:101` | Commit happens only when staged diff exists |
+| Grafana API | `gtd-main-tasks-v3` JSONPath `$.time` accessed 2026-02-28 | Compact dynamic window is active |
+| Grafana API | `gtd-main-tasks-v3` JSONPath `$.panels[1].targets[0].rawSql` accessed 2026-02-28 | 5-week area query plus average overlays are active |
+
+---
+
+#### Dependency Chain
+
+- LOG-030: Established MCP-first dashboard lifecycle and read-only artifact export pattern.
+- LOG-033: Stabilized migration contracts around variables and production-safe UX behavior.
+- LOG-034: Locked lookahead redesign scope and identified readability regression classes.
+- LOG-035: Converts those lessons into scalable guardrail architecture and promoted docs.
+
+---
+
+📦 STATELESS HANDOFF
+
+**Layer 1 — Local Context:**
+→ Last action: LOG-035 documented scalable Grafana guardrails strategy and promoted it to `docs/grafana-guardrails-contracts.md`.
+→ Dependency chain: LOG-035 ← LOG-034 ← LOG-033 ← LOG-030
+→ Next action: Implement executable contract system components: registry, reusable packs, generic pytest runner, prune phase, rollback apply script.
+
+**Layer 2 — Global Context:**
+→ Architecture: dbt remains semantic source-of-truth while Grafana remains interaction layer with MCP-first live iteration.
+→ Patterns: Treat Grafana JSON as versioned artifact memory, then enforce non-regression via declarative contracts rather than bespoke scripts.
+
+**Fork paths:**
+- Continue execution → build contract runner and CI gate exactly as checklist steps 1 through 6.
+- Discuss governance → finalize annotation schema and pack versioning policy before coding.
+### [LOG-036] - [DECISION] [EXEC] - Lookahead UX contract locked and promoted under docs/grafana - Task: PHASE-006
+**Timestamp:** 2026-02-28 23:58
+**Depends On:** LOG-035 (guardrail architecture and promoted testing philosophy), LOG-034 (initial lookahead redesign scope), LOG-033 (stable variable contract)
+
+---
+
+#### Executive Summary
+
+User requested explicit persistence of lookahead requirements, use cases, and UX rationale so future iterations do not erase intent.
+
+Actions completed:
+1. Created a self-contained promoted spec at `docs/grafana/lookahead-chart-spec.md`.
+2. Updated Section 1 state and decisions in `gsd-lite/WORK.md` to lock the finalized chart contract.
+3. Recorded supersession of the earlier weekday-color assumption.
+
+Outcome:
+- Requirement state is now preserved in two places:
+  - runtime artifact memory: `grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json`
+  - promoted human-readable contract: `docs/grafana/lookahead-chart-spec.md`
+
+---
+
+#### What Changed in Understanding
+
+Earlier planning draft in LOG-034 contained this checklist assumption:
+- color by weekday across all weeks.
+
+Final validated UX requirement is different:
+- color by week bucket.
+- days within the same week share that week color.
+- day difference is represented by value and local shape.
+
+This log formally marks that old assumption as superseded for the lookahead panel.
+
+---
+
+#### Evidence A - Prior Assumption That Is Now Superseded
+
+Legacy checklist row in LOG-034:
+
+```text
+Encode weekday fixed colors (Mon blue, Tue green, etc)
+```
+
+Citation:
+- `gsd-lite/WORK.md:5841`
+
+Why superseded:
+- final user-approved rule optimized for cross-week bucket scanning and rebalance actions.
+
+---
+
+#### Evidence B - Canonical Runtime Artifact State
+
+Current exported dashboard artifact confirms finalized contract anchors.
+
+**B1. Compact tactical window**
+- `from=now`
+- `to=now+5w/w`
+
+Citations:
+- `grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json:1069`
+- `grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json:1070`
+
+**B2. Area-flow timeseries rendering for lookahead**
+
+```text
+title: Tasks Lookahead (5-Week Area Flow, Week Color)
+type: timeseries
+```
+
+Citations:
+- `grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json:359`
+- `grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json:360`
+
+**B3. Query encodes five-week bound and integer averages**
+
+```sql
+CURRENT_DATE() AS start_date
+DATE_ADD(DATE_TRUNC(CURRENT_DATE(), WEEK(MONDAY)), INTERVAL 5 WEEK)
+CAST(CEIL(AVG(daily_tasks)) AS INT64)
+...
+AS W1 ... AS W5
+AS `Week Avg`
+AS `Global Avg`
+```
+
+Citation:
+- `grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json:355`
+
+**B4. Series contract present in overrides**
+- `W1`, `W2`, `W3`, `W4`, `W5`, `Week Avg`, `Global Avg`, `weekday_code` are present.
+
+Citations:
+- `grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json:111`
+- `grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json:126`
+- `grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json:141`
+- `grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json:156`
+- `grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json:171`
+- `grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json:186`
+- `grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json:227`
+- `grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json:272`
+
+**B5. Tooltip is compact and detail-first**
+- `hideZeros=true`
+- `mode=multi`
+
+Citations:
+- `grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json:337`
+- `grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json:338`
+
+---
+
+#### Evidence C - Promoted Product Spec Now Exists
+
+Created `docs/grafana/lookahead-chart-spec.md` with:
+- why the chart exists,
+- concrete rebalance use case,
+- UX contract by behavior domain,
+- superseded assumption record,
+- data and query contract snapshot,
+- acceptance checklist,
+- regression signatures,
+- worked example dataset for planning interpretation.
+
+Citations:
+- `docs/grafana/lookahead-chart-spec.md:1`
+- `docs/grafana/lookahead-chart-spec.md:26`
+- `docs/grafana/lookahead-chart-spec.md:89`
+- `docs/grafana/lookahead-chart-spec.md:125`
+- `docs/grafana/lookahead-chart-spec.md:148`
+- `docs/grafana/lookahead-chart-spec.md:170`
+- `docs/grafana/lookahead-chart-spec.md:186`
+
+---
+
+#### Decision Record
+
+**DECISION-019 lock:**
+Lookahead chart semantics are now frozen as:
+- week-color anchored bucket identity,
+- compact tactical window now through now plus five weeks,
+- area-flow chart encoding,
+- minimal axis and tooltip-first detail,
+- integer-rounded average signals.
+
+**Rejected alternatives and why:**
+- Keep requirements only in chat
+  - Rejected because chat is not durable for future agents.
+- Keep only JSON artifact and skip narrative spec
+  - Rejected because artifact is precise but not self-explaining about intent and use case.
+- Preserve weekday-color assumption from LOG-034
+  - Rejected because user-approved final UX uses week-color semantics for faster rebalance scanning.
+
+---
+
+#### Requirement to Interaction Diagram
+
+```mermaid
+graph TD
+    A[Planning question<br/>which day can absorb moved tasks] --> B[Lookahead panel area flow]
+    B --> C[Week color identity<br/>W1 to W5]
+    B --> D[Day value shape inside week]
+    B --> E[Week Avg and Global Avg context]
+    B --> F[Tooltip day and date and count]
+    C --> G[Rebalance decision]
+    D --> G
+    E --> G
+    F --> G
+```
+
+```mermaid
+flowchart TD
+    A[Edit in Grafana via MCP] --> B[Export gtd-main-tasks-v3 artifact]
+    B --> C[Promote requirement to docs slash grafana]
+    C --> D[Lock decision in WORK log]
+    D --> E[Future changes validated against contract]
+```
+
+---
+
+#### Implementation Checklist
+
+| Step | Action | Verification | Status |
+|------|--------|--------------|--------|
+| 1 | Create promoted lookahead spec under docs and grafana | File exists and is self-contained | DONE |
+| 2 | Capture superseded weekday-color assumption explicitly | Supersession section present in spec and log | DONE |
+| 3 | Align Section 1 state with documentation lock | Active task and next action updated | DONE |
+| 4 | Keep runtime artifact as canonical execution memory | Exported dashboard JSON committed path exists | DONE |
+| 5 | Convert spec into executable CI contracts | Registry and packs and runner | PENDING |
+
+---
+
+#### Source Citations Table
+
+| Source | Location | Key Finding |
+|--------|----------|-------------|
+| Legacy checklist row | `gsd-lite/WORK.md:5841` | Old weekday-color assumption exists and needed supersession |
+| Exported dashboard artifact | `grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json:1069` | Tactical window begins at now |
+| Exported dashboard artifact | `grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json:1070` | Tactical window ends at now plus five weeks |
+| Exported dashboard artifact | `grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json:355` | Query encodes five-week bound and integer average logic |
+| Exported dashboard artifact | `grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json:359` | Panel naming confirms lookahead contract target |
+| Exported dashboard artifact | `grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json:360` | Panel type is timeseries area-flow surface |
+| Promoted spec | `docs/grafana/lookahead-chart-spec.md:26` | UX contract now centrally documented |
+| Promoted spec | `docs/grafana/lookahead-chart-spec.md:186` | Example dataset explains planning usefulness |
+
+---
+
+#### Dependency Chain
+
+- LOG-033 provided stable variable and filter mechanics in Grafana migration.
+- LOG-034 scoped initial lookahead redesign but still carried early color assumption.
+- LOG-035 established guardrail philosophy and promoted CI model.
+- LOG-036 locks final lookahead product contract and supersedes stale assumption.
+
+---
+
+📦 STATELESS HANDOFF
+
+**Layer 1 — Local Context:**
+→ Last action: LOG-036 locked lookahead requirement state into promoted spec and log, with supersession of old color assumption.
+→ Dependency chain: LOG-036 <- LOG-035 <- LOG-034 <- LOG-033
+→ Next action: implement executable contracts from docs: registry, packs, generic pytest runner, and prune lifecycle.
+
+**Layer 2 — Global Context:**
+→ Architecture: Grafana JSON artifacts remain runtime memory while docs in docs and grafana carry product intent and rationale.
+→ Patterns: preserve intent by pairing artifact export with narrative UX contract and then enforce via declarative CI checks.
+
+**Fork paths:**
+- Continue execution -> build and wire contract framework from `docs/grafana/lookahead-chart-spec.md` and `docs/grafana/grafana-guardrails-contracts.md`.
+- Discuss scope -> decide whether to extend this same spec pattern to weekly review and future dashboard slices.
+### [LOG-037] - [EXEC] [DECISION] - Executable Grafana contract framework shipped for lookahead dashboard - Task: PHASE-006
+**Timestamp:** 2026-02-29 00:22
+**Depends On:** LOG-036 (lookahead UX contract lock), LOG-035 (guardrail architecture and docs), LOG-030 (MCP-first artifact workflow)
+
+---
+
+#### Executive Summary
+
+Implemented the first executable version of the Grafana guardrail system so regression checks are runnable with a single pytest command.
+
+Shipped components:
+- contract registry ownership model,
+- reusable pack contracts,
+- dashboard-specific contract composition,
+- generic pytest runner,
+- CI workflow for PR enforcement.
+
+This establishes contract-as-data and avoids ad hoc per-chart scripts.
+
+---
+
+#### Evidence A - Registry and Contract Composition Are Now Concrete
+
+Registry defines ownership and active versus archived scope:
+
+```yaml
+version: 1
+policy:
+  unmanaged_artifacts: error
+
+dashboards:
+  - uid: gtd-main-tasks-v3
+    status: active
+    artifact_path: grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json
+    contracts:
+      - grafana/contracts/dashboards/gtd-main-tasks-v3.yaml
+```
+
+Dashboard contract composes reusable packs:
+
+```yaml
+panels:
+  - id: 1
+    alias: tasks_lookahead
+    use_packs:
+      - time_window_now_to_5w
+      - lookahead_area_week_color
+      - avg_integer_signals
+      - tooltip_minimal
+```
+
+Citations:
+- `grafana/contracts/registry.yaml:1`
+- `grafana/contracts/dashboards/gtd-main-tasks-v3.yaml:18`
+
+---
+
+#### Evidence B - Reusable Packs Encode UX Invariants
+
+Pack examples include compact horizon, week-color semantics, integer averages, and tooltip behavior.
+
+```yaml
+- id: dashboard_time_to_now_plus_5w
+  selector: dashboard.time.to
+  op: equals
+  expected: now+5w/w
+```
+
+```yaml
+- id: query_emits_week_bucket_series
+  selector: panel.query
+  op: contains_all
+  expected:
+    - AS W1
+    - AS W2
+    - AS W3
+    - AS W4
+    - AS W5
+```
+
+```yaml
+- id: query_rounds_average_values_with_ceiling
+  selector: panel.query
+  op: contains_all
+  expected:
+    - CAST(CEIL(AVG(daily_tasks)) AS INT64)
+```
+
+Citations:
+- `grafana/contracts/packs/time_window_now_to_5w.yaml:1`
+- `grafana/contracts/packs/lookahead_area_week_color.yaml:1`
+- `grafana/contracts/packs/avg_integer_signals.yaml:1`
+- `grafana/contracts/packs/tooltip_minimal.yaml:1`
+
+---
+
+#### Evidence C - Generic Runner and CI Gate Are Implemented
+
+Generic test runner resolves selectors, override fields, operations, and registry coverage in one test entrypoint:
+
+```python
+def test_grafana_dashboard_contracts() -> None:
+    registry = _load_yaml(REGISTRY_PATH)
+    issues: list[ValidationIssue] = []
+    issues.extend(_check_registry_consistency(registry))
+    ...
+```
+
+CI workflow runs these checks on pull requests touching contracts, artifacts, or docs:
+
+```yaml
+- name: Run Grafana contract tests
+  run: |
+    python -m pytest tests/grafana -q
+```
+
+Citations:
+- `tests/grafana/test_contracts.py:1`
+- `tests/grafana/test_contracts.py:366`
+- `.github/workflows/grafana_contract_ci.yml:1`
+
+---
+
+#### Decision Record
+
+**Chosen design:**
+- one generic runner plus declarative YAML packs and contracts.
+
+**Why chosen:**
+- scales to many dashboards,
+- keeps rule semantics readable,
+- allows dashboard-level failure messages,
+- supports single-command local and CI execution.
+
+**Rejected alternatives:**
+- Per-panel Python validators
+  - rejected due maintenance overhead and duplication.
+- Manual review only
+  - rejected because it does not provide deterministic merge gates.
+
+---
+
+#### Architecture Diagram
+
+```mermaid
+graph TD
+    A[Registry<br/>dashboard ownership] --> B[Dashboard contract]
+    C[Reusable packs] --> B
+    B --> D[Generic pytest runner]
+    D --> E[Dashboard level failures]
+    D --> F[CI workflow gate]
+    F --> G[Merge allowed or blocked]
+```
+
+---
+
+#### Implementation Status Table
+
+| Step | Action | Verification | Status |
+|------|--------|--------------|--------|
+| 1 | Registry file created | Active and archived UIDs declared | DONE |
+| 2 | Reusable packs created | 4 packs committed under `grafana/contracts/packs` | DONE |
+| 3 | Dashboard contract created | `gtd-main-tasks-v3` contract composes packs | DONE |
+| 4 | Generic pytest runner created | `tests/grafana/test_contracts.py` committed | DONE |
+| 5 | CI gate workflow created | `.github/workflows/grafana_contract_ci.yml` committed | DONE |
+| 6 | Local execution proof | `python -m pytest tests/grafana -q` run output captured | PENDING |
+
+Note:
+- Command execution could not be run in this tool session because shell execution is unavailable in the current MCP tool set.
+
+---
+
+#### Source Citations Table
+
+| Source | Location | Key Finding |
+|--------|----------|-------------|
+| Contract docs | `docs/grafana/grafana-guardrails-contracts.md:207` | One-command model defined before implementation |
+| Lookahead spec | `docs/grafana/lookahead-chart-spec.md:26` | UX contract source used to derive executable checks |
+| Registry | `grafana/contracts/registry.yaml:1` | Dashboard ownership and unmanaged policy defined |
+| Dashboard contract | `grafana/contracts/dashboards/gtd-main-tasks-v3.yaml:1` | Pack composition and panel-specific checks |
+| Pack file | `grafana/contracts/packs/lookahead_area_week_color.yaml:1` | Week-color and query invariants encoded |
+| Generic runner | `tests/grafana/test_contracts.py:1` | Single validation engine for all contracts |
+| CI workflow | `.github/workflows/grafana_contract_ci.yml:1` | PR gate wiring for contract execution |
+
+---
+
+#### Dependency Chain
+
+- LOG-035 defined the architecture for contract-as-data and lifecycle guardrails.
+- LOG-036 locked the lookahead UX semantics and superseded old color assumption.
+- LOG-037 implements executable enforcement aligned to those decisions.
+
+---
+
+📦 STATELESS HANDOFF
+
+**Layer 1 — Local Context:**
+→ Last action: LOG-037 shipped executable Grafana contract framework components and CI workflow for `gtd-main-tasks-v3`.
+→ Dependency chain: LOG-037 <- LOG-036 <- LOG-035 <- LOG-030
+→ Next action: run `python -m pytest tests/grafana -q`, fix any contract mismatches, then decide prune strategy for archived dashboards.
+
+**Layer 2 — Global Context:**
+→ Architecture: Grafana artifacts in Git are execution memory; contracts in `grafana/contracts` are now the deterministic non-regression layer.
+→ Patterns: maintain reusable packs plus dashboard composition instead of bespoke validator scripts.
+
+**Fork paths:**
+- Continue execution -> validate runner output, then expand contracts to additional dashboards.
+- Scope cleanup -> trim archived dashboards and tighten registry unmanaged policy if desired.
+### [LOG-038] - [BUG] [EXEC] - Local contract runner bootstrap fixed after missing pytest executable - Task: PHASE-006
+**Timestamp:** 2026-02-29 00:34
+**Depends On:** LOG-037 (executable contract framework), LOG-036 (lookahead contract lock)
+
+---
+
+#### Executive Summary
+
+After the executable framework was shipped, local run failed on first execution because `pytest` was not installed in project dependencies and shell environment still pointed to `grafana/scripts/.venv`.
+
+Implemented fix:
+- added dev dependency group with `pytest` and `pyyaml` in root `pyproject.toml`.
+- updated run instructions to use explicit dev group invocation.
+
+---
+
+#### Reproduction Evidence
+
+User-reported command and error:
+
+```text
+uv run pytest tests/grafana/test_contracts.py
+warning: VIRTUAL_ENV=grafana/scripts/.venv does not match the project environment path `.venv`
+error: Failed to spawn: `pytest`
+Caused by: No such file or directory (os error 2)
+```
+
+Interpretation:
+- warning indicates active shell env mismatch (non-fatal in this case),
+- hard failure indicates missing `pytest` binary in resolved environment.
+
+---
+
+#### Root Cause and Fix
+
+**Root cause A:** project dependency metadata had no dev tools for contract tests.
+
+**Fix A:** append dev dependency group:
+
+```toml
+[dependency-groups]
+dev = [
+    "pytest>=8.4.0",
+    "pyyaml>=6.0.2",
+]
+```
+
+Citation:
+- `pyproject.toml:20`
+
+**Root cause B:** run docs assumed generic invocation without dependency-group bootstrap.
+
+**Fix B:** docs now require explicit dev-group setup and run command:
+
+```bash
+uv sync --group dev
+uv run --group dev pytest tests/grafana -q
+```
+
+Citations:
+- `grafana/contracts/README.md:21`
+- `docs/grafana/grafana-guardrails-contracts.md:212`
+
+---
+
+#### Hypothesis Tracking
+
+| Hypothesis | Likelihood | Test | Status |
+|------------|------------|------|--------|
+| Missing pytest binary in project env | High | Check root dependency metadata for pytest | CONFIRMED |
+| VIRTUAL_ENV mismatch is primary blocker | Medium | Error text includes spawn failure for pytest executable | REJECTED as primary blocker |
+| Missing pyyaml would fail post-spawn import | Medium | Runner imports yaml module | PREVENTED via dev deps |
+
+---
+
+#### Implementation Checklist
+
+| Step | Action | Verification | Status |
+|------|--------|--------------|--------|
+| 1 | Add root dev dependency group | `pytest` and `pyyaml` entries exist | DONE |
+| 2 | Update contract README run instructions | Uses `uv sync --group dev` and `uv run --group dev` | DONE |
+| 3 | Update guardrail philosophy doc command example | Same command shown for consistency | DONE |
+| 4 | Re-run contract suite locally | Requires user shell execution | PENDING |
+
+---
+
+#### Source Citations Table
+
+| Source | Location | Key Finding |
+|--------|----------|-------------|
+| User error report | Session command output | `pytest` spawn failure reproduced |
+| Project metadata | `pyproject.toml:20` | Dev group now includes pytest and pyyaml |
+| Contract readme | `grafana/contracts/README.md:21` | Bootstrap and run command now explicit |
+| Guardrail docs | `docs/grafana/grafana-guardrails-contracts.md:212` | One-command section updated to dev-group flow |
+
+---
+
+#### Dependency Chain
+
+- LOG-037 introduced executable framework and CI workflow.
+- LOG-038 fixes local bootstrap gap so one-command local execution path is viable.
+
+---
+
+📦 STATELESS HANDOFF
+
+**Layer 1 — Local Context:**
+→ Last action: LOG-038 fixed local contract runner bootstrap gap by adding dev dependency group and updating run commands.
+→ Dependency chain: LOG-038 <- LOG-037 <- LOG-036
+→ Next action: run `uv sync --group dev` then `uv run --group dev pytest tests/grafana -q` and capture first green baseline.
+
+**Layer 2 — Global Context:**
+→ Architecture: executable Grafana contracts are now code-complete and locally bootstrappable via uv dev group.
+→ Patterns: keep run instructions aligned with dependency metadata to avoid drift between docs and execution.
+
+**Fork paths:**
+- Continue execution -> run local test suite and resolve any contract mismatches.
+- Scale coverage -> add contracts for additional active dashboards once baseline is green.

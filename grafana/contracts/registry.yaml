@@ -1,0 +1,27 @@
+version: 1
+
+policy:
+  unmanaged_artifacts: error
+  ignore_artifact_globs: []
+
+dashboards:
+  - uid: gtd-main-tasks-v3
+    status: active
+    artifact_path: grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json
+    contracts:
+      - grafana/contracts/dashboards/gtd-main-tasks-v3.yaml
+
+  - uid: gtd-weekly-review-v3
+    status: archived
+    artifact_path: grafana/dashboards/gtd-migration/gtd-weekly-review-v3.json
+    contracts: []
+
+  - uid: ad2lhm6
+    status: archived
+    artifact_path: grafana/dashboards/general/ad2lhm6.json
+    contracts: []
+
+  - uid: mcp-smoke-20260222
+    status: archived
+    artifact_path: grafana/dashboards/general/mcp-smoke-20260222.json
+    contracts: []

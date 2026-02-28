@@ -1,0 +1,54 @@
+version: 1
+
+dashboard_uid: gtd-main-tasks-v3
+dashboard_title: GTD Main Tasks v3 (dbt semantic marts)
+artifact_path: grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json
+
+annotations:
+  rationale: >
+    Lookahead is a tactical planning surface. Broad ranges and noisy labels
+    reduce scan speed and obscure rebalance opportunities.
+  anti_regression_story: >
+    Prior iterations regressed into blank-canvas negative space and overloaded
+    axis labels. This contract keeps the panel readable and planning-centric.
+  decision_refs:
+    - LOG-036
+    - DECISION-019
+
+panels:
+  - id: 1
+    alias: tasks_lookahead
+    use_packs:
+      - time_window_now_to_5w
+      - lookahead_area_week_color
+      - avg_integer_signals
+      - tooltip_minimal
+
+    checks:
+      - id: query_uses_prod_workload_mart
+        selector: panel.query
+        op: contains_all
+        expected:
+          - airbyte-468412.ticktick_dbt_prod.fct_tasks_v3_due_workload_daily
+        severity: error
+
+      - id: query_respects_scope_filter
+        selector: panel.query
+        op: contains_all
+        expected:
+          - (${scope_bucket:singlequote} = 'all' OR w.scope_bucket = ${scope_bucket:singlequote})
+        severity: error
+
+      - id: query_respects_folder_filter
+        selector: panel.query
+        op: contains_all
+        expected:
+          - REGEXP_CONTAINS(w.folder_name, r'^${folder_name:regex}$')
+        severity: error
+
+      - id: query_respects_project_filter
+        selector: panel.query
+        op: contains_all
+        expected:
+          - REGEXP_CONTAINS(w.project_name, r'^${project_name:regex}$')
+        severity: error

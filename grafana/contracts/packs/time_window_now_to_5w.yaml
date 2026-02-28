@@ -1,0 +1,17 @@
+version: 1
+name: time_window_now_to_5w
+
+checks:
+  - id: dashboard_time_from_now
+    selector: dashboard.time.from
+    op: equals
+    expected: now
+    severity: error
+    rationale: Keep tactical lookahead focused on current planning horizon.
+
+  - id: dashboard_time_to_now_plus_5w
+    selector: dashboard.time.to
+    op: equals
+    expected: now+5w/w
+    severity: error
+    rationale: Prevent negative-space regressions from broad global windows.

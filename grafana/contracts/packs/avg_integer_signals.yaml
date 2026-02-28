@@ -1,0 +1,49 @@
+version: 1
+name: avg_integer_signals
+
+checks:
+  - id: query_emits_average_series
+    selector: panel.query
+    op: contains_all
+    expected:
+      - AS `Week Avg`
+      - AS `Global Avg`
+    severity: error
+
+  - id: query_rounds_average_values_with_ceiling
+    selector: panel.query
+    op: contains_all
+    expected:
+      - CAST(CEIL(AVG(daily_tasks)) AS INT64)
+    severity: error
+
+  - id: week_avg_decimals_zero
+    selector: panel.override[Week Avg].decimals
+    op: equals
+    expected: 0
+    severity: error
+
+  - id: global_avg_decimals_zero
+    selector: panel.override[Global Avg].decimals
+    op: equals
+    expected: 0
+    severity: error
+
+  - id: global_avg_not_white
+    selector: panel.override[Global Avg].color
+    op: not_equals
+    expected: "#FFFFFF"
+    severity: error
+    rationale: White can disappear against light backgrounds.
+
+  - id: week_avg_line_width
+    selector: panel.override[Week Avg].line_width
+    op: equals
+    expected: 2
+    severity: error
+
+  - id: global_avg_line_width
+    selector: panel.override[Global Avg].line_width
+    op: equals
+    expected: 1
+    severity: error
