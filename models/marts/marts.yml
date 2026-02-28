@@ -1468,6 +1468,25 @@ models:
                   - label: open in ticktick (web)
                     url: |
                       ${row.fct_tasks_v3.dynamic_grain_url.raw | prepend: 'https://'}
+              formatted_dimension_grain:
+                description: Formatted for readability - dynamic dimension grain
+                label: Formatted grain dimension
+                type: string
+                sql: |-
+                  CONCAT(
+                    CODE_POINTS_TO_STRING([
+                        127812 + MOD(ABS(FARM_FINGERPRINT(${dimension_grain})), 50)
+                    ]),
+                    ' ',
+                    ${dimension_grain}
+                  )
+                urls:
+                  - label: open in ticktick (mac)
+                    url: |
+                      ${row.fct_tasks_v3.dynamic_grain_url.raw | prepend: 'ticktick://'}
+                  - label: open in ticktick (web)
+                    url: |
+                      ${row.fct_tasks_v3.dynamic_grain_url.raw | prepend: 'https://'}
               parent_dimension_grain:
                 description: Dynamic parent dimension of selected grain
                 label: parent grain dimension
@@ -1478,6 +1497,26 @@ models:
                     when ${ld.parameters.fct_tasks_v3.count_grain} = 'project' then ${dim_folders_v3.folder_name}
                     when ${ld.parameters.fct_tasks_v3.count_grain} = 'folder' then ${dim_folders_v3.folder_name}
                   end
+                urls:
+                  - label: open in ticktick (mac)
+                    url: |
+                      ${row.fct_tasks_v3.dynamic_parent_grain_url.raw | prepend: 'ticktick://'}
+                  - label: open in ticktick (web)
+                    url: |
+                      ${row.fct_tasks_v3.dynamic_parent_grain_url.raw | prepend: 'https://'}
+              formatted_parent_dimension_grain:
+                description: Formatted for readability - dynamic parent dimension of the 
+                  dimension_grain
+                label: Formatted parent grain dimension
+                type: string
+                sql: |-
+                  CONCAT(
+                    CODE_POINTS_TO_STRING([
+                        127812 + MOD(ABS(FARM_FINGERPRINT(${parent_dimension_grain})), 50)
+                    ]),
+                    ' ',
+                    ${parent_dimension_grain}
+                  )
                 urls:
                   - label: open in ticktick (mac)
                     url: |

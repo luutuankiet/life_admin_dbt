@@ -1,0 +1,1078 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 5,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "[Clear all filters and reset view](https://kenluu.grafana.net/d/gtd-main-tasks-v3?from=now&to=now%2B5w%2Fw)",
+        "mode": "markdown"
+      },
+      "pluginVersion": "13.0.0-22326976726.patch2",
+      "title": "Reset Filters",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "grafana-bigquery-datasource",
+        "uid": "cfdykvp3d8n40c"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 70,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 3,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "always",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "W1"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#73BF69",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "W2"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#FADE2A",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "W3"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#5794F2",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "W4"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#FF9830",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "W5"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#E24D42",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Week Avg"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#bac1c8",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    8,
+                    4
+                  ],
+                  "fill": "dash"
+                }
+              },
+              {
+                "id": "custom.showPoints",
+                "value": "never"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Global Avg"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "text",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "solid"
+                }
+              },
+              {
+                "id": "custom.showPoints",
+                "value": "never"
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": false,
+                  "viz": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "weekday_code"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Day"
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": false,
+                  "viz": true
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "1": {
+                        "text": "Mon"
+                      },
+                      "2": {
+                        "text": "Tue"
+                      },
+                      "3": {
+                        "text": "Wed"
+                      },
+                      "4": {
+                        "text": "Thu"
+                      },
+                      "5": {
+                        "text": "Fri"
+                      },
+                      "6": {
+                        "text": "Sat"
+                      },
+                      "7": {
+                        "text": "Sun"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 12,
+        "x": 0,
+        "y": 2
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": true,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.0.0-22326976726.patch2",
+      "targets": [
+        {
+          "dataset": "ticktick_dbt_prod",
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "cfdykvp3d8n40c"
+          },
+          "editorMode": "code",
+          "format": 1,
+          "location": "asia-southeast1",
+          "project": "airbyte-468412",
+          "rawQuery": true,
+          "rawSql": "WITH bounds AS (\n  SELECT\n    CURRENT_DATE() AS start_date,\n    DATE_ADD(DATE_TRUNC(CURRENT_DATE(), WEEK(MONDAY)), INTERVAL 5 WEEK) AS end_date_exclusive\n),\ndaily AS (\n  SELECT\n    w.due_date_day,\n    DATE_TRUNC(w.due_date_day, WEEK(MONDAY)) AS due_week_start,\n    SUM(w.open_task_count) AS daily_tasks\n  FROM `airbyte-468412.ticktick_dbt_prod.fct_tasks_v3_due_workload_daily` w\n  CROSS JOIN bounds b\n  WHERE w.due_date_day >= b.start_date\n    AND w.due_date_day < b.end_date_exclusive\n    AND (${scope_bucket:singlequote} = 'all' OR w.scope_bucket = ${scope_bucket:singlequote})\n    AND REGEXP_CONTAINS(w.folder_name, r'^${folder_name:regex}$')\n    AND REGEXP_CONTAINS(w.project_name, r'^${project_name:regex}$')\n  GROUP BY 1, 2\n),\nranked AS (\n  SELECT\n    due_date_day,\n    due_week_start,\n    daily_tasks,\n    DENSE_RANK() OVER (ORDER BY due_week_start) AS week_num\n  FROM daily\n),\nweek_stats AS (\n  SELECT\n    week_num,\n    CAST(CEIL(AVG(daily_tasks)) AS INT64) AS week_avg\n  FROM ranked\n  WHERE week_num <= 5\n  GROUP BY 1\n),\nglobal_stats AS (\n  SELECT CAST(CEIL(AVG(daily_tasks)) AS INT64) AS global_avg\n  FROM ranked\n  WHERE week_num <= 5\n)\nSELECT\n  TIMESTAMP(r.due_date_day) AS time,\n  CASE WHEN r.week_num = 1 THEN r.daily_tasks END AS W1,\n  CASE WHEN r.week_num = 2 THEN r.daily_tasks END AS W2,\n  CASE WHEN r.week_num = 3 THEN r.daily_tasks END AS W3,\n  CASE WHEN r.week_num = 4 THEN r.daily_tasks END AS W4,\n  CASE WHEN r.week_num = 5 THEN r.daily_tasks END AS W5,\n  ws.week_avg AS `Week Avg`,\n  gs.global_avg AS `Global Avg`,\n  MOD(EXTRACT(DAYOFWEEK FROM r.due_date_day) + 5, 7) + 1 AS weekday_code\nFROM ranked r\nLEFT JOIN week_stats ws\n  ON r.week_num = ws.week_num\nCROSS JOIN global_stats gs\nWHERE r.week_num <= 5\nORDER BY r.due_date_day",
+          "refId": "A"
+        }
+      ],
+      "title": "Tasks Lookahead (5-Week Area Flow, Week Color)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-bigquery-datasource",
+        "uid": "cfdykvp3d8n40c"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "parent"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Open parent in TickTick web",
+                    "url": "${__data.fields[\"parent_grain_url_web\"]}"
+                  },
+                  {
+                    "targetBlank": false,
+                    "title": "Open parent in TickTick Mac",
+                    "url": "${__data.fields[\"parent_grain_url_native\"]}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "grain"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Open grain in TickTick web",
+                    "url": "${__data.fields[\"grain_url_web\"]}"
+                  },
+                  {
+                    "targetBlank": false,
+                    "title": "Open grain in TickTick Mac",
+                    "url": "${__data.fields[\"grain_url_native\"]}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "parent_grain_url_web"
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom.viz",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "parent_grain_url_native"
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom.viz",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "grain_url_web"
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom.viz",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "grain_url_native"
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom.viz",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "due_date_day"
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom.viz",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "day"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 111
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "date_mmdd"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 69
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 12,
+        "x": 12,
+        "y": 2
+      },
+      "id": 2,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true
+      },
+      "pluginVersion": "13.0.0-22326976726.patch2",
+      "targets": [
+        {
+          "dataset": "ticktick_dbt_prod",
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "cfdykvp3d8n40c"
+          },
+          "editorMode": "builder",
+          "format": 1,
+          "location": "asia-southeast1",
+          "project": "airbyte-468412",
+          "rawSql": "SELECT\n  due_date_day,\n  due_date_day_of_week_name AS day,\n  FORMAT_DATE('%m/%d', due_date_day) AS date_mmdd,\n  CONCAT(\n    CODE_POINTS_TO_STRING([\n      127812 + MOD(ABS(FARM_FINGERPRINT(parent_grain_label)), 50)\n    ]),\n    ' ',\n    parent_grain_label\n  ) AS parent,\n  CASE\n    WHEN grain_level IN ('project', 'folder') THEN CONCAT(\n      CODE_POINTS_TO_STRING([\n        127812 + MOD(ABS(FARM_FINGERPRINT(grain_label)), 50)\n      ]),\n      ' ',\n      grain_label\n    )\n    ELSE grain_label\n  END AS grain,\n  task_count,\n  parent_grain_url_web,\n  parent_grain_url_native,\n  grain_url_web,\n  grain_url_native\nFROM `airbyte-468412.ticktick_dbt_prod.fct_tasks_v3_grain_rollup`\nWHERE due_date_day BETWEEN CURRENT_DATE() AND DATE_ADD(CURRENT_DATE(), INTERVAL CAST(${lookahead_days} AS INT64) DAY)\n  AND grain_level = ${grain_level:singlequote}\n  AND (${scope_bucket:singlequote} = 'all' OR scope_bucket = ${scope_bucket:singlequote})\n  AND REGEXP_CONTAINS(folder_name, r'^${folder_name:regex}$')\n  AND (${grain_level:singlequote} = 'folder' OR REGEXP_CONTAINS(project_name, r'^${project_name:regex}$'))\nORDER BY due_date_day ASC, parent_grain_label ASC, task_count DESC\nLIMIT 1000",
+          "refId": "A"
+        }
+      ],
+      "title": "Drill Down by Grain",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-bigquery-datasource",
+        "uid": "cfdykvp3d8n40c"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "id": 3,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "never",
+        "stacking": "normal",
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "13.0.0-22326976726.patch2",
+      "targets": [
+        {
+          "dataset": "ticktick_dbt_prod",
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "cfdykvp3d8n40c"
+          },
+          "editorMode": "builder",
+          "format": 1,
+          "location": "asia-southeast1",
+          "project": "airbyte-468412",
+          "rawSql": "SELECT\n  due_date_day,\n  CONCAT(\n    CODE_POINTS_TO_STRING([\n      127812 + MOD(ABS(FARM_FINGERPRINT(parent_grain_label)), 50)\n    ]),\n    ' ',\n    parent_grain_label\n  ) AS parent_grain_label,\n  SUM(task_count) AS open_tasks\nFROM `airbyte-468412.ticktick_dbt_prod.fct_tasks_v3_grain_rollup`\nWHERE due_date_day BETWEEN CURRENT_DATE() AND DATE_ADD(CURRENT_DATE(), INTERVAL CAST(${lookahead_days} AS INT64) DAY)\n  AND grain_level = ${grain_level:singlequote}\n  AND (${scope_bucket:singlequote} = 'all' OR scope_bucket = ${scope_bucket:singlequote})\n  AND REGEXP_CONTAINS(folder_name, r'^${folder_name:regex}$')\n  AND (${grain_level:singlequote} = 'folder' OR REGEXP_CONTAINS(project_name, r'^${project_name:regex}$'))\nGROUP BY 1, 2\nORDER BY 1 ASC, 3 DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Distribution by Parent Dimension",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-bigquery-datasource",
+        "uid": "cfdykvp3d8n40c"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "project"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Open project in TickTick web",
+                    "url": "${__data.fields[\"project_url_web\"]}"
+                  },
+                  {
+                    "targetBlank": false,
+                    "title": "Open project in TickTick Mac",
+                    "url": "${__data.fields[\"project_url_native\"]}"
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 347
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "task"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Open task in TickTick web",
+                    "url": "${__data.fields[\"task_url_web\"]}"
+                  },
+                  {
+                    "targetBlank": false,
+                    "title": "Open task in TickTick Mac",
+                    "url": "${__data.fields[\"task_url_native\"]}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "project_url_web"
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom.viz",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "project_url_native"
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom.viz",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "task_url_web"
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom.viz",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "task_url_native"
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom.viz",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "gtd_work_type"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 20
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "day"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 143
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "completed_date"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 160
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "id": 4,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "13.0.0-22326976726.patch2",
+      "targets": [
+        {
+          "dataset": "ticktick_dbt_prod",
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "cfdykvp3d8n40c"
+          },
+          "editorMode": "code",
+          "format": 1,
+          "location": "asia-southeast1",
+          "project": "airbyte-468412",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  completed_time_day AS completed_date,\n  completed_time_day_of_week_name AS day,\n  gtd_work_type,\n  project_name_formatted AS project,\n  project_url_web,\n  project_url_native,\n  title AS task,\n  task_url_web,\n  task_url_native\nFROM `airbyte-468412.ticktick_dbt_prod.fct_tasks_v3_completed_activity`\nWHERE \n  due_date is not null\n  AND\ncompleted_time_day BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL CAST(${completed_days} AS INT64) DAY) AND CURRENT_DATE()\n  AND (${scope_bucket:singlequote} = 'all' OR scope_bucket = ${scope_bucket:singlequote})\n  AND REGEXP_CONTAINS(folder_name, r'^${folder_name:regex}$')\n  AND REGEXP_CONTAINS(project_name, r'^${project_name:regex}$')\nORDER BY completed_date DESC, updated_time DESC\nLIMIT 500",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "What Did You Do",
+      "type": "table"
+    }
+  ],
+  "preload": false,
+  "refresh": "5m",
+  "schemaVersion": 42,
+  "tags": [
+    "mcp",
+    "main-tasks",
+    "semantic-marts",
+    "phase-006"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "all",
+          "value": "all"
+        },
+        "label": "Scope",
+        "name": "scope_bucket",
+        "options": [
+          {
+            "selected": true,
+            "text": "all",
+            "value": "all"
+          },
+          {
+            "selected": false,
+            "text": "joons",
+            "value": "joons"
+          },
+          {
+            "selected": false,
+            "text": "rest",
+            "value": "rest"
+          }
+        ],
+        "query": "all,joons,rest",
+        "type": "custom",
+        "valuesFormat": "csv"
+      },
+      {
+        "current": {
+          "text": "task",
+          "value": "task"
+        },
+        "label": "Grain",
+        "name": "grain_level",
+        "options": [
+          {
+            "selected": true,
+            "text": "task",
+            "value": "task"
+          },
+          {
+            "selected": false,
+            "text": "project",
+            "value": "project"
+          },
+          {
+            "selected": false,
+            "text": "folder",
+            "value": "folder"
+          }
+        ],
+        "query": "task,project,folder",
+        "type": "custom",
+        "valuesFormat": "csv"
+      },
+      {
+        "current": {
+          "text": "35",
+          "value": "35"
+        },
+        "label": "Lookahead days",
+        "name": "lookahead_days",
+        "options": [
+          {
+            "selected": false,
+            "text": "14",
+            "value": "14"
+          },
+          {
+            "selected": false,
+            "text": "21",
+            "value": "21"
+          },
+          {
+            "selected": true,
+            "text": "35",
+            "value": "35"
+          },
+          {
+            "selected": false,
+            "text": "56",
+            "value": "56"
+          }
+        ],
+        "query": "14,21,35,56",
+        "type": "custom",
+        "valuesFormat": "csv"
+      },
+      {
+        "current": {
+          "text": "2",
+          "value": "2"
+        },
+        "label": "Completed window days",
+        "name": "completed_days",
+        "options": [
+          {
+            "selected": true,
+            "text": "2",
+            "value": "2"
+          },
+          {
+            "selected": false,
+            "text": "3",
+            "value": "3"
+          },
+          {
+            "selected": false,
+            "text": "7",
+            "value": "7"
+          },
+          {
+            "selected": false,
+            "text": "14",
+            "value": "14"
+          }
+        ],
+        "query": "2,3,7,14",
+        "type": "custom",
+        "valuesFormat": "csv"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "grafana-bigquery-datasource",
+          "uid": "cfdykvp3d8n40c"
+        },
+        "definition": "SELECT DISTINCT w.folder_name FROM `airbyte-468412.ticktick_dbt_prod.fct_tasks_v3_due_workload_daily` w JOIN `airbyte-468412.ticktick_dbt_prod.dim_projects_v3` p ON w.project_id = p.project_id WHERE COALESCE(p.closed, FALSE) = FALSE ORDER BY 1",
+        "includeAll": true,
+        "label": "Folder",
+        "multi": true,
+        "name": "folder_name",
+        "options": [],
+        "query": {
+          "dataset": "ticktick_dbt_prod",
+          "editorMode": "code",
+          "format": 1,
+          "location": "asia-southeast1",
+          "project": "airbyte-468412",
+          "rawQuery": true,
+          "rawSql": "SELECT DISTINCT w.folder_name\nFROM `airbyte-468412.ticktick_dbt_prod.fct_tasks_v3_due_workload_daily` w\nJOIN `airbyte-468412.ticktick_dbt_prod.dim_projects_v3` p\n  ON w.project_id = p.project_id\nWHERE COALESCE(p.closed, FALSE) = FALSE\nORDER BY 1",
+          "refId": "A"
+        },
+        "refresh": 1,
+        "regexApplyTo": "value",
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "grafana-bigquery-datasource",
+          "uid": "cfdykvp3d8n40c"
+        },
+        "definition": "SELECT DISTINCT w.project_name FROM `airbyte-468412.ticktick_dbt_prod.fct_tasks_v3_due_workload_daily` w JOIN `airbyte-468412.ticktick_dbt_prod.dim_projects_v3` p ON w.project_id = p.project_id WHERE COALESCE(p.closed, FALSE) = FALSE AND REGEXP_CONTAINS(w.folder_name, r'^${folder_name:regex}$') ORDER BY 1",
+        "includeAll": true,
+        "label": "Project",
+        "multi": true,
+        "name": "project_name",
+        "options": [],
+        "query": {
+          "dataset": "ticktick_dbt_prod",
+          "editorMode": "code",
+          "format": 1,
+          "location": "asia-southeast1",
+          "project": "airbyte-468412",
+          "rawQuery": true,
+          "rawSql": "SELECT DISTINCT w.project_name\nFROM `airbyte-468412.ticktick_dbt_prod.fct_tasks_v3_due_workload_daily` w\nJOIN `airbyte-468412.ticktick_dbt_prod.dim_projects_v3` p\n  ON w.project_id = p.project_id\nWHERE COALESCE(p.closed, FALSE) = FALSE\n  AND REGEXP_CONTAINS(w.folder_name, r'^${folder_name:regex}$')\nORDER BY 1",
+          "refId": "A"
+        },
+        "refresh": 1,
+        "regexApplyTo": "value",
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now",
+    "to": "now+5w/w"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "GTD Main Tasks v3 (dbt semantic marts)",
+  "uid": "gtd-main-tasks-v3",
+  "version": 1,
+  "weekStart": ""
+}

@@ -17,3 +17,8 @@ dependencies = [
     "requests-ratelimiter>=0.7.0",
     "sqlmodel>=0.0.24",
 ]
+[dependency-groups]
+dev = [
+    "pytest>=8.4.0",
+    "pyyaml>=6.0.2",
+]

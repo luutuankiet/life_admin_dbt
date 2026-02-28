@@ -1,0 +1,81 @@
+version: 1
+name: lookahead_area_week_color
+
+checks:
+  - id: panel_is_timeseries
+    selector: panel.type
+    op: equals
+    expected: timeseries
+    severity: error
+    rationale: Area flow is required for trend readability.
+
+  - id: panel_title_prefix
+    selector: panel.title
+    op: regex
+    expected: "^Tasks Lookahead"
+    severity: error
+
+  - id: query_has_five_week_bounds
+    selector: panel.query
+    op: contains_all
+    expected:
+      - CURRENT_DATE() AS start_date
+      - INTERVAL 5 WEEK
+      - week_num <= 5
+    severity: error
+
+  - id: query_uses_time_axis
+    selector: panel.query
+    op: contains_all
+    expected:
+      - TIMESTAMP(r.due_date_day) AS time
+    severity: error
+
+  - id: query_avoids_long_axis_label_fields
+    selector: panel.query
+    op: contains_none
+    expected:
+      - AS day_slot
+    severity: error
+    rationale: Keep axis minimal and push detail into tooltip.
+
+  - id: query_emits_week_bucket_series
+    selector: panel.query
+    op: contains_all
+    expected:
+      - AS W1
+      - AS W2
+      - AS W3
+      - AS W4
+      - AS W5
+    severity: error
+
+  - id: w1_color_locked
+    selector: panel.override[W1].color
+    op: equals
+    expected: "#73BF69"
+    severity: error
+
+  - id: w2_color_locked
+    selector: panel.override[W2].color
+    op: equals
+    expected: "#FADE2A"
+    severity: error
+
+  - id: w3_color_locked
+    selector: panel.override[W3].color
+    op: equals
+    expected: "#5794F2"
+    severity: error
+
+  - id: w4_color_locked
+    selector: panel.override[W4].color
+    op: equals
+    expected: "#FF9830"
+    severity: error
+
+  - id: w5_color_locked
+    selector: panel.override[W5].color
+    op: equals
+    expected: "#E24D42"
+    severity: error

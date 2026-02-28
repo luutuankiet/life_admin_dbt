@@ -1,0 +1,75 @@
+name: ticktick - count inbox v3
+description: ""
+tableName: fct_tasks_v3
+updatedAt: "2026-02-20T00:00:00.000Z"
+metricQuery:
+  exploreName: fct_tasks_v3
+  dimensions: []
+  metrics:
+    - fct_tasks_v3_total_task_instances
+  filters:
+    dimensions:
+      id: c8ed94aa-d13f-4ee4-9a84-7fe2c4bc9e01
+      and:
+        - id: 18ced573-86e4-451d-80ec-67aafeddb5b0
+          target:
+            fieldId: fct_tasks_v3_status
+          values:
+            - "0"
+          operator: equals
+          required: false
+        - id: 8737f65c-755a-4446-91c5-c2865b5ffe65
+          target:
+            fieldId: dim_projects_v3_closed
+          values:
+            - false
+          operator: equals
+          required: false
+        - id: 35167ff6-0587-4bc1-8955-7aad2e6173fc
+          target:
+            fieldId: fct_tasks_v3_kind
+          values:
+            - TASK
+          operator: equals
+          required: false
+        - id: 7c3dc355-07b2-45f0-bf3c-eeba24842f13
+          target:
+            fieldId: dim_folders_v3_folder_name
+          values:
+            - "💤on hold lists"
+            - "🚀SOMEDAY lists"
+            - "🛩️Horizon of focus"
+          operator: notEquals
+          required: false
+        - id: 3db5c874-3a65-432a-8c1e-1e000e6fa37c
+          target:
+            fieldId: dim_projects_v3_project_name
+          values:
+            - "📍ref - tickler notes for the day"
+          operator: notEquals
+          required: false
+  sorts:
+    - fieldId: fct_tasks_v3_total_task_instances
+      descending: true
+  limit: 500
+  metricOverrides: {}
+  tableCalculations: []
+  additionalMetrics: []
+  customDimensions: []
+chartConfig:
+  type: big_number
+  config:
+    label: to clarify
+    flipColors: false
+    selectedField: fct_tasks_v3_total_task_instances
+    showComparison: false
+    comparisonFormat: raw
+    showBigNumberLabel: false
+    showTableNamesInLabel: false
+slug: ticktick-inbox-distribution-v3
+tableConfig:
+  columnOrder:
+    - fct_tasks_v3_total_task_instances
+spaceSlug: shared
+version: 1
+downloadedAt: "2026-02-20T00:00:00.000Z"

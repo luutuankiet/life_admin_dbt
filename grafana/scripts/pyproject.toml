@@ -1,0 +1,13 @@
+[project]
+name = "grafana-artifact-export"
+version = "0.1.0"
+description = "Export Grafana dashboards and provisioning artifacts into this repository"
+requires-python = ">=3.11"
+dependencies = [
+  "requests>=2.32.0",
+  "pyyaml>=6.0.2",
+  "python-dotenv>=1.1.1",
+]
+
+[tool.uv]
+package = false

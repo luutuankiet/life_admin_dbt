@@ -1,0 +1,34 @@
+version: 1
+name: tooltip_minimal
+
+checks:
+  - id: tooltip_mode_multi
+    selector: panel.options.tooltip.mode
+    op: equals
+    expected: multi
+    severity: error
+
+  - id: tooltip_hides_zeros
+    selector: panel.options.tooltip.hideZeros
+    op: equals
+    expected: true
+    severity: error
+
+  - id: query_emits_weekday_code
+    selector: panel.query
+    op: contains_all
+    expected:
+      - AS weekday_code
+    severity: error
+
+  - id: weekday_code_hidden_from_viz
+    selector: panel.override[weekday_code].hide_from.viz
+    op: equals
+    expected: true
+    severity: error
+
+  - id: weekday_code_visible_in_tooltip
+    selector: panel.override[weekday_code].hide_from.tooltip
+    op: equals
+    expected: false
+    severity: error

@@ -1,6 +1,6 @@
 name: gtd dash v2.0
 description: ""
-updatedAt: "2026-02-19T19:02:33.823Z"
+updatedAt: "2026-02-20T00:00:00.000Z"
 tiles:
   - x: 0
     "y": 0
@@ -50,12 +50,145 @@ tiles:
       chartSlug: what-did-you-do-v3
       chartName: what did you do v3
     tileSlug: what-did-you-do-v3
+  - x: 0
+    "y": 0
+    h: 5
+    w: 9
+    tabUuid: 8cf3276e-4812-4a1d-bb70-a24dea637558
+    type: saved_chart
+    properties:
+      title: ""
+      hideTitle: false
+      chartSlug: todoist-new-today-v0-2-1
+      chartName: todoist new today v0.2
+    tileSlug: todoist-new-today-v0-2-1
+  - x: 9
+    "y": 0
+    h: 14
+    w: 27
+    tabUuid: 8cf3276e-4812-4a1d-bb70-a24dea637558
+    type: saved_chart
+    properties:
+      title: ""
+      hideTitle: false
+      chartSlug: todoist-due-today
+      chartName: todoist due today
+    tileSlug: todoist-due-today
+  - x: 0
+    "y": 5
+    h: 5
+    w: 9
+    tabUuid: 8cf3276e-4812-4a1d-bb70-a24dea637558
+    type: saved_chart
+    properties:
+      title: ""
+      hideTitle: false
+      chartSlug: todoist-completed-today-v0-2
+      chartName: todoist completed today v0.2
+    tileSlug: todoist-completed-today-v0-2
+  - x: 0
+    "y": 0
+    h: 3
+    w: 12
+    tabUuid: 016984cf-f812-4c71-9605-4e58685f0300
+    type: saved_chart
+    properties:
+      title: loops (clarify them)
+      hideTitle: false
+      chartSlug: ticktick-inbox-distribution-v3
+      chartName: ticktick - count inbox v3
+    tileSlug: ticktick-inbox-distribution-v3
+  - x: 12
+    "y": 0
+    h: 8
+    w: 24
+    tabUuid: 016984cf-f812-4c71-9605-4e58685f0300
+    type: saved_chart
+    properties:
+      title: loops distro (clarify them)
+      hideTitle: false
+      chartSlug: ticktick-count-of-inbox-v3
+      chartName: ticktick - inbox distribution v3
+    tileSlug: ticktick-count-of-inbox-v3
+  - x: 0
+    "y": 3
+    h: 5
+    w: 12
+    tabUuid: 016984cf-f812-4c71-9605-4e58685f0300
+    type: saved_chart
+    properties:
+      title: empty projects (archive them)
+      hideTitle: false
+      chartSlug: ticktick-empty-projects-to-be-cleaned-v3
+      chartName: ticktick - empty projects to be cleaned v3
+    tileSlug: ticktick-empty-projects-to-be-cleaned-v3
+  - x: 0
+    "y": 8
+    h: 5
+    w: 36
+    tabUuid: 016984cf-f812-4c71-9605-4e58685f0300
+    type: saved_chart
+    properties:
+      title: project inacive > 5d (schedule new tasks / archive them)
+      hideTitle: false
+      chartSlug: tmp-v3
+      chartName: ticktick - project pulse v3
+    tileSlug: tmp-v3
+  - x: 1
+    "y": 13
+    h: 6
+    w: 15
+    tabUuid: 016984cf-f812-4c71-9605-4e58685f0300
+    type: saved_chart
+    properties:
+      title: tasks this week (distribute them)
+      hideTitle: false
+      chartSlug: tasks-lookahead-v3
+      chartName: tasks lookahead v3
+    tileSlug: copy-of-tasks-lookahead-v3-weekly
+  - x: 16
+    "y": 13
+    h: 13
+    w: 20
+    tabUuid: 016984cf-f812-4c71-9605-4e58685f0300
+    type: saved_chart
+    properties:
+      title: overview this week (distribute them)
+      hideTitle: false
+      chartSlug: ticktick-dynamic-grain-count-v3
+      chartName: Ticktick - dynamic grain count v3
+    tileSlug: ticktick-dynamic-grain-count-v3
+  - x: 1
+    "y": 19
+    h: 7
+    w: 15
+    tabUuid: 016984cf-f812-4c71-9605-4e58685f0300
+    type: saved_chart
+    properties:
+      title: tasks this week (distribute them)
+      hideTitle: false
+      chartSlug: distribution-by-parent-dimension-v3
+      chartName: distribution by parent dimension v3
+    tileSlug: copy-of-distribution-by-parent-dimension-v3-weekly
+  - x: 0
+    "y": 26
+    h: 2
+    w: 36
+    tabUuid: 016984cf-f812-4c71-9605-4e58685f0300
+    type: markdown
+    properties:
+      title: Last item before finishing the review
+      hideTitle: false
+      content: >-
+        Ask youself this : How is you WIG doing? write it down to appreciate the
+        progress you made.
 filters:
   metrics: []
   dimensions:
     - label: Lookahead Date day
       target:
         fieldId: dim_date_spine_date_day
+        fieldName: date_day
         tableName: dim_date_spine
       values:
         - 5
@@ -69,30 +202,57 @@ filters:
         tasks-lookahead-v3:
           fieldId: dim_date_spine_date_day
           tableName: dim_date_spine
+        copy-of-distribution-by-parent-dimension-v3-weekly:
+          fieldId: dim_date_spine_date_day
+          tableName: dim_date_spine
+        ticktick-empty-projects-to-be-cleaned-v3: false
+        tmp-v3: false
+        copy-of-tasks-lookahead-v3-weekly:
+          fieldId: dim_date_spine_date_day
+          tableName: dim_date_spine
+        ticktick-inbox-distribution-v3: false
+        ticktick-count-of-inbox-v3: false
+        ticktick-dynamic-grain-count-v3:
+          fieldId: dim_date_spine_date_day
+          tableName: dim_date_spine
     - target:
         fieldId: fct_tasks_v3_status
+        fieldName: status
         tableName: fct_tasks_v3
       values:
         - "2"
       disabled: false
       operator: notEquals
       tileTargets:
-        what-did-you-do-v3: false
-        distribution-by-parent-dimension-v3:
-          fieldId: fct_tasks_v3_status
-          tableName: fct_tasks_v3
         tasks-drill-down-by-grain-v3:
           fieldId: fct_tasks_v3_status
           tableName: fct_tasks_v3
+        what-did-you-do-v3: false
         tasks-lookahead-v3:
           fieldId: fct_tasks_v3_status
           tableName: fct_tasks_v3
+        distribution-by-parent-dimension-v3:
+          fieldId: fct_tasks_v3_status
+          tableName: fct_tasks_v3
+        copy-of-distribution-by-parent-dimension-v3-weekly: false
+        ticktick-empty-projects-to-be-cleaned-v3: false
+        tmp-v3: false
+        copy-of-tasks-lookahead-v3-weekly: false
+        ticktick-inbox-distribution-v3: false
+        ticktick-count-of-inbox-v3: false
+        ticktick-dynamic-grain-count-v3: false
   tableCalculations: []
 tabs:
   - name: main tasks
     uuid: 39a6f194-6bb1-4f15-ac03-8f49a0a6d602
     order: 0
+  - name: recurring tasks
+    uuid: 8cf3276e-4812-4a1d-bb70-a24dea637558
+    order: 1
+  - name: GTD weekly review
+    uuid: 016984cf-f812-4c71-9605-4e58685f0300
+    order: 2
 slug: gtd-dash-v2-0
 spaceSlug: shared
 version: 1
-downloadedAt: "2026-02-20T01:30:58.996Z"
+downloadedAt: "2026-02-20T00:00:00.000Z"

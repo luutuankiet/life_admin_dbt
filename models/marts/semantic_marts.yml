@@ -1,0 +1,200 @@
+version: 2
+
+models:
+  - name: fct_tasks_v3_semantic_base
+    description: Denormalized semantic base for PHASE-006 cockpit marts.
+    config:
+      meta:
+        primary_key: task_id
+    columns:
+      - name: task_id
+        description: Task identifier.
+        tests:
+          - not_null
+      - name: project_id
+        description: Project identifier for task ownership.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_projects_v3')
+              field: project_id
+              config:
+                severity: warn
+      - name: folder_id
+        description: Canonical folder identifier where 0 and default are normalized.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_folders_v3')
+              field: folder_id
+      - name: scope_bucket
+        description: Binary planning scope inferred from folder and project naming.
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['joons', 'rest']
+      - name: task_url_web
+        description: TickTick web deep link at task grain.
+        tests:
+          - not_null
+      - name: task_url_native
+        description: TickTick native deep link at task grain.
+        tests:
+          - not_null
+
+  - name: fct_tasks_v3_due_workload_daily
+    description: Daily due-date workload mart at project granularity with date-spine continuity.
+    config:
+      meta:
+        primary_key: due_workload_daily_id
+    columns:
+      - name: due_workload_daily_id
+        description: Surrogate key for due date and project grain.
+        tests:
+          - unique
+          - not_null
+      - name: due_date_day
+        description: Due date day bucket.
+        tests:
+          - not_null
+      - name: scope_bucket
+        description: Binary scope for Joons versus rest.
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['joons', 'rest']
+      - name: folder_id
+        description: Normalized folder identifier.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_folders_v3')
+              field: folder_id
+      - name: project_id
+        description: Project identifier for filter controls.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_projects_v3')
+              field: project_id
+      - name: open_task_count
+        description: Open task count for the day and project grain.
+        tests:
+          - not_null
+
+  - name: fct_tasks_v3_grain_rollup
+    description: Explicit grain rollup replacing Lightdash count_grain parameter logic.
+    config:
+      meta:
+        primary_key: grain_rollup_id
+    columns:
+      - name: grain_rollup_id
+        description: Surrogate key for due date, grain level, grain id, and scope.
+        tests:
+          - unique
+          - not_null
+      - name: scope_bucket
+        description: Binary scope for Joons versus rest.
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['joons', 'rest']
+      - name: grain_level
+        description: Grain label task, project, or folder.
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['task', 'project', 'folder']
+      - name: folder_id
+        description: Normalized folder identifier.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_folders_v3')
+              field: folder_id
+      - name: project_id
+        description: Project identifier for task and project grain rows.
+        tests:
+          - relationships:
+              to: ref('dim_projects_v3')
+              field: project_id
+              config:
+                severity: warn
+      - name: grain_label
+        description: Display label for selected grain.
+        tests:
+          - not_null
+      - name: parent_grain_label
+        description: Display label for parent grain.
+        tests:
+          - not_null
+      - name: grain_url_web
+        description: TickTick web deep link for selected grain.
+        tests:
+          - not_null
+      - name: grain_url_native
+        description: TickTick native deep link for selected grain.
+        tests:
+          - not_null
+      - name: parent_grain_url_web
+        description: TickTick web deep link for parent grain.
+        tests:
+          - not_null
+      - name: parent_grain_url_native
+        description: TickTick native deep link for parent grain.
+        tests:
+          - not_null
+      - name: task_count
+        description: Distinct open task count at the selected grain.
+        tests:
+          - not_null
+
+  - name: fct_tasks_v3_completed_activity
+    description: Completed-task activity mart for retrospective cockpit table views.
+    config:
+      meta:
+        primary_key: completed_activity_id
+    columns:
+      - name: completed_activity_id
+        description: Surrogate key for completed task activity rows.
+        tests:
+          - unique
+          - not_null
+      - name: task_id
+        description: Completed task identifier.
+        tests:
+          - not_null
+      - name: project_id
+        description: Project identifier for completed task.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_projects_v3')
+              field: project_id
+              config:
+                severity: warn
+      - name: folder_id
+        description: Normalized folder identifier for completed task.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_folders_v3')
+              field: folder_id
+      - name: scope_bucket
+        description: Binary scope for Joons versus rest.
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['joons', 'rest']
+      - name: completed_time_day
+        description: Completion day bucket.
+        tests:
+          - not_null
+      - name: task_url_web
+        description: TickTick web deep link for completed task.
+        tests:
+          - not_null
+      - name: task_url_native
+        description: TickTick native deep link for completed task.
+        tests:
+          - not_null

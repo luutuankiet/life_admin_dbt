@@ -20,3 +20,18 @@
 **Resolution:** _(pending)_
 
 ## Resolved Loops
+
+### [LOOP-002] - Preserve historical completed-task coverage across fresh poller resets - Status: Open
+**Created:** 2026-02-20 | **Source:** LOG-023 follow-up | **Origin:** User
+
+**Context:** After restarting SQLite from scratch, we confirmed a structural limitation of checkpoint sync: completed tasks that disappeared before the new poller run are not recoverable from `/api/v3/batch/check/{cp}`. This creates historical completion gaps whenever replica state is rebuilt from zero.
+
+**Details:**
+- Problem: fresh bootstrap (`cp=0` onward) only captures what the endpoint can still emit; older completed tasks are absent.
+- Goal: carry forward previously observed completed-task history instead of losing it on redeploy/reset.
+- Candidate direction A: migrate/seed new SQLite from prior replica snapshot so `status=2` tasks observed historically are retained.
+- Candidate direction B: define backup/restore path for SQLite replica and/or exported task history before resets.
+- Open design question: should long-term preservation happen at poller storage layer, dbt model layer, or both (to avoid circular dependency loops)?
+- Constraint: keep unofficial API integration lightweight and operationally resilient.
+
+**Resolution:** _(pending)_
