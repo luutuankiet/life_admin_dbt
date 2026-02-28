@@ -42,6 +42,7 @@ Personal data platform for GTD-driven life decisions. The goal is "perceptual re
 - DECISION-018: Grafana regression prevention will use declarative contract-as-data with reusable packs and a single generic pytest runner; MCP remains interactive authoring QA, not merge-gate enforcement.
 - DECISION-019: Lookahead chart semantics are week-color anchored (one color per week bucket), compact window `now` to `now+5w/w`, minimal x-axis labels with tooltip-first detail, and integer-rounded average signals; this supersedes LOG-034 checklist item that assumed weekday-fixed colors.
 - DECISION-020: Grafana executable contract framework is standardized as registry-driven dashboard ownership (`grafana/contracts/registry.yaml`), reusable packs (`grafana/contracts/packs/*.yaml`), dashboard contract composition (`grafana/contracts/dashboards/*.yaml`), and a single generic pytest runner (`tests/grafana/test_contracts.py`) enforced by CI workflow (`.github/workflows/grafana_contract_ci.yml`).
+- DECISION-021: This repository now intentionally runs two uv projects: root project for dbt plus tests (including Grafana contracts via `--group dev`) and `grafana/scripts` project for exporter utilities; dependencies and lockfiles are isolated and must be invoked from correct project context.
 </decisions>
 
 <blockers>
@@ -49,7 +50,7 @@ Personal data platform for GTD-driven life decisions. The goal is "perceptual re
 </blockers>
 
 <next_action>
-Run and harden the new contract framework: validate current artifacts against `grafana/contracts/registry.yaml`, decide prune policy for archived dashboards, then expand packs and dashboard contracts beyond `gtd-main-tasks-v3`.
+Execute the first green baseline with the correct root project context (`uv sync --group dev` then `uv run --group dev pytest tests/grafana -q`), then harden prune policy for archived dashboards and expand contracts beyond `gtd-main-tasks-v3`.
 </next_action>
 
 ---
@@ -6714,3 +6715,723 @@ Citations:
 **Fork paths:**
 - Continue execution -> run local test suite and resolve any contract mismatches.
 - Scale coverage -> add contracts for additional active dashboards once baseline is green.
+### [LOG-039] - [DISCOVERY] [DECISION] - End-to-end uv and pyproject interaction model documented for this repo - Task: PHASE-006
+**Timestamp:** 2026-02-29 01:02
+**Depends On:** LOG-038 (pytest bootstrap fix), LOG-037 (contract framework implementation), LOG-036 (lookahead contract lock)
+
+---
+
+#### Executive Summary
+
+User asked for a deep, end-to-end explanation of how uv resolves projects and dependency groups in this repository, including why recent commands behaved differently.
+
+This log documents the execution model with concrete evidence:
+- the repo intentionally has two independent uv projects,
+- `--group dev` applies only to the selected project,
+- command behavior depends on current working directory,
+- warning about `VIRTUAL_ENV` mismatch is informational while missing binary is the real blocker.
+
+This is now codified as DECISION-021 in Section 1.
+
+---
+
+#### The Live Question
+
+What exactly happens when running:
+- `uv run --group dev pytest tests/grafana`
+- `uv run python export_grafana_artifacts.py`
+
+And how do root `pyproject.toml` and `grafana/scripts/pyproject.toml` interact.
+
+---
+
+#### Evidence A - Root Project Defines Dev Group for Contract Tests
+
+Raw config evidence:
+
+```toml
+[project]
+name = "ticktick-dbt"
+...
+[dependency-groups]
+dev = [
+    "pytest>=8.4.0",
+    "pyyaml>=6.0.2",
+]
+```
+
+Interpretation:
+- `pytest` and `pyyaml` are not root base dependencies,
+- they are intentionally scoped to root dev group,
+- contract test invocation must include `--group dev` when using uv.
+
+Citations:
+- `pyproject.toml:1`
+- `pyproject.toml:20`
+- `pyproject.toml:22`
+- `pyproject.toml:23`
+
+---
+
+#### Evidence B - Exporter Is a Separate uv Project
+
+Raw config evidence:
+
+```toml
+[project]
+name = "grafana-artifact-export"
+requires-python = ">=3.11"
+dependencies = [
+  "requests>=2.32.0",
+  "pyyaml>=6.0.2",
+  "python-dotenv>=1.1.1",
+]
+
+[tool.uv]
+package = false
+```
+
+Interpretation:
+- `grafana/scripts` has its own project metadata and dependency scope,
+- exporter runtime dependencies are isolated from root dev group,
+- this project is tooling-oriented and not packaged for distribution.
+
+Citations:
+- `grafana/scripts/pyproject.toml:1`
+- `grafana/scripts/pyproject.toml:2`
+- `grafana/scripts/pyproject.toml:6`
+- `grafana/scripts/pyproject.toml:12`
+- `grafana/scripts/pyproject.toml:13`
+
+---
+
+#### Evidence C - Command Docs Already Encode Two Contexts
+
+Exporter docs require script-project context:
+
+```bash
+cd grafana/scripts
+uv run python export_grafana_artifacts.py
+```
+
+Contract docs require root project plus dev group:
+
+```bash
+uv sync --group dev
+uv run --group dev pytest tests/grafana -q
+```
+
+Citations:
+- `grafana/scripts/README.md:23`
+- `grafana/scripts/README.md:24`
+- `grafana/contracts/README.md:23`
+- `grafana/contracts/README.md:29`
+
+---
+
+#### Evidence D - CI Is Independent of uv Groups
+
+Current CI workflow installs test deps with pip and then runs pytest directly:
+
+```yaml
+- name: Install contract test dependencies
+  run: |
+    python -m pip install pytest pyyaml
+
+- name: Run Grafana contract tests
+  run: |
+    python -m pytest tests/grafana -q
+```
+
+Interpretation:
+- CI currently does not rely on uv group resolution,
+- local uv group confusion does not imply CI failure,
+- local and CI command paths differ intentionally for now.
+
+Citations:
+- `.github/workflows/grafana_contract_ci.yml:26`
+- `.github/workflows/grafana_contract_ci.yml:29`
+- `.github/workflows/grafana_contract_ci.yml:33`
+
+---
+
+#### Evidence E - Failure Signature From Session
+
+Raw session evidence from user terminal:
+
+```text
+warning: VIRTUAL_ENV=grafana/scripts/.venv does not match the project environment path `.venv`
+error: Failed to spawn: `pytest`
+Caused by: No such file or directory (os error 2)
+```
+
+Interpretation:
+- warning is environment mismatch notice,
+- spawn error indicates executable missing in selected project env at that time.
+
+Source:
+- Session terminal output, 2026-02-29.
+
+---
+
+#### End-to-End Resolution Model
+
+```mermaid
+graph TD
+    A[Command starts<br/>uv run ...] --> B[uv selects project by current directory]
+    B --> C[Root project<br/>pyproject.toml]
+    B --> D[grafana scripts project<br/>grafana/scripts/pyproject.toml]
+    C --> E[Root dependencies]
+    C --> F[Root dependency groups]
+    D --> G[Script dependencies]
+    E --> H[Root environment]
+    F --> H
+    G --> I[Scripts environment]
+    H --> J[Execute root command]
+    I --> K[Execute exporter command]
+```
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant S as Shell
+    participant UV as uv
+    participant P as Selected pyproject
+    participant E as Environment
+    participant X as Executable
+
+    U->>S: uv run --group dev pytest tests/grafana
+    S->>UV: parse command
+    UV->>P: resolve project from cwd
+    P-->>UV: root project metadata
+    UV->>E: include base deps plus dev group
+    E-->>UV: tool paths
+    UV->>X: spawn pytest
+    X-->>U: test result
+```
+
+---
+
+#### What `uv run --group dev` Means in This Repo
+
+| Step | What uv does in this case | Why it mattered |
+|------|---------------------------|-----------------|
+| 1 | Detect project from current directory | Chooses root project or `grafana/scripts` project |
+| 2 | Load selected `pyproject.toml` | Defines available dependencies and groups |
+| 3 | Apply `--group dev` from selected project only | Root has `dev`, scripts project does not |
+| 4 | Resolve environment for selected project | Determines whether `pytest` executable exists |
+| 5 | Spawn command inside resolved environment | Missing executable causes spawn error |
+
+---
+
+#### Interaction Matrix For Maintainers
+
+| Task | Where to run | Command |
+|------|---------------|---------|
+| Run Grafana contracts locally | Repo root | `uv sync --group dev` then `uv run --group dev pytest tests/grafana -q` |
+| Export dashboard artifacts | `grafana/scripts` | `uv run python export_grafana_artifacts.py --dashboard-uids gtd-main-tasks-v3` |
+| Run contract CI locally in CI-like mode | Repo root | `python -m pytest tests/grafana -q` after installing deps |
+
+---
+
+#### Decision Record
+
+**DECISION-021 clarified operationally:**
+- Treat root and `grafana/scripts` as two independent uv projects with isolated dependency graphs.
+- Use root dev group for contract tests.
+- Use scripts project for exporter runtime.
+
+**Rejected shortcuts:**
+- Single global activated env for everything
+  - rejected because it hides project boundaries and causes drift.
+- Installing pytest into scripts project to silence root test issues
+  - rejected because that couples unrelated tooling scopes.
+
+---
+
+#### Common Failure Modes and Fast Fixes
+
+| Symptom | Likely cause | Fix |
+|--------|--------------|-----|
+| `Failed to spawn: pytest` | Missing `pytest` in selected env | run root command with `--group dev` |
+| `VIRTUAL_ENV ... does not match` warning | Shell active env differs from selected project env | `unset VIRTUAL_ENV` or open new shell |
+| Export script import error in root | Running exporter from wrong project context | `cd grafana/scripts` then `uv run ...` |
+
+---
+
+#### Source Citations Table
+
+| Source | Location | Key Finding |
+|--------|----------|-------------|
+| Root project metadata | `pyproject.toml:1` | Root project identity and dependency root |
+| Root dev group | `pyproject.toml:20` | `dev` group exists for test tooling |
+| Root dev deps | `pyproject.toml:22` | `pytest` bound to root dev group |
+| Scripts project metadata | `grafana/scripts/pyproject.toml:1` | Separate uv project exists for exporter |
+| Scripts uv mode | `grafana/scripts/pyproject.toml:13` | Tooling project marked `package = false` |
+| Export run instructions | `grafana/scripts/README.md:23` | Export commands are scripts-project scoped |
+| Contract run instructions | `grafana/contracts/README.md:23` | Contract tests require root dev-group flow |
+| CI install path | `.github/workflows/grafana_contract_ci.yml:29` | CI installs pytest and pyyaml directly |
+| CI execute path | `.github/workflows/grafana_contract_ci.yml:33` | CI runs pytest without uv group |
+| Session failure text | terminal output 2026-02-29 | Warning versus spawn error signature |
+
+---
+
+#### Dependency Chain
+
+- LOG-037 introduced executable contracts and CI gate.
+- LOG-038 fixed missing local test deps and command docs.
+- LOG-039 explains full uv project-selection and dependency-group behavior end-to-end.
+
+---
+
+📦 STATELESS HANDOFF
+
+**Layer 1 — Local Context:**
+→ Last action: LOG-039 added full uv plus pyproject deep dive with diagrams, command matrix, and failure-mode fixes.
+→ Dependency chain: LOG-039 <- LOG-038 <- LOG-037 <- LOG-036
+→ Next action: run the root baseline command (`uv sync --group dev` and `uv run --group dev pytest tests/grafana -q`) and record first green run in a follow-up log.
+
+**Layer 2 — Global Context:**
+→ Architecture: two uv projects are now explicit operational contract in this repo, aligned with executable Grafana contract framework.
+→ Patterns: choose command context by project boundary, not by whichever virtual environment happens to be active.
+
+**Fork paths:**
+- Continue execution -> run baseline tests and close PHASE-006 contract bootstrap.
+- Documentation hardening -> promote this uv deep dive into `docs/grafana` if external audience needs it.
+
+
+#### Appendix A - Python Packaging 101 for Junior Developers
+
+This appendix explains the same model from first principles, with no prior Python packaging assumptions.
+
+##### A1. What is `pyproject.toml`
+
+`pyproject.toml` is the standard metadata file that tells Python tooling:
+- what this project is,
+- which Python version it needs,
+- which libraries it depends on,
+- optional groups of dependencies for specific workflows such as testing or linting.
+
+In our repo, we have two separate `pyproject.toml` files, which means two separate Python projects.
+
+##### A2. Why can one repo have two Python projects
+
+A single git repo can contain multiple tool scopes:
+- main application and tests at repo root,
+- utility scripts in a nested folder.
+
+We intentionally do this because exporter scripts should stay lightweight and isolated from the root dbt plus testing stack.
+
+##### A3. What is a dependency
+
+A dependency is an external Python package your code imports.
+
+Example from root project:
+- `sqlmodel`
+- `requests`
+- `python-dotenv`
+
+Example from scripts project:
+- `requests`
+- `pyyaml`
+- `python-dotenv`
+
+Dependencies are declared under `[project].dependencies`.
+
+##### A4. What is a dependency group
+
+A dependency group is an optional set of dependencies used for a specific purpose.
+
+In root project:
+- `dev` group contains `pytest` and `pyyaml`.
+
+Meaning:
+- you do not always need test tools for every runtime command,
+- but when running tests you include that group.
+
+##### A5. Why `pytest` was missing earlier
+
+At the time of failure, command attempted to run `pytest` but selected environment did not include it.
+
+The fix was:
+1. add `pytest` to root dev group,
+2. run command with `--group dev` so uv includes that group.
+
+##### A6. What is a lockfile
+
+A lockfile pins exact package versions resolved from dependency ranges.
+
+Why this matters:
+- `pytest>=8.4.0` is a range,
+- lockfile records exact version selected now,
+- teammates and CI get consistent installs.
+
+In this repo:
+- root project uses `uv.lock` at repo root,
+- scripts project uses `grafana/scripts/uv.lock`.
+
+These lockfiles are independent because projects are independent.
+
+##### A7. What is a virtual environment
+
+A virtual environment is an isolated Python interpreter plus installed packages for one project context.
+
+Why needed:
+- avoid package conflicts between unrelated projects,
+- keep reproducible behavior.
+
+Our warning example:
+- active shell had `VIRTUAL_ENV=grafana/scripts/.venv`,
+- uv selected root project and expected root environment,
+- uv warned mismatch and ignored active env.
+
+Important:
+- this warning is informational,
+- actual failure was missing `pytest` executable at that moment.
+
+##### A8. What does `uv sync` do
+
+`uv sync` installs dependencies from project metadata into the project environment, aligned with lockfile.
+
+`uv sync --group dev` means:
+- install base project dependencies,
+- plus optional dependencies from dev group.
+
+##### A9. What does `uv run` do
+
+`uv run <command>` runs a command inside the environment uv resolves for the selected project.
+
+`uv run --group dev pytest ...` means:
+- resolve selected project from current directory,
+- include dev group dependencies,
+- execute pytest in that resolved environment.
+
+##### A10. Why current directory changes behavior
+
+uv chooses which project metadata to use based on where command is run.
+
+If run in repo root:
+- selected project is root `pyproject.toml`.
+
+If run in `grafana/scripts`:
+- selected project is scripts `pyproject.toml`.
+
+Because those files differ, available commands and dependencies differ.
+
+##### A11. Command cookbook with explanation
+
+Root contract testing flow:
+
+```bash
+unset VIRTUAL_ENV
+uv sync --group dev
+uv run --group dev pytest tests/grafana -q
+```
+
+Why each line:
+- `unset VIRTUAL_ENV`: avoids mismatch noise from previously active env,
+- `uv sync --group dev`: ensures pytest and pyyaml are installed in root env,
+- `uv run --group dev pytest ...`: runs tests in correct root context.
+
+Exporter flow:
+
+```bash
+cd grafana/scripts
+uv run python export_grafana_artifacts.py --dashboard-uids gtd-main-tasks-v3
+```
+
+Why:
+- exporter dependencies live in scripts project,
+- command should resolve against scripts `pyproject.toml`.
+
+##### A12. CI versus local behavior
+
+Local path:
+- uses uv groups and project metadata.
+
+Current CI path:
+- installs pytest and pyyaml directly with pip in workflow,
+- runs pytest directly.
+
+Both can pass simultaneously because they are two different bootstrap strategies.
+
+##### A13. Common beginner pitfalls
+
+| Pitfall | What it looks like | Fix |
+|--------|---------------------|-----|
+| Running from wrong folder | command cannot find expected dependency | run from correct project directory |
+| Forgetting dependency group | binary not found like `pytest` | include `--group dev` and sync |
+| Assuming one env for whole repo | random mismatch warnings and inconsistent behavior | treat each project context independently |
+| Editing pyproject without syncing | imports fail after config change | run `uv sync` after dependency edits |
+
+##### A14. Simple rule of thumb
+
+- If command is about dashboard contract tests, run from root with dev group.
+- If command is about Grafana artifact export script, run from `grafana/scripts`.
+
+That single rule avoids most confusion.
+
+##### A15. Teaching Diagram - Project Selection 101
+
+```mermaid
+graph TD
+    A[You run uv command] --> B{Where are you standing}
+    B --> C[Repo root]
+    B --> D[grafana scripts folder]
+    C --> E[Use root pyproject]
+    D --> F[Use scripts pyproject]
+    E --> G[Can use dev group pytest]
+    F --> H[Can run exporter dependencies]
+```
+
+##### A16. Teaching Diagram - Why `--group dev` matters
+
+```mermaid
+graph LR
+    A[Root base dependencies] --> C[Resolved environment]
+    B[Root dev group pytest and pyyaml] --> C
+    C --> D[pytest executable available]
+```
+
+Without dev group B, node D is not guaranteed.
+
+---
+
+#### Clarified Operational Contract
+
+For this repository moving forward:
+- root project owns dbt plus tests plus Grafana contract runner,
+- scripts project owns exporter utility runtime,
+- command context and dependency group selection are mandatory parts of the execution contract.
+
+This clarification is now recorded as part of DECISION-021 behavior semantics.
+
+
+#### Appendix B - More Practical Examples and Best Practices
+
+##### B1. Example Scenarios With Exact Commands
+
+Scenario 1 - Run Grafana contract tests from root:
+
+```bash
+# from repo root
+unset VIRTUAL_ENV
+uv sync --group dev
+uv run --group dev pytest tests/grafana -q
+```
+
+Expected outcome:
+- uses root `pyproject.toml`,
+- includes root dev group,
+- `pytest` executable is available,
+- contract checks run.
+
+Scenario 2 - Run exporter from scripts project:
+
+```bash
+# from repo root
+cd grafana/scripts
+uv run python export_grafana_artifacts.py --dashboard-uids gtd-main-tasks-v3
+```
+
+Expected outcome:
+- uses `grafana/scripts/pyproject.toml`,
+- uses exporter dependencies only,
+- no need for root dev group.
+
+Scenario 3 - Wrong context example and fix:
+
+```bash
+# wrong for contract tests if you stay in scripts folder
+cd grafana/scripts
+uv run --group dev pytest tests/grafana -q
+```
+
+Potential issue:
+- scripts project does not define `dev` group.
+
+Fix:
+- run from root project for contract tests.
+
+Scenario 4 - Wrong context example for exporter:
+
+```bash
+# from root, this may still work only if deps happen to exist,
+# but it violates ownership boundaries
+uv run python grafana/scripts/export_grafana_artifacts.py
+```
+
+Best-practice fix:
+- run exporter within scripts project context so dependency ownership stays explicit.
+
+##### B2. Best Practice for Repos With One `pyproject.toml`
+
+Use one project when:
+- most commands share the same dependency graph,
+- tooling and app lifecycle are tightly coupled,
+- team prefers simplest onboarding.
+
+Recommended pattern:
+- keep base runtime deps in `[project].dependencies`,
+- keep optional workflows in `[dependency-groups]` such as `dev`, `lint`, `docs`,
+- use one lockfile,
+- standardize commands in one README section.
+
+Pros:
+- simplest mental model,
+- lowest maintenance overhead,
+- fewer context-switch mistakes.
+
+Cons:
+- environment can become large,
+- optional tools can leak into unrelated workflows if not grouped carefully.
+
+##### B3. Best Practice for Nested Multiple `pyproject.toml`
+
+Use nested projects only when there is real boundary value.
+
+Recommended rules:
+1. Each nested project has clear ownership purpose.
+2. Each nested project has its own README with run commands.
+3. Keep lockfiles committed per project.
+4. Avoid implicit cross-project imports.
+5. Document command matrix at repo level.
+6. Keep naming explicit so developers know which context they are in.
+
+Pros:
+- isolates dependency bloat,
+- allows faster installs for focused tools,
+- reduces blast radius when one tool stack changes.
+
+Cons:
+- steeper learning curve,
+- more chances to run commands in wrong context,
+- requires disciplined documentation.
+
+##### B4. Why This Repo Uses Two Projects Specifically
+
+Real use case in this repository:
+
+Project A - root `ticktick-dbt`:
+- dbt and data platform workflows,
+- contract tests,
+- broader engineering dependencies.
+
+Project B - `grafana-artifact-export` in `grafana/scripts`:
+- one focused utility that calls Grafana API,
+- only requests, yaml, dotenv footprint,
+- can run independently on machines that only need export capability.
+
+Practical benefit:
+- someone doing only dashboard export does not need full root dependency stack,
+- someone doing dbt plus tests does not have exporter utility concerns mixed into root runtime contract.
+
+##### B5. Decision Guide - One Project or Two
+
+```mermaid
+flowchart TD
+    A[Need separate dependency lifecycle] --> B{Yes or No}
+    B -->|No| C[Use one pyproject with dependency groups]
+    B -->|Yes| D[Use nested pyproject projects]
+    D --> E[Document ownership and command matrix]
+    D --> F[Keep lockfiles and readmes per project]
+```
+
+Quick decision checklist:
+- If separation is only aesthetic, do not split.
+- If separation improves runtime, onboarding, and blast radius, split with clear guardrails.
+
+##### B6. Golden Rules for Junior Developers on This Repo
+
+1. Start by deciding what you are trying to do.
+2. Pick project context first, command second.
+3. For tests use root plus dev group.
+4. For export use `grafana/scripts` context.
+5. If confused, read `pyproject.toml` in the directory you are standing in.
+
+These rules prevent most uv and dependency confusion in day-to-day work.
+
+##### B7. Dev Dependencies in This Setup
+
+Yes, dev dependencies apply directly here.
+
+In this repo they are represented via dependency groups in root project:
+
+```toml
+[dependency-groups]
+dev = [
+    "pytest>=8.4.0",
+    "pyyaml>=6.0.2",
+]
+```
+
+How this works:
+- base dependencies are always part of project runtime context,
+- dev group dependencies are optional extras included when you ask for them.
+
+For root contract tests:
+- `pytest` lives in dev group,
+- so test commands should include `--group dev`.
+
+For scripts project:
+- there is currently no dev group declared,
+- exporter command does not require one.
+
+If we later add tests for `grafana/scripts` project:
+- we can add a scripts-local dev group there,
+- then run scripts tests in scripts context with scripts dev group.
+
+Dev group best practice in multi-project repos:
+1. Keep dev groups local to the project that needs them.
+2. Do not assume root dev group applies to nested projects.
+3. Name groups consistently such as `dev` unless there is a clear reason not to.
+4. Document exactly which command includes which group.
+
+Beginner mental shortcut:
+- `--group dev` means "include optional test tooling for the current project only".
+- It never means "include every dev dependency across the whole repository".
+
+
+##### B8. How uv Finds the Right `pyproject.toml`
+
+uv resolves project configuration from your current working directory context.
+
+Practical behavior in this repo:
+- if you run command from repo root, uv uses root `pyproject.toml`,
+- if you run command from `grafana/scripts`, uv uses `grafana/scripts/pyproject.toml`.
+
+So yes, directory matters. `cd` is the simplest way to select project context.
+
+Conceptually:
+1. uv starts at current directory.
+2. uv determines project root for that command context.
+3. uv loads that project's `pyproject.toml` and lockfile.
+4. uv resolves dependencies and optional groups from that project only.
+5. uv executes command in that resolved environment.
+
+Why this matters:
+- same command string can resolve to different dependency sets when run from different directories.
+
+Safe team habit:
+- always include context in runbooks, for example:
+  - `from repo root: uv run --group dev pytest tests/grafana -q`
+  - `from grafana/scripts: uv run python export_grafana_artifacts.py`
+
+Alternative to `cd`:
+- some tooling supports explicit project targeting flags,
+- but this repo workflow currently standardizes on directory-based context for clarity and consistency.
+
+Teaching diagram for discovery flow:
+
+```mermaid
+flowchart TD
+    A[Current working directory] --> B[uv project discovery]
+    B --> C{Which project root}
+    C -->|root| D[Load root pyproject and lock]
+    C -->|grafana scripts| E[Load scripts pyproject and lock]
+    D --> F[Resolve deps and groups]
+    E --> G[Resolve scripts deps]
+    F --> H[Execute command]
+    G --> H
+```
+ 
