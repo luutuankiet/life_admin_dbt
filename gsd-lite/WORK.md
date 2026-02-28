@@ -43,6 +43,7 @@ Personal data platform for GTD-driven life decisions. The goal is "perceptual re
 - DECISION-019: Lookahead chart semantics are week-color anchored (one color per week bucket), compact window `now` to `now+5w/w`, minimal x-axis labels with tooltip-first detail, and integer-rounded average signals; this supersedes LOG-034 checklist item that assumed weekday-fixed colors.
 - DECISION-020: Grafana executable contract framework is standardized as registry-driven dashboard ownership (`grafana/contracts/registry.yaml`), reusable packs (`grafana/contracts/packs/*.yaml`), dashboard contract composition (`grafana/contracts/dashboards/*.yaml`), and a single generic pytest runner (`tests/grafana/test_contracts.py`) enforced by CI workflow (`.github/workflows/grafana_contract_ci.yml`).
 - DECISION-021: This repository now intentionally runs two uv projects: root project for dbt plus tests (including Grafana contracts via `--group dev`) and `grafana/scripts` project for exporter utilities; dependencies and lockfiles are isolated and must be invoked from correct project context.
+- DECISION-022: Grafana export artifacts are deterministic UID-path snapshots with normalized volatile fields (`id=null`, `version=1`, `iteration` removed). Re-running export with no semantic dashboard change is expected to produce no git diff.
 </decisions>
 
 <blockers>
@@ -50,7 +51,7 @@ Personal data platform for GTD-driven life decisions. The goal is "perceptual re
 </blockers>
 
 <next_action>
-Execute the first green baseline with the correct root project context (`uv sync --group dev` then `uv run --group dev pytest tests/grafana -q`), then harden prune policy for archived dashboards and expand contracts beyond `gtd-main-tasks-v3`.
+Execute the first green baseline with the correct root project context (`uv sync --group dev` then `uv run --group dev pytest tests/grafana -q`), then tighten export lifecycle docs with deterministic-no-diff expectations and harden prune policy for archived dashboards.
 </next_action>
 
 ---
@@ -7435,3 +7436,212 @@ flowchart TD
     G --> H
 ```
  
+### [LOG-040] - [DISCOVERY] [DECISION] - Export context and no-diff behavior explained with 101 examples - Task: PHASE-006
+**Timestamp:** 2026-02-29 01:18
+**Depends On:** LOG-039 (uv project discovery model), LOG-038 (local runner bootstrap), LOG-037 (contract framework)
+
+---
+
+#### Executive Summary
+
+User asked two practical questions:
+1. Which directory should be used to run `export_grafana_artifacts.py`.
+2. Why export sometimes appears to not overwrite state.
+
+Resolved answer:
+- Run exporter in `grafana/scripts` project context.
+- Export does overwrite deterministic UID file path, but if normalized JSON content is unchanged, git shows no diff and this is expected.
+
+---
+
+#### 101 Explanation - Which Directory To Run Export
+
+There are two uv projects in this repo.
+
+Project A - root:
+- owns dbt and contract tests,
+- provides `dev` group with `pytest`.
+
+Project B - `grafana/scripts`:
+- owns exporter utility runtime,
+- has independent dependencies and lockfile.
+
+Therefore exporter command should be run from scripts project context:
+
+```bash
+cd grafana/scripts
+uv run python export_grafana_artifacts.py --dashboard-uids gtd-main-tasks-v3
+```
+
+Contract tests should be run from root:
+
+```bash
+uv sync --group dev
+uv run --group dev pytest tests/grafana -q
+```
+
+---
+
+#### 101 Explanation - Why Export Can Produce No Visible Change
+
+Exporter behavior is deterministic:
+- target path is fixed per UID,
+- write operation always writes normalized dashboard JSON,
+- volatile fields are normalized to reduce noise.
+
+Normalization contract:
+- set `id` to `null`,
+- set `version` to `1`,
+- remove `iteration`.
+
+Implication:
+- if live dashboard semantics are already identical to artifact semantics after normalization, re-export has no git diff.
+- this means exporter is working correctly, not failing.
+
+---
+
+#### Evidence A - Exporter Writes Deterministically and Normalizes Volatile Fields
+
+Raw code evidence:
+
+```python
+def normalize_dashboard_json(dashboard: dict[str, Any]) -> dict[str, Any]:
+    data = json.loads(json.dumps(dashboard))
+    data["id"] = None
+    if "version" in data:
+        data["version"] = 1
+    data.pop("iteration", None)
+    return data
+```
+
+```python
+out_path = dashboards_root / dir_name / f"{uid}.json"
+write_json(out_path, normalize_dashboard_json(dashboard))
+```
+
+Citations:
+- `grafana/scripts/export_grafana_artifacts.py:126`
+- `grafana/scripts/export_grafana_artifacts.py:128`
+- `grafana/scripts/export_grafana_artifacts.py:130`
+- `grafana/scripts/export_grafana_artifacts.py:206`
+- `grafana/scripts/export_grafana_artifacts.py:207`
+
+---
+
+#### Evidence B - Exporter Command Context Is Documented as scripts Project
+
+Raw docs evidence:
+
+```bash
+cd grafana/scripts
+uv run python export_grafana_artifacts.py
+```
+
+Citation:
+- `grafana/scripts/README.md:23`
+- `grafana/scripts/README.md:24`
+
+---
+
+#### Evidence C - Current Live Query and Exported Artifact Already Match
+
+Live dashboard panel 2 currently has:
+
+```sql
+ORDER BY due_date_day ASC, parent_grain_label ASC, task_count DESC
+```
+
+Exported artifact has the same clause in panel 2 SQL:
+
+```text
+ORDER BY due_date_day ASC, parent_grain_label ASC, task_count DESC
+```
+
+Interpretation:
+- when live and artifact content already match, re-export yields no state change.
+
+Citations:
+- Grafana API property `$.panels[2].targets[0].rawSql` on `gtd-main-tasks-v3`, accessed 2026-02-29.
+- `grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json:550`
+
+---
+
+#### Command Examples and Expected Outcome
+
+| Goal | Where to run | Command | Expected result |
+|------|---------------|---------|-----------------|
+| Export one dashboard | `grafana/scripts` | `uv run python export_grafana_artifacts.py --dashboard-uids gtd-main-tasks-v3` | Overwrites UID artifact file; no diff if content unchanged |
+| Export all dashboards | `grafana/scripts` | `uv run python export_grafana_artifacts.py` | Updates all discovered UID artifacts |
+| Run contract tests | repo root | `uv sync --group dev` then `uv run --group dev pytest tests/grafana -q` | Validates contract invariants |
+
+---
+
+#### Concept Diagram - Why No Diff Is Often Healthy
+
+```mermaid
+flowchart TD
+    A[Live dashboard JSON] --> B[Exporter normalize step]
+    B --> C[Deterministic UID artifact path]
+    C --> D{Content changed after normalization}
+    D -->|Yes| E[Git diff appears]
+    D -->|No| F[No git diff]
+    F --> G[Expected stable state]
+```
+
+```mermaid
+graph TD
+    A[Current directory] --> B{uv project selection}
+    B -->|repo root| C[root pyproject]
+    B -->|grafana scripts| D[scripts pyproject]
+    C --> E[Run contract tests]
+    D --> F[Run export utility]
+```
+
+---
+
+#### Decision Record
+
+**DECISION-022 confirmed operationally:**
+- no-diff after export is expected when normalized artifact state already matches live dashboard state.
+- this should be treated as success signal, not failure signal.
+
+**Rejected interpretation:**
+- "export did not overwrite therefore exporter is broken"
+  - rejected by deterministic write path plus live-artifact SQL match evidence.
+
+---
+
+#### Source Citations Table
+
+| Source | Location | Key Finding |
+|--------|----------|-------------|
+| Export script | `grafana/scripts/export_grafana_artifacts.py:126` | Normalize function removes volatile diff noise |
+| Export script | `grafana/scripts/export_grafana_artifacts.py:206` | UID-based deterministic artifact output path |
+| Export README | `grafana/scripts/README.md:23` | Export command context is `grafana/scripts` |
+| Live dashboard | Grafana API `$.panels[2].targets[0].rawSql` accessed 2026-02-29 | Live panel sort currently ASC |
+| Exported artifact | `grafana/dashboards/gtd-migration/gtd-main-tasks-v3.json:550` | Artifact panel sort currently ASC |
+| Root test runbook | `grafana/contracts/README.md:29` | Contract test command belongs to root dev-group context |
+
+---
+
+#### Dependency Chain
+
+- LOG-039 documented uv project discovery and context behavior.
+- LOG-040 applies that model to exporter execution and no-diff interpretation.
+
+---
+
+📦 STATELESS HANDOFF
+
+**Layer 1 — Local Context:**
+→ Last action: LOG-040 documented exporter directory context and no-diff overwrite semantics with beginner examples and diagrams.
+→ Dependency chain: LOG-040 <- LOG-039 <- LOG-038 <- LOG-037
+→ Next action: run exporter from `grafana/scripts` for intentional snapshot refreshes; interpret no diff as healthy when live and artifact match.
+
+**Layer 2 — Global Context:**
+→ Architecture: two uv projects are intentional. Root handles tests and contracts; scripts project handles export utility.
+→ Patterns: deterministic normalized artifacts prioritize stable diffs over superficial version churn.
+
+**Fork paths:**
+- Continue execution -> add a root wrapper command for exporter to reduce directory-context mistakes.
+- Lifecycle hardening -> add prune policy and registry-based export scope enforcement in CI.
