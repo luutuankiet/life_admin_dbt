@@ -37,9 +37,11 @@ with_project as (
         h.status,
         case h.status
             when 0 then 'open'
-            when 2 then 'completed'
+            when 2 then 'done'
+            when -1 then 'wont_do'
             else 'other'
         end as status_label,
+        cast(h.updated_time as date) as updated_date,
         h.repeat_flag,
         h.tags
     from habits h
