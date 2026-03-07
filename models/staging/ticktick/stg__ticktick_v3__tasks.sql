@@ -17,10 +17,7 @@ with source as (
             when status = 2 then _completed_time
             else cast(NULL as DATETIME)
         end as completed_time,
-        case
-            when status = 2 then modified_time
-            else cast(NULL as DATETIME)
-        end as updated_time,
+        modified_time as updated_time,
         status
     from {{ ref('base__ticktick_v3__tasks') }}
     where deleted = 0

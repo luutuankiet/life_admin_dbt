@@ -22,10 +22,12 @@ with completed_tasks as (
         project_url_native,
         folder_url_path,
         folder_url_web,
-        folder_url_native
+        folder_url_native,
+        is_habit
     from {{ ref('fct_tasks_v3_semantic_base') }}
     where status = 2
       and completed_time_day is not null
+      and is_habit = false
 )
 
 select
@@ -59,5 +61,6 @@ select
     project_url_native,
     folder_url_path,
     folder_url_web,
-    folder_url_native
+    folder_url_native,
+    is_habit
 from completed_tasks

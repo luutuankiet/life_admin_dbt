@@ -233,3 +233,35 @@ The active BI operating model has shifted from Lightdash-centric execution to **
 ### Current migration execution rule
 
 For PHASE-006, implement push-left dbt semantics first on the Lightdash `main tasks` tab scope, then keep Grafana queries thin by consuming those dbt semantic marts.
+
+### Grafana Color Contracts
+
+Standardized color palettes for visual consistency across dashboard panels.
+
+#### Week Color Palette (Lookahead Charts)
+
+Used for week-based series in time charts (e.g., `Tasks Lookahead (5-Week Area Flow)`).
+
+| Week | Color Name | Hex |
+|------|------------|-----|
+| W1 | Green | `#73BF69` |
+| W2 | Yellow | `#FADE2A` |
+| W3 | Blue | `#5794F2` |
+| W4 | Orange | `#FF9830` |
+| W5 | Red | `#E24D42` |
+
+#### Day-of-Week Color Palette (Tables)
+
+Used for day column cell backgrounds in table panels (e.g., `Drill Down by Grain`, `What Did You Do`).
+
+| Day | Color Name | Hex |
+|-----|------------|-----|
+| Monday | Green | `#73BF69` |
+| Tuesday | Yellow | `#FADE2A` |
+| Wednesday | Blue | `#5794F2` |
+| Thursday | Orange | `#FF9830` |
+| Friday | Red | `#E24D42` |
+| Saturday | Purple | `#B877D9` |
+| Sunday | Light Blue | `#8AB8FF` |
+
+**Design rationale:** Weekdays (Mon-Fri) share the same 5-color sequence as weeks for cognitive consistency. Weekend days extend the palette with distinct colors for visual separation.

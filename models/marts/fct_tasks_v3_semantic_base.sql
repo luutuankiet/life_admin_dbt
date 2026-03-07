@@ -7,7 +7,8 @@ with tasks as (
         completed_time,
         updated_time,
         status,
-        gtd_work_type
+        gtd_work_type,
+        'habit' in unnest(tags) as is_habit
     from {{ ref('stg__ticktick_v3__tasks') }}
 ),
 
@@ -45,7 +46,8 @@ joined as (
         format_date('%A', cast(tasks.completed_time as date)) as completed_time_day_of_week_name,
         tasks.updated_time,
         tasks.status,
-        tasks.gtd_work_type
+        tasks.gtd_work_type,
+        tasks.is_habit
     from tasks
     left join projects
         on tasks.project_id = projects.project_id
@@ -80,7 +82,8 @@ normalized as (
         completed_time_day_of_week_name,
         updated_time,
         status,
-        gtd_work_type
+        gtd_work_type,
+        is_habit
     from joined
 ),
 
@@ -117,6 +120,7 @@ select
     status,
     gtd_work_type,
     scope_bucket,
+    is_habit,
     format(
         'ticktick.com/webapp/#p/%s/tasks/%s',
         coalesce(project_id, 'unknown_project'),
