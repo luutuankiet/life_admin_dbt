@@ -22,13 +22,19 @@ def _http_status_from_exception(exc: Exception) -> int | None:
 
 
 def classify_poll_error(exc: Exception) -> str:
+    """Classify poll errors for halt decisions.
+
+    TickTick's unofficial API returns unpredictable HTTP codes (401, 403, 429,
+    500, 503) for the same rejection intent.  Any HTTP response error is treated
+    as a server rejection and halts the loop immediately.  Network-level errors
+    (DNS, timeout, connection reset) are potentially transient and use an
+    error-streak threshold before halting.
+    """
     status_code = _http_status_from_exception(exc)
-    if status_code in (401, 403):
-        return "auth_required"
-    if status_code == 429 or (status_code is not None and 500 <= status_code < 600):
-        return "degraded"
+    if status_code is not None:
+        return "server_rejected"
     if isinstance(exc, requests.RequestException):
-        return "degraded"
+        return "network_error"
     return "error"
 
 
@@ -165,18 +171,51 @@ class PollerService:
                 with Session(self.engine) as session:
                     repo = ReplicaRepository(session)
                     repo.set_checkpoint_status(account_id, status, str(exc))
+                    state = repo.get_checkpoint_state(account_id)
+                    error_streak = state.error_streak
                     try:
                         repo.heartbeat_lease(account_id, owner_id, self.settings.lease_ttl_seconds)
                     except RuntimeError:
                         pass
 
-                sleep_seconds = self.settings.auth_pause_seconds if status == "auth_required" else self.settings.poll_interval_seconds
+                if status == "server_rejected":
+                    print(
+                        json.dumps(
+                            {
+                                "account_id": account_id,
+                                "status": status,
+                                "error": str(exc),
+                                "http_code": _http_status_from_exception(exc),
+                                "action": "loop_stopped",
+                            },
+                            ensure_ascii=False,
+                        )
+                    )
+                    break
+
+                if error_streak >= self.settings.error_streak_halt_threshold:
+                    print(
+                        json.dumps(
+                            {
+                                "account_id": account_id,
+                                "status": status,
+                                "error": str(exc),
+                                "error_streak": error_streak,
+                                "action": "loop_stopped",
+                            },
+                            ensure_ascii=False,
+                        )
+                    )
+                    break
+
+                sleep_seconds = self.settings.poll_interval_seconds
                 print(
                     json.dumps(
                         {
                             "account_id": account_id,
                             "status": status,
                             "error": str(exc),
+                            "error_streak": error_streak,
                             "sleep_seconds": sleep_seconds,
                         },
                         ensure_ascii=False,

@@ -83,8 +83,22 @@ class LoopController:
                     self._context["last_error"] = None
             except Exception as exc:  # noqa: BLE001
                 status = classify_poll_error(exc)
-                if status == "auth_required":
-                    wait_seconds = self.service.settings.auth_pause_seconds
+                if status == "server_rejected":
+                    with self._lock:
+                        self._context["state"] = "server_rejected"
+                        self._context["last_error"] = str(exc)
+                    break
+
+                with Session(self.service.engine) as session:
+                    repo = ReplicaRepository(session)
+                    chk_state = repo.get_checkpoint_state(account_id)
+                    error_streak = chk_state.error_streak
+
+                if error_streak >= self.service.settings.error_streak_halt_threshold:
+                    with self._lock:
+                        self._context["state"] = status
+                        self._context["last_error"] = str(exc)
+                    break
 
                 with self._lock:
                     self._context["state"] = status
@@ -165,9 +179,9 @@ def _compute_state_gauge(status_payload: dict) -> int:
     checkpoint_status = str(checkpoint.get("last_status") or "")
     running = bool(loop.get("running"))
 
-    if loop_state == "auth_required" or checkpoint_status == "auth_required":
+    if loop_state == "server_rejected" or checkpoint_status == "server_rejected":
         return 2
-    if loop_state in {"degraded", "error"} or checkpoint_status == "error":
+    if loop_state in {"network_error", "error"} or checkpoint_status == "error":
         return 1
     if not running:
         return 3
@@ -179,7 +193,7 @@ def _render_metrics(status_payload: dict) -> str:
     value = _compute_state_gauge(status_payload)
     loop_running = "1" if status_payload.get("loop", {}).get("running") else "0"
     lines = [
-        "# HELP ticktick_poller_state Poller state gauge. 0=running 1=degraded 2=auth_required 3=stopped",
+        "# HELP ticktick_poller_state Poller state gauge. 0=running 1=degraded 2=server_rejected 3=stopped",
         "# TYPE ticktick_poller_state gauge",
         f'ticktick_poller_state{{account_id="{account_id}",loop_running="{loop_running}"}} {value}',
     ]

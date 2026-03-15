@@ -30,6 +30,7 @@ class PollerSettings(BaseModel):
     lease_ttl_seconds: int = Field(default=90, ge=30, le=600)
     poll_interval_seconds: int = Field(default=30, ge=5, le=3600)
     auth_pause_seconds: int = Field(default=300, ge=30, le=86400)
+    error_streak_halt_threshold: int = Field(default=3, ge=1, le=100)
     archive_raw_payloads: bool = Field(default=True)
     raw_retention_hours: int = Field(default=24, ge=1, le=720)
 
@@ -49,6 +50,7 @@ class PollerSettings(BaseModel):
             lease_ttl_seconds=int(os.getenv("TICKTICK_V3_LEASE_TTL", "90")),
             poll_interval_seconds=int(os.getenv("TICKTICK_V3_POLL_INTERVAL", "30")),
             auth_pause_seconds=int(os.getenv("TICKTICK_V3_AUTH_PAUSE_SECONDS", "300")),
+            error_streak_halt_threshold=int(os.getenv("TICKTICK_V3_ERROR_STREAK_HALT", "3")),
             archive_raw_payloads=os.getenv("TICKTICK_V3_ARCHIVE_RAW", "1") == "1",
             raw_retention_hours=int(os.getenv("TICKTICK_V3_RAW_RETENTION_HOURS", "24")),
             gcs_emit_enabled=os.getenv("TICKTICK_V3_GCS_EMIT_ENABLED", "0") == "1",

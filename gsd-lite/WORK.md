@@ -44,6 +44,7 @@ Personal data platform for GTD-driven life decisions. The goal is "perceptual re
 - DECISION-020: Grafana executable contract framework is standardized as registry-driven dashboard ownership (`grafana/contracts/registry.yaml`), reusable packs (`grafana/contracts/packs/*.yaml`), dashboard contract composition (`grafana/contracts/dashboards/*.yaml`), and a single generic pytest runner (`tests/grafana/test_contracts.py`) enforced by CI workflow (`.github/workflows/grafana_contract_ci.yml`).
 - DECISION-021: This repository now intentionally runs two uv projects: root project for dbt plus tests (including Grafana contracts via `--group dev`) and `grafana/scripts` project for exporter utilities; dependencies and lockfiles are isolated and must be invoked from correct project context.
 - DECISION-022: Grafana export artifacts are deterministic UID-path snapshots with normalized volatile fields (`id=null`, `version=1`, `iteration` removed). Re-running export with no semantic dashboard change is expected to produce no git diff.
+- DECISION-023: All HTTP errors from TickTick halt poller immediately (`server_rejected`); network errors (DNS/timeout/connection) halt after 3 consecutive failures via `error_streak`. TickTick's error codes are unpredictable across 4xx/5xx — wide net is the only safe approach at high-frequency polling.
 </decisions>
 
 <blockers>
@@ -76,6 +77,7 @@ Execute the first green baseline with the correct root project context (`uv sync
 | LOG-032 | DISCOVERY+PLAN | PHASE-006 | Lookahead cockpit requirements crystallized with chart contract and onboarding map for semantic push-left execution |
 | LOG-033 | BREAKTHROUGH+EXEC+DECISION | PHASE-006 | Foundational migration pattern locked: dbt semantic marts plus invariant tests plus regex-safe dependent Grafana filters |
 | LOG-034 | DISCOVERY+PLAN | PHASE-006 | Dashboard UX baseline logged: dual open actions, emoji readability, reset control shipped; next task scoped for nested 5-bucket lookahead and weekday color contract |
+| LOG-041 | RESEARCH+DECISION+EXEC | POLLER-HARDENING | Poller error classification widened: any HTTP → server_rejected (immediate halt), network errors → streak-based halt; Prometheus alerts updated on Hetzner |
 
 ---
 
@@ -7645,3 +7647,114 @@ graph TD
 **Fork paths:**
 - Continue execution -> add a root wrapper command for exporter to reduce directory-context mistakes.
 - Lifecycle hardening -> add prune policy and registry-based export scope enforcement in CI.
+### [LOG-041] - [RESEARCH] [DECISION] [EXEC] - Poller error classification widened to halt on all HTTP rejections with streak-based network error halt - Task: POLLER-HARDENING
+**Timestamp:** 2026-03-15
+**Depends On:** LOG-015 (v3 poller implementation), LOG-016 (bounded retention + packaging)
+
+---
+
+#### What Was The Question
+
+The v3 poller (LOG-015) uses spoofed browser cookies to authenticate with TickTick's unofficial `/api/v3/batch/check/{checkPoint}` endpoint. When cookies expire, the server returns HTTP errors. At 5-second polling intervals: **how should the poller protect itself from getting the account banned?**
+
+Original behavior: on 401/403, classified as `auth_required` and retried every 300 seconds perpetually. All other HTTP errors (429, 5xx) classified as `degraded` and retried at normal poll interval. No halt mechanism existed.
+
+---
+
+#### Research: TickTick's Unpredictable Error Codes
+
+Investigated `lazeroffmichael/ticktick-py` (another unofficial TickTick client) via GitHub issues for community-reported error patterns.
+
+| HTTP Code | What It Actually Means | Source |
+|-----------|----------------------|--------|
+| **500** | Primary "lazy rejection" — anti-fraud, CAPTCHA required, bad credentials. Body sometimes: `{"errorCode": "username_password_not_match", "remainderTimes": 7}` | ticktick-py #42, #26, #16; TickTickSync #208 |
+| **503** | Same rejection as 500, different period | ticktick-py #25 |
+| **429** | Explicit rate limit — "Too Many Requests" | ticktick-py #53, #26 |
+| **405** | Endpoint deprecated/moved without notice | ticktick-py #56 |
+| **401** | Expired OAuth/session token | ticktick-py #25 |
+| **Account lock** | After repeated attempts → 24-hour ban, still returns HTTP 500 | ticktick-py #56, #26 |
+
+**Key finding:** Zero reports of genuine TickTick server blips causing 5xx. Every 5xx traces back to intentional rejection/throttling/anti-fraud. The same anti-fraud system has produced 500, 503, 429, and 405 at different times.
+
+---
+
+#### Decision: Two-Tier Halt Strategy (DECISION-023)
+
+| Signal | Classification | Behavior |
+|--------|---------------|----------|
+| Any HTTP status code (4xx, 5xx) | `server_rejected` | **Immediate halt** — the server spoke, it said no |
+| Network error (DNS, timeout, connection reset) | `network_error` | **Retry with streak threshold** (default: 3 consecutive) |
+| Other exceptions | `error` | Same as network_error |
+
+**Rejected alternative:** Maintaining a specific list of "known rejection codes" (401, 403, 429, 500, 503). Rejected because TickTick invents new codes unpredictably.
+
+---
+
+#### Implementation: 3 Files Changed
+
+**`service.py` — `classify_poll_error()` rewritten:**
+
+```python
+def classify_poll_error(exc: Exception) -> str:
+    status_code = _http_status_from_exception(exc)
+    if status_code is not None:
+        return "server_rejected"
+    if isinstance(exc, requests.RequestException):
+        return "network_error"
+    return "error"
+```
+
+**`service.py` — `run_loop()` halt logic:**
+- `server_rejected` → structured JSON log with `http_code` + `action: loop_stopped` → `break`
+- `error_streak >= threshold` → structured JSON log with streak count → `break`
+- Otherwise → retry at `poll_interval_seconds` with streak info in log
+
+**`webapp.py` — `_worker()` halt logic:**
+- Same two-tier halt (server_rejected immediate, streak-based for network_error)
+- Reads `error_streak` from DB via `self.service.engine` session
+- On halt: sets `self._context["state"]`, thread exits, `/status` shows `running: false`
+- Prometheus gauge updated: `server_rejected` → 2, `network_error` → 1
+
+**`config.py` — new setting:**
+- `error_streak_halt_threshold: int = Field(default=3, ge=1, le=100)`
+- Env: `TICKTICK_V3_ERROR_STREAK_HALT`
+
+---
+
+#### Monitoring Stack Update (Remote Hetzner Server)
+
+Alert rules updated on deployed Prometheus (`monitoring/prometheus/alerts.yml`):
+
+| Alert | Before | After |
+|-------|--------|-------|
+| `TicktickPollerAuthRequired` | gauge == 2 for 2m, "auth expired" | **Renamed** → `TicktickPollerServerRejected`, "HTTP error from TickTick" |
+| *(new)* `TicktickPollerUnhealthy` | — | gauge != 0 for 5m, catch-all for network_error/server_rejected/stopped |
+
+Docker-compose (`ticktick-poll/docker-compose.yaml`): added `TICKTICK_V3_ERROR_STREAK_HALT` env var.
+
+**Restart required:** Prometheus (alert rules) + ticktick poller (new Docker image).
+
+---
+
+#### Citations
+
+| Source | Location | Key Finding |
+|--------|----------|-------------|
+| ticktick-py #42 | `github.com/lazeroffmichael/ticktick-py/issues/42` | 500 from anti-fraud, urllib3 MaxRetryError |
+| ticktick-py #25 | `github.com/lazeroffmichael/ticktick-py/issues/25` | 503 on signin |
+| ticktick-py #53 | `github.com/lazeroffmichael/ticktick-py/issues/53` | 429 rate limit |
+| ticktick-py #56 | `github.com/lazeroffmichael/ticktick-py/issues/56` | 405 endpoint deprecated + account lockout |
+| TickTickSync #208 | `github.com/thesamim/TickTickSync/issues/208` | 500 body: `errorCode: username_password_not_match` |
+| `service.py` | `EL/ticktick/v3/poller/service.py:24-35` | `classify_poll_error` rewrite |
+| `webapp.py` | `EL/ticktick/v3/poller/webapp.py:76-113` | `_worker` halt logic |
+| `config.py` | `EL/ticktick/v3/poller/config.py:33` | `error_streak_halt_threshold` |
+| `alerts.yml` | `monitoring/prometheus/alerts.yml` (Hetzner) | Alert rule updates |
+| `docker-compose.yaml` | `ticktick-poll/docker-compose.yaml` (Hetzner) | Env var addition |
+
+---
+
+📦 STATELESS HANDOFF (for future agents reading this log)
+**Dependency chain:** LOG-041 ← LOG-015 (poller implementation) ← LOG-014 (parser rules) ← LOG-013 (control plane plan)
+**What was decided:** (DECISION-023) All HTTP errors halt immediately (`server_rejected`); network errors halt after 3 consecutive failures via `error_streak`. TickTick's error codes are unpredictable across 4xx/5xx — wide net is the only safe approach.
+**Next action:** (1) Rebuild Docker image with code changes. (2) Restart Prometheus on Hetzner. (3) Deploy new poller image. (4) Validate: force auth failure → confirm loop halts → confirm ntfy fires within ~2min.
+**If pivoting:** LOG-015 has the original poller architecture. This log extends it with safety hardening.
