@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import random
 import threading
 from datetime import datetime, timezone
 
@@ -108,7 +109,8 @@ class LoopController:
                 with self._lock:
                     self._context["last_tick_at"] = datetime.now(timezone.utc).isoformat()
 
-            if self._stop_event.wait(wait_seconds):
+            jittered_wait = max(1, wait_seconds + random.uniform(-5, 5))
+            if self._stop_event.wait(jittered_wait):
                 break
 
 

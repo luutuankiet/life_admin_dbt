@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import random
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -119,6 +120,7 @@ class PollerService:
                     state = repo.get_or_create_checkpoint_state(account_id)
                     state.last_status = "idle"
                     state.last_error = None
+                    state.error_streak = 0
                     state.updated_at = datetime.now(timezone.utc)
                     session.add(state)
 
@@ -222,4 +224,4 @@ class PollerService:
                     )
                 )
 
-            time.sleep(sleep_seconds)
+            time.sleep(max(1, sleep_seconds + random.uniform(-5, 5)))
