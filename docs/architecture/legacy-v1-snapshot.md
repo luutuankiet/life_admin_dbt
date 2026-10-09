@@ -20,7 +20,7 @@ what changed between photos.
 
 ```mermaid
 flowchart LR
-  X[external scheduler] -->|repository_dispatch| W[Serverless snapshot workflow<br/>on main]
+  X[n8n job<br/>holds a GitHub token] -->|repository_dispatch| W[Serverless snapshot workflow<br/>on main]
   W -->|checkout ref: incremental_run_gha| F[ticktick_fetcher.py<br/>Open API, open tasks only]
   F --> L[dbt target load_snapshot<br/>DuckDB reads previous snapshot from GCS]
   L --> D[dbt target dump_snapshot<br/>dbt snapshot, then COPY back to GCS JSONL]
@@ -39,9 +39,15 @@ default branch. So the code that ran every few minutes was **not the code on
 `snapshots/snapshots.yml` and models under `models/1_load_statefull_to_mem/` and
 `models/2_dump_snapshot_to_gcs/`.
 
-The workflow has no `schedule:`. A scheduler outside this repository sent
-`repository_dispatch` events of type `serverless_snapshot`. The last recorded run
-history shows one every 15 minutes, matching `DBT_LOAD_INTERVAL=15`:
+The workflow has no `schedule:`. The trigger was an **n8n workflow**, run on a
+self-hosted n8n server, that held a personal GitHub token allowed to send
+`repository_dispatch` events of type `serverless_snapshot`. The owner recalls
+the n8n server sitting on the same VPS as the poller to spread the dispatch
+requests, but not how the n8n job itself was started. On `2026-10-09` that VPS
+had no n8n container, process, systemd unit or install directory, so the server
+is gone or lives elsewhere. Either way the token it embedded may still be valid.
+The last recorded run history shows one dispatch every 15 minutes, matching
+`DBT_LOAD_INTERVAL=15`:
 
 ```
 2026-02-18T23:45:03Z repository_dispatch failure
@@ -84,6 +90,7 @@ freshness label for the dashboard.
 ## What can be deleted when v1 is retired
 
 - `.github/workflows/serverless_snapshot.yml` and the `incremental_run_gha` branch
+- the n8n dispatch job, wherever it lives, and the GitHub token it embeds (revoke it in GitHub settings even if n8n is gone)
 - `models/staging/ticktick/base/base__ticktick__*`, `stg__ticktick__{tasks,projects,project_folder,task_tags}`
 - marts without a `_v3` suffix that read them: `fct_tasks`, `dim_projects`, `dim_folders`, `fct_task_tags_bridge`, `dim_tags` (check `ref()`s first)
 - the `load_raw`, `stage_raw`, `load_snapshot`, `dump_snapshot` outputs in `profiles.yml`, and the target switches in `dbt_project.yml`

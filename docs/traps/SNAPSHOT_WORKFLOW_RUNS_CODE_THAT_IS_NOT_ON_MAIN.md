@@ -27,17 +27,19 @@ its history shows a run every 15 minutes.
    `snapshots/`) is on the long-lived branch `incremental_run_gha`. Last commit
    there: `eaec99a`, `2025-12-07`, "hotfix: pipeline crash when inbox 0".
 2. **The trigger lives outside the repo.** The workflow listens for
-   `repository_dispatch` of type `serverless_snapshot`. A scheduler somewhere
-   else POSTs that event using a GitHub token. Nothing in this repository says
-   where it runs or how often.
+   `repository_dispatch` of type `serverless_snapshot`. An n8n workflow on a
+   self-hosted n8n server POSTs that event using an embedded personal GitHub
+   token. Nothing in this repository says where it runs or how often. On
+   `2026-10-09` no n8n install was found on the poller's VPS.
 
 The two branches drift silently, and a fix on one never reaches the other.
 The external scheduler can also keep spending Actions minutes or fail runs
 while this repo shows no `cron:` anywhere.
 
 **Fix.** The pipeline is retired. Keep the workflow disabled, delete the branch
-and the workflow file when v1 is removed, and find and turn off whatever sends
-the dispatch (it needs a GitHub token with repo scope, so revoke that token too).
+and the workflow file when v1 is removed, and turn off the n8n dispatch job.
+Revoke the GitHub token it embeds in GitHub settings, whether or not the n8n
+server still exists.
 Any future frequent job should keep its code and its schedule in the same branch
 as its workflow.
 

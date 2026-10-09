@@ -31,7 +31,7 @@ names are repository **secrets** or **variables**. On the poller host they go in
 | `ENABLE_GTD_WORK_TYPE_CATEGORIZATION` | no | | `true` fills `gtd_work_type` |
 | `GTD_DEEP_WORK_TAGS`, `GTD_SHALLOW_WORK_TAGS` | no | | JSON arrays of tag names |
 | `DBT_OWNER_EMAIL` | no | `owner@example.com` | owner on Lightdash exposures |
-| `LIGHTDASH_URL` | no | `https://lightdash.example.com` | base URL on Lightdash exposures; also used by the Lightdash workflow |
+| `LIGHTDASH_URL` | no | `https://lightdash.example.com` | base URL on Lightdash exposures; also used by the Lightdash workflows (legacy) |
 
 ## v3 poller (`EL/ticktick/v3/poller/config.py`)
 
@@ -79,12 +79,12 @@ Variables: `DBT_LOAD_INTERVAL`, `DBT_TIMEZONE`,
 
 | workflow | state | trigger |
 |---|---|---|
-| `CI.yml` | active | pull request; builds into `PR_<n>`, then drops it with `macros/drop_ci_schema.sql` (`PR_20` to `PR_25` were left behind) |
-| `CD.yml` | active | merge to `main` |
-| `dbt_docs.yml` | active | publishes dbt docs to GitHub Pages |
+| `CI.yml` | disabled (Lightdash, legacy) | pull request; ran `lightdash validate`, built into `PR_<n>`, then drops it with `macros/drop_ci_schema.sql` (`PR_20` to `PR_25` were left behind) |
+| `CD.yml` | disabled (Lightdash, legacy) | any push to `main` outside `.github/**` and `lightdash/**` |
+| `dbt_docs.yml` | active | push to `main`; publishes dbt docs to GitHub Pages |
 | `grafana_contract_ci.yml` | active | pull request |
 | `grafana_write_back.yml` | active | manual |
-| `LD_write_back.yml` | active | Lightdash (legacy) |
+| `LD_write_back.yml` | disabled (Lightdash, legacy) | manual |
 | `run_dbt.yml` "Daily dbt job" | disabled | cron `0 23 * * *` |
-| `serverless_snapshot.yml` | disabled | external `repository_dispatch`, runs the `incremental_run_gha` branch |
+| `serverless_snapshot.yml` | disabled (legacy) | `repository_dispatch` sent by an n8n job, runs the `incremental_run_gha` branch |
 | `todoist_EL.yml` | disabled (inactivity) | |

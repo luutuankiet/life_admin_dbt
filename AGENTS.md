@@ -34,7 +34,7 @@ tests/marts/               - singular dbt data tests on the v3 marts
 grafana/                   - exported dashboards, contract YAML, exporter script
 tests/grafana/             - pytest runner for the Grafana contracts
 lightdash/, models/lightdash_exposures.yml - legacy BI layer, superseded by Grafana
-.github/workflows/         - CI/CD for dbt and Grafana; extraction workflows disabled
+.github/workflows/         - Grafana CI, dbt docs; extraction + Lightdash disabled (legacy)
 docs/                      - architecture, traps, reference, decision records
 ```
 

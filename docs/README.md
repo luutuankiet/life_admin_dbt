@@ -16,6 +16,7 @@ something is implemented.
 | page | covers | verified |
 |---|---|---|
 | [Grafana dashboards, exports and contracts](architecture/grafana-dashboards.md) | where the dashboard JSON comes from, why it contains ${DBT_BQ_PROJECT} placeholders, how dashboard regressions are tested | 2026-10-09 |
+| [Legacy Lightdash layer (dashboards as code, retired for Grafana)](architecture/legacy-lightdash.md) | what the Lightdash CI/CD loop did, which files and workflows belong to it, what can be deleted | 2026-10-09 |
 | [Legacy v1 pipeline (Open API + dbt snapshots + branch workflow)](architecture/legacy-v1-snapshot.md) | what the incremental_run_gha branch and the Serverless snapshot workflow did, why stg__ticktick__tasks unions snapshot rows, what can be deleted | 2026-10-09 |
 | [Current pipeline (v3 poller to Grafana)](architecture/pipeline-v3.md) | where TickTick data comes from today, how it reaches BigQuery, which dbt models feed the dashboard, where to restart the poller | 2026-10-09 |
 
@@ -63,5 +64,6 @@ it with a new one rather than editing it.
 - [Test Grafana dashboards with declarative contracts and one generic runner](adr/0004-grafana-contracts-as-data.md)
 - [The poller stops on any HTTP rejection and waits for a human](adr/0005-poller-halts-on-any-rejection.md)
 - [DuckDB copies the SQLite replica to GCS as Parquet after each changed cycle](adr/0006-duckdb-copies-the-replica-to-gcs.md)
+- [The current extraction, storage and orchestration are legacy; redesign from the source up](adr/0007-current-extraction-storage-and-orchestration-are-legacy.md)
 
 <!-- END GENERATED INDEX -->

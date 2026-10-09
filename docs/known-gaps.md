@@ -7,10 +7,11 @@ verified: 2026-10-09
 # Known gaps in the TickTick extraction
 
 State on `2026-10-09`: the poller container is up, its loop is stopped, GitHub
-extraction workflows are disabled, BigQuery and Grafana hold data frozen at
+extraction and Lightdash workflows are disabled, BigQuery and Grafana hold data frozen at
 `2026-10-09 04:08Z`. This page lists everything known to be wrong or fragile,
 so a redesign can start from the full list. Each row links to the page with
-evidence.
+evidence. The whole path is declared legacy in
+`adr/0007-current-extraction-storage-and-orchestration-are-legacy.md`.
 
 ## Data correctness
 
@@ -32,10 +33,13 @@ evidence.
 | 9 | the poller authenticates with a browser cookie and stops on any rejection | dashboard freezes until a human re-imports a cURL | `traps/POLLER_STOPPED_AND_DASHBOARD_FROZE.md` |
 | 10 | `/health` reports the process, not data age | a halted loop looks healthy | same page as 9 |
 | 11 | the `pollcycle` table logs every poll and is never pruned (560,271 rows after ~8 months) | the SQLite file grows forever | GitHub issue |
-| 12 | the v1 snapshot workflow ran code from the `incremental_run_gha` branch, triggered by a scheduler outside the repo | fixes on `main` never ran; an unknown external caller holds a GitHub token | `traps/SNAPSHOT_WORKFLOW_RUNS_CODE_THAT_IS_NOT_ON_MAIN.md` |
+| 12 | the v1 snapshot workflow ran code from the `incremental_run_gha` branch, triggered by an n8n job outside the repo | fixes on `main` never ran; the n8n job embeds a personal GitHub token that may still be valid | `traps/SNAPSHOT_WORKFLOW_RUNS_CODE_THAT_IS_NOT_ON_MAIN.md` |
 | 13 | dbt behaviour switches on target name (`load_raw`, `stage_raw`, `load_snapshot`, `dump_snapshot`) | pipeline stages are hidden in `profiles.yml` and `dbt_project.yml` | `architecture/legacy-v1-snapshot.md` |
 | 14 | CI per-PR datasets `PR_20` to `PR_25` were never dropped | clutter in BigQuery | GitHub issue |
 | 15 | the private API can change without notice | silent breakage | `adr/0002-extract-from-the-private-sync-endpoint.md` |
+| 16 | every BigQuery model is a view over external Parquet on GCS | no warehouse state of its own; each dashboard query re-reads the bucket; storage design is overwrite-only | `adr/0006-duckdb-copies-the-replica-to-gcs.md` |
+| 17 | Lightdash `CD.yml` fired on every push to `main` and tried to deploy to an unused instance (disabled `2026-10-09`) | stuck `pending` runs; a bot could commit back to `main` | `architecture/legacy-lightdash.md` |
+| 18 | `CI.yml` was the only dbt build on pull requests and is now disabled with Lightdash | no automated dbt check on PRs until a replacement exists | `reference/configuration.md` |
 
 ## Open questions for the API recon
 
@@ -46,3 +50,29 @@ evidence.
 3. When a project with tasks is hard-deleted, are the tasks sent in `delete[]`?
 4. When a folder is deleted, do its projects get `groupId: null`?
 5. Is there a longer-lived credential than the `t` session cookie?
+
+## Redesign brief for the next session
+
+Goal: decide, top to bottom, the idiomatic way to get TickTick data into a
+dashboard now that the private web API can be mapped directly (Firefox driven by
+an agent while logged in, plus a TickTick MCP server), instead of inferring
+history from polls. Walk these in order; each answer constrains the next.
+
+1. **Source.** Which web-app requests carry completion events, won't-do,
+   reopen, delete and recurrence lineage? Answer the five questions above first.
+2. **Credential.** What does the web app use to stay logged in, and can a
+   service hold it without a human re-pasting a cURL?
+3. **Change capture.** Is there anything event-like (websocket, push channel,
+   per-entity history endpoint), or is polling the checkpoint still the only way?
+   If polling, what is the cheapest cadence that loses nothing?
+4. **History.** Where does an append-only record of every state change live, so
+   that no single file is the only copy (issue #30)?
+5. **Storage and load.** Replace overwrite-Parquet-plus-views
+   (`adr/0006`) with something that keeps its own state: native BigQuery tables
+   loaded incrementally, or a different warehouse entirely.
+6. **Orchestration.** Nothing on GitHub Actions branches or n8n dispatch; one
+   place holds both the code and its schedule. Decide whether the repo still
+   needs to be public once Actions minutes no longer matter.
+7. **Modelling.** Rebuild staging on the new raw shape; retire the v1 chain and
+   its target switching (deletion list in `architecture/legacy-v1-snapshot.md`).
+8. **Serving.** Grafana and its contracts stay; re-point panels at the new marts.

@@ -51,6 +51,7 @@ it with a new one rather than editing it.
 - [Test Grafana dashboards with declarative contracts and one generic runner](../../../docs/adr/0004-grafana-contracts-as-data.md)
 - [The poller stops on any HTTP rejection and waits for a human](../../../docs/adr/0005-poller-halts-on-any-rejection.md)
 - [DuckDB copies the SQLite replica to GCS as Parquet after each changed cycle](../../../docs/adr/0006-duckdb-copies-the-replica-to-gcs.md)
+- [The current extraction, storage and orchestration are legacy; redesign from the source up](../../../docs/adr/0007-current-extraction-storage-and-orchestration-are-legacy.md)
 
 <!-- END GENERATED INDEX -->
 
