@@ -19,7 +19,6 @@ uv.lock
 tmp
 
 
-.opencode
 
 __pycache__
 */**/raw_batches/**/*

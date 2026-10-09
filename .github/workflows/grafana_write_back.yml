@@ -21,6 +21,7 @@ on:
 env:
   GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
   GRAFANA_SERVICE_ACCOUNT_TOKEN: ${{ secrets.GRAFANA_SERVICE_ACCOUNT_TOKEN }}
+  DBT_BQ_PROJECT: ${{ secrets.DBT_BQ_PROJECT }}
 
 permissions:
   contents: write

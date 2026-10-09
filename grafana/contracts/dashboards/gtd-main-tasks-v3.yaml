@@ -29,7 +29,7 @@ panels:
         selector: panel.query
         op: contains_all
         expected:
-          - airbyte-468412.ticktick_dbt_prod.fct_tasks_v3_due_workload_daily
+          - ${DBT_BQ_PROJECT}.ticktick_dbt_prod.fct_tasks_v3_due_workload_daily
         severity: error
 
       - id: query_respects_scope_filter

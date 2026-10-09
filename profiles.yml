@@ -1,23 +1,23 @@
 life_admin_dbt:
-  target: dev
+  target: "{{ env_var('DBT_TARGET', 'dev') }}"
   outputs:
     dev:
       type: bigquery
       location: "{{ env_var('DBT_BQ_LOCATION') }}"
       project: "{{ env_var('DBT_BQ_PROJECT') }}"
       method: service-account
-      dataset: ticktick_dbt_dev
+      dataset: "{{ env_var('DBT_DEV_DATASET', 'ticktick_dbt_dev') }}"
       # Use keyfile_json and an environment variable. This is a base64 string NOT a json object
       # how to gen the base64 string: base64 -w 0 bq_sa.json > sa.txt
-      keyfile: "./sa.json"
+      keyfile: "{{ env_var('DBT_BQ_KEYFILE', './sa.json') }}"
       threads: 16
     prod:
       type: bigquery
       location: "{{ env_var('DBT_BQ_LOCATION') }}"
       project: "{{ env_var('DBT_BQ_PROJECT') }}"
       method: service-account
-      dataset: ticktick_dbt_prod
-      keyfile: "./sa.json"
+      dataset: "{{ env_var('DBT_PROD_DATASET', 'ticktick_dbt_prod') }}"
+      keyfile: "{{ env_var('DBT_BQ_KEYFILE', './sa.json') }}"
       threads: 16
     CI:
       type: bigquery
@@ -25,7 +25,7 @@ life_admin_dbt:
       project: "{{ env_var('DBT_BQ_PROJECT') }}"
       method: service-account
       dataset: "{{ env_var('DBT_CI_SCHEMA','ticktick_dbt_ci')}}"
-      keyfile: "./sa.json"
+      keyfile: "{{ env_var('DBT_BQ_KEYFILE', './sa.json') }}"
       threads: 16
 
 # EL profile to load from data in fetched at runtime
@@ -36,7 +36,7 @@ life_admin_dbt:
      threads: 16
      secrets:
        - type: s3
-         region: asia-southeast1
+         region: "{{ env_var('GCS_REGION', 'auto') }}"
          key_id: "{{ env_var('GCS_KEY') }}"
          secret: "{{ env_var('GCS_SECRET') }}"
          endpoint: "storage.googleapis.com"
@@ -48,7 +48,7 @@ life_admin_dbt:
       # this is just arbitrary value won't get picked up by 
       # the actual dbt macro external table
       dataset: raw 
-      keyfile: "./sa.json"
+      keyfile: "{{ env_var('DBT_BQ_KEYFILE', './sa.json') }}"
       threads: 16
 
 
@@ -61,7 +61,7 @@ life_admin_dbt:
      threads: 16
      secrets:
        - type: s3
-         region: asia-southeast1
+         region: "{{ env_var('GCS_REGION', 'auto') }}"
          key_id: "{{ env_var('GCS_KEY') }}"
          secret: "{{ env_var('GCS_SECRET') }}"
          endpoint: "storage.googleapis.com"
@@ -72,7 +72,7 @@ life_admin_dbt:
      threads: 16
      secrets:
        - type: s3
-         region: asia-southeast1
+         region: "{{ env_var('GCS_REGION', 'auto') }}"
          key_id: "{{ env_var('GCS_KEY') }}"
          secret: "{{ env_var('GCS_SECRET') }}"
          endpoint: "storage.googleapis.com"

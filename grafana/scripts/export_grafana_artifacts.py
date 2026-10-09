@@ -123,8 +123,21 @@ class GrafanaClient:
         return payload
 
 
+# Deployment-specific values are swapped for placeholders so exported artifacts
+# stay publishable. Substitute them back before importing a file into Grafana.
+def deployment_placeholders() -> dict[str, str]:
+    pairs = {
+        os.getenv("GRAFANA_URL", "").rstrip("/"): "${GRAFANA_URL}",
+        os.getenv("DBT_BQ_PROJECT", ""): "${DBT_BQ_PROJECT}",
+    }
+    return {value: token for value, token in pairs.items() if value}
+
+
 def normalize_dashboard_json(dashboard: dict[str, Any]) -> dict[str, Any]:
-    data = json.loads(json.dumps(dashboard))
+    raw = json.dumps(dashboard)
+    for value, token in deployment_placeholders().items():
+        raw = raw.replace(value, token)
+    data = json.loads(raw)
     data["id"] = None
     if "version" in data:
         data["version"] = 1

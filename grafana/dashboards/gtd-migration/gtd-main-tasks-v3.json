@@ -35,7 +35,7 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "[Clear all filters and reset view](https://kenluu.grafana.net/d/gtd-main-tasks-v3?from=now&to=now%2B5w%2Fw)",
+        "content": "[Clear all filters and reset view](${GRAFANA_URL}/d/gtd-main-tasks-v3?from=now&to=now%2B5w%2Fw)",
         "mode": "markdown"
       },
       "pluginVersion": "13.0.0-22326976726.patch2",
@@ -350,9 +350,9 @@
           "editorMode": "code",
           "format": 1,
           "location": "asia-southeast1",
-          "project": "airbyte-468412",
+          "project": "${DBT_BQ_PROJECT}",
           "rawQuery": true,
-          "rawSql": "WITH bounds AS (\n  SELECT\n    CURRENT_DATE() AS start_date,\n    DATE_ADD(DATE_TRUNC(CURRENT_DATE(), WEEK(MONDAY)), INTERVAL 5 WEEK) AS end_date_exclusive\n),\ndaily AS (\n  SELECT\n    w.due_date_day,\n    DATE_TRUNC(w.due_date_day, WEEK(MONDAY)) AS due_week_start,\n    SUM(w.open_task_count) AS daily_tasks\n  FROM `airbyte-468412.ticktick_dbt_prod.fct_tasks_v3_due_workload_daily` w\n  CROSS JOIN bounds b\n  WHERE w.due_date_day >= b.start_date\n    AND w.due_date_day < b.end_date_exclusive\n    AND (${scope_bucket:singlequote} = 'all' OR w.scope_bucket = ${scope_bucket:singlequote})\n    AND REGEXP_CONTAINS(w.folder_name, r'^${folder_name:regex}$')\n    AND REGEXP_CONTAINS(w.project_name, r'^${project_name:regex}$')\n  GROUP BY 1, 2\n),\nranked AS (\n  SELECT\n    due_date_day,\n    due_week_start,\n    daily_tasks,\n    DENSE_RANK() OVER (ORDER BY due_week_start) AS week_num\n  FROM daily\n),\nweek_stats AS (\n  SELECT\n    week_num,\n    CAST(CEIL(AVG(daily_tasks)) AS INT64) AS week_avg\n  FROM ranked\n  WHERE week_num <= 5\n  GROUP BY 1\n),\nglobal_stats AS (\n  SELECT CAST(CEIL(AVG(daily_tasks)) AS INT64) AS global_avg\n  FROM ranked\n  WHERE week_num <= 5\n)\nSELECT\n  TIMESTAMP(r.due_date_day) AS time,\n  CASE WHEN r.week_num = 1 THEN r.daily_tasks END AS W1,\n  CASE WHEN r.week_num = 2 THEN r.daily_tasks END AS W2,\n  CASE WHEN r.week_num = 3 THEN r.daily_tasks END AS W3,\n  CASE WHEN r.week_num = 4 THEN r.daily_tasks END AS W4,\n  CASE WHEN r.week_num = 5 THEN r.daily_tasks END AS W5,\n  ws.week_avg AS `Week Avg`,\n  gs.global_avg AS `Global Avg`,\n  MOD(EXTRACT(DAYOFWEEK FROM r.due_date_day) + 5, 7) + 1 AS weekday_code\nFROM ranked r\nLEFT JOIN week_stats ws\n  ON r.week_num = ws.week_num\nCROSS JOIN global_stats gs\nWHERE r.week_num <= 5\nORDER BY r.due_date_day",
+          "rawSql": "WITH bounds AS (\n  SELECT\n    CURRENT_DATE() AS start_date,\n    DATE_ADD(DATE_TRUNC(CURRENT_DATE(), WEEK(MONDAY)), INTERVAL 5 WEEK) AS end_date_exclusive\n),\ndaily AS (\n  SELECT\n    w.due_date_day,\n    DATE_TRUNC(w.due_date_day, WEEK(MONDAY)) AS due_week_start,\n    SUM(w.open_task_count) AS daily_tasks\n  FROM `${DBT_BQ_PROJECT}.ticktick_dbt_prod.fct_tasks_v3_due_workload_daily` w\n  CROSS JOIN bounds b\n  WHERE w.due_date_day >= b.start_date\n    AND w.due_date_day < b.end_date_exclusive\n    AND (${scope_bucket:singlequote} = 'all' OR w.scope_bucket = ${scope_bucket:singlequote})\n    AND REGEXP_CONTAINS(w.folder_name, r'^${folder_name:regex}$')\n    AND REGEXP_CONTAINS(w.project_name, r'^${project_name:regex}$')\n  GROUP BY 1, 2\n),\nranked AS (\n  SELECT\n    due_date_day,\n    due_week_start,\n    daily_tasks,\n    DENSE_RANK() OVER (ORDER BY due_week_start) AS week_num\n  FROM daily\n),\nweek_stats AS (\n  SELECT\n    week_num,\n    CAST(CEIL(AVG(daily_tasks)) AS INT64) AS week_avg\n  FROM ranked\n  WHERE week_num <= 5\n  GROUP BY 1\n),\nglobal_stats AS (\n  SELECT CAST(CEIL(AVG(daily_tasks)) AS INT64) AS global_avg\n  FROM ranked\n  WHERE week_num <= 5\n)\nSELECT\n  TIMESTAMP(r.due_date_day) AS time,\n  CASE WHEN r.week_num = 1 THEN r.daily_tasks END AS W1,\n  CASE WHEN r.week_num = 2 THEN r.daily_tasks END AS W2,\n  CASE WHEN r.week_num = 3 THEN r.daily_tasks END AS W3,\n  CASE WHEN r.week_num = 4 THEN r.daily_tasks END AS W4,\n  CASE WHEN r.week_num = 5 THEN r.daily_tasks END AS W5,\n  ws.week_avg AS `Week Avg`,\n  gs.global_avg AS `Global Avg`,\n  MOD(EXTRACT(DAYOFWEEK FROM r.due_date_day) + 5, 7) + 1 AS weekday_code\nFROM ranked r\nLEFT JOIN week_stats ws\n  ON r.week_num = ws.week_num\nCROSS JOIN global_stats gs\nWHERE r.week_num <= 5\nORDER BY r.due_date_day",
           "refId": "A"
         }
       ],
@@ -546,8 +546,8 @@
           "editorMode": "builder",
           "format": 1,
           "location": "asia-southeast1",
-          "project": "airbyte-468412",
-          "rawSql": "SELECT\n  due_date_day,\n  due_date_day_of_week_name AS day,\n  FORMAT_DATE('%m/%d', due_date_day) AS date_mmdd,\n  CONCAT(\n    CODE_POINTS_TO_STRING([\n      127812 + MOD(ABS(FARM_FINGERPRINT(parent_grain_label)), 50)\n    ]),\n    ' ',\n    parent_grain_label\n  ) AS parent,\n  CASE\n    WHEN grain_level IN ('project', 'folder') THEN CONCAT(\n      CODE_POINTS_TO_STRING([\n        127812 + MOD(ABS(FARM_FINGERPRINT(grain_label)), 50)\n      ]),\n      ' ',\n      grain_label\n    )\n    ELSE grain_label\n  END AS grain,\n  task_count,\n  parent_grain_url_web,\n  parent_grain_url_native,\n  grain_url_web,\n  grain_url_native\nFROM `airbyte-468412.ticktick_dbt_prod.fct_tasks_v3_grain_rollup`\nWHERE due_date_day BETWEEN CURRENT_DATE() AND DATE_ADD(CURRENT_DATE(), INTERVAL CAST(${lookahead_days} AS INT64) DAY)\n  AND grain_level = ${grain_level:singlequote}\n  AND (${scope_bucket:singlequote} = 'all' OR scope_bucket = ${scope_bucket:singlequote})\n  AND REGEXP_CONTAINS(folder_name, r'^${folder_name:regex}$')\n  AND (${grain_level:singlequote} = 'folder' OR REGEXP_CONTAINS(project_name, r'^${project_name:regex}$'))\nORDER BY due_date_day ASC, parent_grain_label ASC, task_count DESC\nLIMIT 1000",
+          "project": "${DBT_BQ_PROJECT}",
+          "rawSql": "SELECT\n  due_date_day,\n  due_date_day_of_week_name AS day,\n  FORMAT_DATE('%m/%d', due_date_day) AS date_mmdd,\n  CONCAT(\n    CODE_POINTS_TO_STRING([\n      127812 + MOD(ABS(FARM_FINGERPRINT(parent_grain_label)), 50)\n    ]),\n    ' ',\n    parent_grain_label\n  ) AS parent,\n  CASE\n    WHEN grain_level IN ('project', 'folder') THEN CONCAT(\n      CODE_POINTS_TO_STRING([\n        127812 + MOD(ABS(FARM_FINGERPRINT(grain_label)), 50)\n      ]),\n      ' ',\n      grain_label\n    )\n    ELSE grain_label\n  END AS grain,\n  task_count,\n  parent_grain_url_web,\n  parent_grain_url_native,\n  grain_url_web,\n  grain_url_native\nFROM `${DBT_BQ_PROJECT}.ticktick_dbt_prod.fct_tasks_v3_grain_rollup`\nWHERE due_date_day BETWEEN CURRENT_DATE() AND DATE_ADD(CURRENT_DATE(), INTERVAL CAST(${lookahead_days} AS INT64) DAY)\n  AND grain_level = ${grain_level:singlequote}\n  AND (${scope_bucket:singlequote} = 'all' OR scope_bucket = ${scope_bucket:singlequote})\n  AND REGEXP_CONTAINS(folder_name, r'^${folder_name:regex}$')\n  AND (${grain_level:singlequote} = 'folder' OR REGEXP_CONTAINS(project_name, r'^${project_name:regex}$'))\nORDER BY due_date_day ASC, parent_grain_label ASC, task_count DESC\nLIMIT 1000",
           "refId": "A"
         }
       ],
@@ -643,8 +643,8 @@
           "editorMode": "builder",
           "format": 1,
           "location": "asia-southeast1",
-          "project": "airbyte-468412",
-          "rawSql": "SELECT\n  due_date_day,\n  CONCAT(\n    CODE_POINTS_TO_STRING([\n      127812 + MOD(ABS(FARM_FINGERPRINT(parent_grain_label)), 50)\n    ]),\n    ' ',\n    parent_grain_label\n  ) AS parent_grain_label,\n  SUM(task_count) AS open_tasks\nFROM `airbyte-468412.ticktick_dbt_prod.fct_tasks_v3_grain_rollup`\nWHERE due_date_day BETWEEN CURRENT_DATE() AND DATE_ADD(CURRENT_DATE(), INTERVAL CAST(${lookahead_days} AS INT64) DAY)\n  AND grain_level = ${grain_level:singlequote}\n  AND (${scope_bucket:singlequote} = 'all' OR scope_bucket = ${scope_bucket:singlequote})\n  AND REGEXP_CONTAINS(folder_name, r'^${folder_name:regex}$')\n  AND (${grain_level:singlequote} = 'folder' OR REGEXP_CONTAINS(project_name, r'^${project_name:regex}$'))\nGROUP BY 1, 2\nORDER BY 1 ASC, 3 DESC",
+          "project": "${DBT_BQ_PROJECT}",
+          "rawSql": "SELECT\n  due_date_day,\n  CONCAT(\n    CODE_POINTS_TO_STRING([\n      127812 + MOD(ABS(FARM_FINGERPRINT(parent_grain_label)), 50)\n    ]),\n    ' ',\n    parent_grain_label\n  ) AS parent_grain_label,\n  SUM(task_count) AS open_tasks\nFROM `${DBT_BQ_PROJECT}.ticktick_dbt_prod.fct_tasks_v3_grain_rollup`\nWHERE due_date_day BETWEEN CURRENT_DATE() AND DATE_ADD(CURRENT_DATE(), INTERVAL CAST(${lookahead_days} AS INT64) DAY)\n  AND grain_level = ${grain_level:singlequote}\n  AND (${scope_bucket:singlequote} = 'all' OR scope_bucket = ${scope_bucket:singlequote})\n  AND REGEXP_CONTAINS(folder_name, r'^${folder_name:regex}$')\n  AND (${grain_level:singlequote} = 'folder' OR REGEXP_CONTAINS(project_name, r'^${project_name:regex}$'))\nGROUP BY 1, 2\nORDER BY 1 ASC, 3 DESC",
           "refId": "A"
         }
       ],
@@ -843,9 +843,9 @@
           "editorMode": "code",
           "format": 1,
           "location": "asia-southeast1",
-          "project": "airbyte-468412",
+          "project": "${DBT_BQ_PROJECT}",
           "rawQuery": true,
-          "rawSql": "SELECT\n  completed_time_day AS completed_date,\n  completed_time_day_of_week_name AS day,\n  gtd_work_type,\n  project_name_formatted AS project,\n  project_url_web,\n  project_url_native,\n  title AS task,\n  task_url_web,\n  task_url_native\nFROM `airbyte-468412.ticktick_dbt_prod.fct_tasks_v3_completed_activity`\nWHERE \n  due_date is not null\n  AND\ncompleted_time_day BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL CAST(${completed_days} AS INT64) DAY) AND CURRENT_DATE()\n  AND (${scope_bucket:singlequote} = 'all' OR scope_bucket = ${scope_bucket:singlequote})\n  AND REGEXP_CONTAINS(folder_name, r'^${folder_name:regex}$')\n  AND REGEXP_CONTAINS(project_name, r'^${project_name:regex}$')\nORDER BY completed_date DESC, updated_time DESC\nLIMIT 500",
+          "rawSql": "SELECT\n  completed_time_day AS completed_date,\n  completed_time_day_of_week_name AS day,\n  gtd_work_type,\n  project_name_formatted AS project,\n  project_url_web,\n  project_url_native,\n  title AS task,\n  task_url_web,\n  task_url_native\nFROM `${DBT_BQ_PROJECT}.ticktick_dbt_prod.fct_tasks_v3_completed_activity`\nWHERE \n  due_date is not null\n  AND\ncompleted_time_day BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL CAST(${completed_days} AS INT64) DAY) AND CURRENT_DATE()\n  AND (${scope_bucket:singlequote} = 'all' OR scope_bucket = ${scope_bucket:singlequote})\n  AND REGEXP_CONTAINS(folder_name, r'^${folder_name:regex}$')\n  AND REGEXP_CONTAINS(project_name, r'^${project_name:regex}$')\nORDER BY completed_date DESC, updated_time DESC\nLIMIT 500",
           "refId": "A",
           "sql": {
             "columns": [
@@ -1013,7 +1013,7 @@
           "type": "grafana-bigquery-datasource",
           "uid": "cfdykvp3d8n40c"
         },
-        "definition": "SELECT DISTINCT w.folder_name FROM `airbyte-468412.ticktick_dbt_prod.fct_tasks_v3_due_workload_daily` w JOIN `airbyte-468412.ticktick_dbt_prod.dim_projects_v3` p ON w.project_id = p.project_id WHERE COALESCE(p.closed, FALSE) = FALSE ORDER BY 1",
+        "definition": "SELECT DISTINCT w.folder_name FROM `${DBT_BQ_PROJECT}.ticktick_dbt_prod.fct_tasks_v3_due_workload_daily` w JOIN `${DBT_BQ_PROJECT}.ticktick_dbt_prod.dim_projects_v3` p ON w.project_id = p.project_id WHERE COALESCE(p.closed, FALSE) = FALSE ORDER BY 1",
         "includeAll": true,
         "label": "Folder",
         "multi": true,
@@ -1024,9 +1024,9 @@
           "editorMode": "code",
           "format": 1,
           "location": "asia-southeast1",
-          "project": "airbyte-468412",
+          "project": "${DBT_BQ_PROJECT}",
           "rawQuery": true,
-          "rawSql": "SELECT DISTINCT w.folder_name\nFROM `airbyte-468412.ticktick_dbt_prod.fct_tasks_v3_due_workload_daily` w\nJOIN `airbyte-468412.ticktick_dbt_prod.dim_projects_v3` p\n  ON w.project_id = p.project_id\nWHERE COALESCE(p.closed, FALSE) = FALSE\nORDER BY 1",
+          "rawSql": "SELECT DISTINCT w.folder_name\nFROM `${DBT_BQ_PROJECT}.ticktick_dbt_prod.fct_tasks_v3_due_workload_daily` w\nJOIN `${DBT_BQ_PROJECT}.ticktick_dbt_prod.dim_projects_v3` p\n  ON w.project_id = p.project_id\nWHERE COALESCE(p.closed, FALSE) = FALSE\nORDER BY 1",
           "refId": "A"
         },
         "refresh": 1,
@@ -1043,7 +1043,7 @@
           "type": "grafana-bigquery-datasource",
           "uid": "cfdykvp3d8n40c"
         },
-        "definition": "SELECT DISTINCT w.project_name FROM `airbyte-468412.ticktick_dbt_prod.fct_tasks_v3_due_workload_daily` w JOIN `airbyte-468412.ticktick_dbt_prod.dim_projects_v3` p ON w.project_id = p.project_id WHERE COALESCE(p.closed, FALSE) = FALSE AND REGEXP_CONTAINS(w.folder_name, r'^${folder_name:regex}$') ORDER BY 1",
+        "definition": "SELECT DISTINCT w.project_name FROM `${DBT_BQ_PROJECT}.ticktick_dbt_prod.fct_tasks_v3_due_workload_daily` w JOIN `${DBT_BQ_PROJECT}.ticktick_dbt_prod.dim_projects_v3` p ON w.project_id = p.project_id WHERE COALESCE(p.closed, FALSE) = FALSE AND REGEXP_CONTAINS(w.folder_name, r'^${folder_name:regex}$') ORDER BY 1",
         "includeAll": true,
         "label": "Project",
         "multi": true,
@@ -1054,9 +1054,9 @@
           "editorMode": "code",
           "format": 1,
           "location": "asia-southeast1",
-          "project": "airbyte-468412",
+          "project": "${DBT_BQ_PROJECT}",
           "rawQuery": true,
-          "rawSql": "SELECT DISTINCT w.project_name\nFROM `airbyte-468412.ticktick_dbt_prod.fct_tasks_v3_due_workload_daily` w\nJOIN `airbyte-468412.ticktick_dbt_prod.dim_projects_v3` p\n  ON w.project_id = p.project_id\nWHERE COALESCE(p.closed, FALSE) = FALSE\n  AND REGEXP_CONTAINS(w.folder_name, r'^${folder_name:regex}$')\nORDER BY 1",
+          "rawSql": "SELECT DISTINCT w.project_name\nFROM `${DBT_BQ_PROJECT}.ticktick_dbt_prod.fct_tasks_v3_due_workload_daily` w\nJOIN `${DBT_BQ_PROJECT}.ticktick_dbt_prod.dim_projects_v3` p\n  ON w.project_id = p.project_id\nWHERE COALESCE(p.closed, FALSE) = FALSE\n  AND REGEXP_CONTAINS(w.folder_name, r'^${folder_name:regex}$')\nORDER BY 1",
           "refId": "A"
         },
         "refresh": 1,

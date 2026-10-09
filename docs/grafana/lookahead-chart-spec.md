@@ -84,7 +84,7 @@ Lookahead query must respect dashboard controls:
 - `project_name`
 
 Lookahead query must aggregate from:
-- `airbyte-468412.ticktick_dbt_prod.fct_tasks_v3_due_workload_daily`
+- `${DBT_BQ_PROJECT}.ticktick_dbt_prod.fct_tasks_v3_due_workload_daily`
 
 ## Superseded Assumption
 
