@@ -82,14 +82,19 @@ working directory. Check the Runs page first.
 
 ## Dagster UI
 
-Published on port `3070` of the address in `DAGSTER_WEB_BIND` (loopback by default). Set
-it to a private address such as a VPN interface; the container has no reverse-proxy
-route, so it is never public.
+Published on port `3070` of the address in `DAGSTER_WEB_BIND` (loopback by default).
+Production sets `0.0.0.0` on a host whose provider-level firewall blocks every inbound
+port from the internet, and reaches the UI over the VPN, either directly at the host's
+VPN name on port `3070` or through a LAN reverse proxy that forwards a private hostname
+there. A host firewall alone is not enough: Docker-published ports bypass ufw and host
+iptables INPUT rules. After changing the bind, probe the host's public IP on `3070`
+from outside the VPN; it must time out.
 
 ## Reboot ordering
 
-When `DAGSTER_WEB_BIND` is a VPN address (Tailscale), dockerd can start before that
-address exists. The port bind then fails with `cannot assign requested address` and the
+Only needed when `DAGSTER_WEB_BIND` is a VPN address; with `0.0.0.0` the bind cannot
+fail at boot and the drop-in is harmless but optional. When `DAGSTER_WEB_BIND` is a VPN
+address (Tailscale), dockerd can start before that address exists. The port bind then fails with `cannot assign requested address` and the
 `dagster` container stays down after a reboot, with no alert. Install the drop-in once
 per host so docker waits for Tailscale:
 

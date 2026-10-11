@@ -198,10 +198,13 @@ Nothing on the host is the only copy of anything. Removing the `state` volume co
 run history and any pending body edits, nothing else. The CLI and Dagster share the
 dlt working dir: do not run a CLI command while a run is in progress.
 
-The one host-level dependency is boot order. When the UI is published on a
-Tailscale address, `docker.service` must start after Tailscale has that address,
-or the `dagster` container stays down after a reboot without alerting. A systemd
-drop-in template for that lives in `EL/ticktick/ingest/docker/host/`; see
+The UI is published on `0.0.0.0:3070` in production and reached over the VPN,
+directly or through a LAN reverse proxy. That is safe only because the provider-level
+firewall blocks the port publicly: Docker-published ports bypass the host's own
+firewall. Binding a Tailscale address instead adds a boot-order dependency:
+`docker.service` must start after Tailscale has that address, or the `dagster`
+container stays down after a reboot without alerting. A systemd drop-in template for
+that lives in `EL/ticktick/ingest/docker/host/`; see
 `docs/traps/INGEST_STACK_ABSENT_AFTER_HOST_REBOOT.md`.
 
 ## Known gaps

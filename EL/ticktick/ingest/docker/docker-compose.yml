@@ -25,8 +25,8 @@ services:
     command: ["dagster", "dev", "-m", "ticktick_ingest.defs", "-h", "0.0.0.0", "-p", "3000"]
     mem_limit: 1536m
     # No Traefik labels: the reverse proxy does not expose containers by default, so
-    # there is no public route. The UI is published only on DAGSTER_WEB_BIND (set it
-    # to the host's tailnet address; loopback by default).
+    # there is no public route. The UI is published only on DAGSTER_WEB_BIND (loopback
+    # by default; 0.0.0.0 is safe only behind a provider firewall, see the README).
     ports:
       - "${DAGSTER_WEB_BIND:-127.0.0.1}:${DAGSTER_WEB_PORT:-3070}:3000"
     networks:
