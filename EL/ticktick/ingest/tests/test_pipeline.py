@@ -179,6 +179,37 @@ def test_backfill_pages_closed_and_stores_cursor(env, load):
     assert client.stop_ats == [newest]
 
 
+def test_safety_keeps_only_closed_rows_at_or_after_the_cursor(env, load):
+    pipeline, gate = env()
+    page = load("completed_page.json")
+    sync("backfill", [load("delta_lists.json")], pipeline, gate, closed_pages=[page])
+    raw_before = count(pipeline, "raw_closed_tasks")
+    cursor = max(r["completedTime"] for r in page)  # 2026-10-09T16:26:37
+    equal = next(r for r in page if r["completedTime"] == cursor)
+    older = [r for r in page if r["completedTime"] < cursor]
+    newer = {
+        **equal,
+        "id": "newclosed000000000000001",
+        "completedTime": "2026-10-10T08:00:00.000+0000",
+    }
+    mixed = [newer, equal, *older]
+
+    summary, _ = sync(
+        "safety", [load("delta_empty.json")], pipeline, gate, closed_pages=[mixed], run_id="safety"
+    )
+    assert summary.rows["raw_closed_tasks"] == 2 and summary.rows["closed_tasks"] == 2
+    assert count(pipeline, "raw_closed_tasks") == raw_before + 2
+    new_raw = query(pipeline, "select task_id from {ds}.raw_closed_tasks where _run_id = 'safety'")
+    assert {r[0] for r in new_raw} == {newer["id"], equal["id"]}
+
+    # backfill ignores the cursor and keeps every row of the page
+    summary, _ = sync(
+        "backfill", [load("delta_empty.json")], pipeline, gate, closed_pages=[mixed], run_id="bf"
+    )
+    assert summary.rows["raw_closed_tasks"] == len(mixed)
+    assert summary.rows["closed_tasks"] == len({r["id"] for r in mixed})
+
+
 def test_bookmark_and_gate_survive_a_lost_working_dir(env, load):
     pipeline, gate = env("w1")
     sync("hint", [load("delta_lists.json")], pipeline, gate)

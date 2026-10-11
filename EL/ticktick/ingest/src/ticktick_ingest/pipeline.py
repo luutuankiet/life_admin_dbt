@@ -296,10 +296,12 @@ def _add_closed(
         summary.closed_pages += 1
         env = Envelope(run_id, _now(), stop_at)
         for row in page:
+            done = to_cursor(row["completedTime"]) if row.get("completedTime") else None
+            if stop_at is not None and done is not None and done < stop_at:
+                continue  # pages are ~1000 rows; keep only those at or after the cursor
             batch.raw_closed_rows.append({"task_id": row["id"], "payload": row, **env.columns()})
             latest[row["id"]] = typed_row(row, env)
-            if row.get("completedTime"):
-                done = to_cursor(row["completedTime"])
+            if done is not None:
                 cursor = done if cursor is None or done > cursor else cursor
     batch.closed_rows = list(latest.values())
     if cursor != stored_cursor:
