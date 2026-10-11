@@ -56,7 +56,7 @@ into both containers. Real values never go in the repository.
 | `GOOGLE_APPLICATION_CREDENTIALS` | yes | `/secrets/sa.json` in the containers | service-account key file; compose mounts `docker/secrets/` read-only at `/secrets` |
 | `NTFY_URL` | no | | full ntfy topic URL the failure sensor posts to; unset = the alert is only logged |
 | `INGEST_STATE_DIR` | no | `/state` in the containers (compose sets it); `~/.local/state/ticktick_ingest` for the CLI outside them | hint file, gate cache, dlt working dir; the Dagster storage sits at `/state/dagster` |
-| `DAGSTER_WEB_BIND` | no | `127.0.0.1` | host address the Dagster UI is published on; set a private (VPN) address, never a public one |
+| `DAGSTER_WEB_BIND` | no | `127.0.0.1` | host address the Dagster UI is published on; set a private (VPN) address, never a public one; a Tailscale address also needs the boot-order drop-in in `EL/ticktick/ingest/docker/host/` |
 | `DAGSTER_WEB_PORT` | no | `3070` | host port of the Dagster UI |
 
 The credential is the bare `t` cookie, not a pasted cURL. There is no login and no

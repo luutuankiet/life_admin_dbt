@@ -86,6 +86,24 @@ Published on port `3070` of the address in `DAGSTER_WEB_BIND` (loopback by defau
 it to a private address such as a VPN interface; the container has no reverse-proxy
 route, so it is never public.
 
+## Reboot ordering
+
+When `DAGSTER_WEB_BIND` is a VPN address (Tailscale), dockerd can start before that
+address exists. The port bind then fails with `cannot assign requested address` and the
+`dagster` container stays down after a reboot, with no alert. Install the drop-in once
+per host so docker waits for Tailscale:
+
+```sh
+sudo install -D -m 0644 EL/ticktick/ingest/docker/host/wait-for-tailscale.conf \
+  /etc/systemd/system/docker.service.d/wait-for-tailscale.conf
+sudo systemctl daemon-reload
+systemctl show docker -p After -p ExecStartPre   # lists tailscaled.service and tailscale wait
+```
+
+No docker restart is needed; it applies from the next boot. The wait is capped at 60 s
+and its failure is ignored, so a host with Tailscale logged out still starts every
+container except the tailnet-bound port. Details: `docs/traps/INGEST_STACK_ABSENT_AFTER_HOST_REBOOT.md`.
+
 ## Alerts
 
 A failed run posts to `NTFY_URL` with the title `ticktick-ingest failed`.

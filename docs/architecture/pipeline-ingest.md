@@ -198,6 +198,12 @@ Nothing on the host is the only copy of anything. Removing the `state` volume co
 run history and any pending body edits, nothing else. The CLI and Dagster share the
 dlt working dir: do not run a CLI command while a run is in progress.
 
+The one host-level dependency is boot order. When the UI is published on a
+Tailscale address, `docker.service` must start after Tailscale has that address,
+or the `dagster` container stays down after a reboot without alerting. A systemd
+drop-in template for that lives in `EL/ticktick/ingest/docker/host/`; see
+`docs/traps/INGEST_STACK_ABSENT_AFTER_HOST_REBOOT.md`.
+
 ## Known gaps
 
 - **A closed task deleted later stays closed.** Deleting a closed task removes it
