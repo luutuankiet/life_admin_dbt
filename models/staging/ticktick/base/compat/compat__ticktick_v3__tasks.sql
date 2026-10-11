@@ -99,3 +99,9 @@ SELECT
     raw_json,
     updated_at
 FROM deduped
+-- after the dedup, so a task's newest state decides. Deleting a list leaves its tasks
+-- behind: the change feed carries no task deletes for them. Inbox is not a list row;
+-- stg adds it from the legacy projects source.
+WHERE project_id IS NULL
+    OR project_id LIKE 'inbox%'
+    OR project_id IN (SELECT JSON_VALUE(raw_json, '$.id') FROM {{ source('ticktick_ingest', 'lists') }})
