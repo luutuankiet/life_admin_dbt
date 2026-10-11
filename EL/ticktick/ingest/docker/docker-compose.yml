@@ -1,0 +1,44 @@
+# TickTick ingestion: Dagster (webserver + daemon) and the websocket hint listener.
+#   docker compose -p ticktick-ingest up -d --build
+# Needs .env (copy .env.example) and secrets/sa.json (service-account key).
+name: ticktick-ingest
+
+x-common: &common
+  build:
+    context: ..
+    dockerfile: docker/Dockerfile
+  env_file: .env
+  environment:
+    INGEST_STATE_DIR: /state
+    GOOGLE_APPLICATION_CREDENTIALS: /secrets/sa.json
+  volumes:
+    - state:/state
+    - ./secrets:/secrets:ro
+  restart: unless-stopped
+
+services:
+  dagster:
+    <<: *common
+    command: ["dagster", "dev", "-m", "ticktick_ingest.defs", "-h", "0.0.0.0", "-p", "3000"]
+    mem_limit: 1536m
+    # No Traefik labels: the reverse proxy does not expose containers by default, so
+    # there is no public route. The UI is published only on DAGSTER_WEB_BIND (set it
+    # to the host's tailnet address; loopback by default).
+    ports:
+      - "${DAGSTER_WEB_BIND:-127.0.0.1}:${DAGSTER_WEB_PORT:-3070}:3000"
+    networks:
+      - frontend
+
+  listener:
+    <<: *common
+    command: ["python", "-m", "ticktick_ingest.listener"]
+    mem_limit: 256m
+    # Exit 3 = cookie rejected. Restarting cannot fix that, but the 30 min safety net
+    # keeps failing and alerting until a fresh cookie is pasted into .env.
+
+volumes:
+  state:
+
+networks:
+  frontend:
+    external: true

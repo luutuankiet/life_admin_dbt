@@ -25,3 +25,5 @@ __pycache__
 ticktick_replica.db
 ticktick_check.curl
 .ingest_state/
+EL/ticktick/ingest/docker/secrets/
+EL/ticktick/ingest/docker/.env

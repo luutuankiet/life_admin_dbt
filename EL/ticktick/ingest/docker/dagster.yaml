@@ -1,0 +1,32 @@
+# Instance config, baked into the image at $DAGSTER_HOME. Run, event and schedule
+# storage live on the shared `state` volume so they survive a rebuild.
+storage:
+  sqlite:
+    base_dir: /state/dagster
+
+local_artifact_storage:
+  module: dagster._core.storage.root
+  class: LocalArtifactStorage
+  config:
+    base_dir: /state/dagster/artifacts
+
+# One sync at a time: two runs on the same dlt working dir would race the bookmark.
+run_queue:
+  max_concurrent_runs: 1
+
+# Tick history. Run history (7 days) is purged by the purge_old_runs_daily schedule,
+# since OSS Dagster has no run retention setting.
+retention:
+  schedule:
+    purge_after_days:
+      skipped: 1
+      success: 7
+      failure: 7
+  sensor:
+    purge_after_days:
+      skipped: 1
+      success: 7
+      failure: 7
+
+telemetry:
+  enabled: false

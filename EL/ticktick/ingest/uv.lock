@@ -668,19 +668,6 @@ wheels = [
 ]
 
 [[package]]
-name = "dagster-dlt"
-version = "0.29.26"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "dagster" },
-    { name = "dlt" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/73/54/7ab8d3a85b59a51cbc914f0bada651ee208f67818be924e22e6fc859b71e/dagster_dlt-0.29.26.tar.gz", hash = "sha256:1a5e77209ae3c8391655385a0eb94e09f5e9d1c406e49fb743889b87920bbc13", size = 230934, upload-time = "2026-10-09T21:43:44.904Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/61/6d/0bcf69c3ec3ac335aa2dc48e7a023d93038986d152455d7af1575138c843/dagster_dlt-0.29.26-py3-none-any.whl", hash = "sha256:087222ceb8f272602fe907b510c360c67b57494513bd674ddebff06c6b41aa27", size = 21169, upload-time = "2026-10-09T21:43:43.695Z" },
-]
-
-[[package]]
 name = "dagster-graphql"
 version = "1.13.26"
 source = { registry = "https://pypi.org/simple" }
@@ -3233,7 +3220,6 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "dagster" },
-    { name = "dagster-dlt" },
     { name = "dagster-webserver" },
     { name = "dlt", extra = ["bigquery"] },
     { name = "httpx" },
@@ -3250,7 +3236,6 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "dagster", specifier = ">=1.9" },
-    { name = "dagster-dlt", specifier = ">=0.25" },
     { name = "dagster-webserver", specifier = ">=1.9" },
     { name = "dlt", extras = ["bigquery"], specifier = ">=1.5" },
     { name = "httpx", specifier = ">=0.27" },
