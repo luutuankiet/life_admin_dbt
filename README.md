@@ -39,7 +39,7 @@ A TickTick edit reaches BigQuery in about a minute. Nothing polls on a timer:
 
 Both containers run from one compose file on a small VPS, reached over a private VPN. The warehouse is the only state that matters: the stack can be rebuilt on any machine from its `.env` and resumes where the last finished load left off.
 
-Diagrams (excalidraw.com): architecture `https://excalidraw.com/#json=R5hl_wruHCekuCldgNm68,NkzpJ-Qnwep3xDlcBWTkvQ`, run lifecycle and recovery `https://excalidraw.com/#json=fR-TItqRreAkeb0q9_aEJ,Krz31pI7IDpD7eb1aBMEjg`.
+Diagrams live in [docs/diagrams/](docs/diagrams/) as `.excalidraw` files. Share links: architecture `https://excalidraw.com/#json=R5hl_wruHCekuCldgNm68,NkzpJ-Qnwep3xDlcBWTkvQ`, run lifecycle and recovery `https://excalidraw.com/#json=fR-TItqRreAkeb0q9_aEJ,Krz31pI7IDpD7eb1aBMEjg`, which TickTick action fills which table `https://excalidraw.com/#json=anV90A6MC81durHKbx6oH,rcBdMZsebAro0mSnnjF0gQ`.
 
 How each part works, what happens when a run is cancelled or fails, and how a moved or rebooted host recovers: [docs/architecture/pipeline-ingest.md](docs/architecture/pipeline-ingest.md). Deploying and operating it: [EL/ticktick/ingest/README.md](EL/ticktick/ingest/README.md). Every deployment value is an environment variable, listed in [docs/reference/configuration.md](docs/reference/configuration.md).
 

@@ -53,6 +53,7 @@ it with a new one rather than editing it.
 - [The poller stops on any HTTP rejection and waits for a human](../../../docs/adr/0005-poller-halts-on-any-rejection.md)
 - [DuckDB copies the SQLite replica to GCS as Parquet after each changed cycle](../../../docs/adr/0006-duckdb-copies-the-replica-to-gcs.md)
 - [The current extraction, storage and orchestration are legacy; redesign from the source up](../../../docs/adr/0007-current-extraction-storage-and-orchestration-are-legacy.md)
+- [Ingest on TickTick's sync hints with Dagster and dlt into BigQuery](../../../docs/adr/0008-ingest-on-sync-hints-with-dagster-and-dlt.md)
 
 <!-- END GENERATED INDEX -->
 

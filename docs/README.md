@@ -18,7 +18,7 @@ something is implemented.
 | [Grafana dashboards, exports and contracts](architecture/grafana-dashboards.md) | where the dashboard JSON comes from, why it contains ${DBT_BQ_PROJECT} placeholders, how dashboard regressions are tested | 2026-10-09 |
 | [Legacy Lightdash layer (dashboards as code, retired for Grafana)](architecture/legacy-lightdash.md) | what the Lightdash CI/CD loop did, which files and workflows belong to it, what can be deleted | 2026-10-09 |
 | [Legacy v1 pipeline (Open API + dbt snapshots + branch workflow)](architecture/legacy-v1-snapshot.md) | what the incremental_run_gha branch and the Serverless snapshot workflow did, why stg__ticktick__tasks unions snapshot rows, what can be deleted | 2026-10-09 |
-| [Current pipeline (websocket hint, Dagster and dlt into BigQuery)](architecture/pipeline-ingest.md) | how a TickTick edit reaches BigQuery today, which run kinds exist, the run lifecycle and what a cancelled, failed or killed run or a lost host does, the body-edit gate, the ingest tables and bookmarks, the compat views the v3 dbt models read, the failure alert, where state lives and how to rebuild it, known gaps | 2026-10-11 |
+| [Current pipeline (websocket hint, Dagster and dlt into BigQuery)](architecture/pipeline-ingest.md) | how a TickTick edit reaches BigQuery today, which run kinds exist, the run lifecycle and what a cancelled, failed or killed run or a lost host does, the body-edit gate, the ingest tables and bookmarks, the compat views the v3 dbt models read, the failure alert, retention and log rotation, where state lives and how to rebuild it, known gaps | 2026-10-11 |
 | [Legacy pipeline (v3 poller to Grafana)](architecture/pipeline-v3.md) | (legacy, superseded by pipeline-ingest.md) where TickTick data came from before the ingestion stack, how it reaches BigQuery, which dbt models feed the dashboard, where to restart the poller | 2026-10-09 |
 
 ## Traps
@@ -67,5 +67,6 @@ it with a new one rather than editing it.
 - [The poller stops on any HTTP rejection and waits for a human](adr/0005-poller-halts-on-any-rejection.md)
 - [DuckDB copies the SQLite replica to GCS as Parquet after each changed cycle](adr/0006-duckdb-copies-the-replica-to-gcs.md)
 - [The current extraction, storage and orchestration are legacy; redesign from the source up](adr/0007-current-extraction-storage-and-orchestration-are-legacy.md)
+- [Ingest on TickTick's sync hints with Dagster and dlt into BigQuery](adr/0008-ingest-on-sync-hints-with-dagster-and-dlt.md)
 
 <!-- END GENERATED INDEX -->

@@ -24,11 +24,16 @@ flowchart LR
   J -.->|run failed| N[ntfy_on_failure<br/>POST NTFY_URL]
 ```
 
-Editable diagrams on excalidraw.com: the architecture
-`https://excalidraw.com/#json=R5hl_wruHCekuCldgNm68,NkzpJ-Qnwep3xDlcBWTkvQ` and the
-run lifecycle with its failure and recovery paths
-`https://excalidraw.com/#json=fR-TItqRreAkeb0q9_aEJ,Krz31pI7IDpD7eb1aBMEjg`. Their
-sources are not in the repo; the mermaid blocks on this page say the same.
+Diagrams, kept in `docs/diagrams/` as `.excalidraw` files (open them at
+excalidraw.com, or with the VS Code Excalidraw extension), with share links:
+
+| diagram | file | link |
+|---|---|---|
+| architecture | `docs/diagrams/ingest-architecture.excalidraw` | `https://excalidraw.com/#json=R5hl_wruHCekuCldgNm68,NkzpJ-Qnwep3xDlcBWTkvQ` |
+| run lifecycle, failure and recovery | `docs/diagrams/ingest-lifecycle.excalidraw` | `https://excalidraw.com/#json=fR-TItqRreAkeb0q9_aEJ,Krz31pI7IDpD7eb1aBMEjg` |
+| which TickTick action fills which table | `docs/diagrams/ingest-tables.excalidraw` | `https://excalidraw.com/#json=anV90A6MC81durHKbx6oH,rcBdMZsebAro0mSnnjF0gQ` |
+
+A share link is a snapshot: after editing a file, re-share it and update the link.
 
 Line numbers below are a starting point, not an address. Jump roughly there and
 confirm by what the code says. If a range is off by more than a screen, fix it and
@@ -128,6 +133,20 @@ JSON; timestamps stay as TickTick's strings.
 | `tasks` | merge, upsert on `id`, hard delete | current state of every task seen in `update[]`, plus `raw_json` |
 | `closed_tasks` | merge, upsert on `id` | current state of every closed-history item, plus `raw_json` |
 | `lists`, `folders` | replace | every list or folder, whenever the delta carries them |
+
+Which TickTick action reaches which table (also the third diagram above). Every
+table is one asset of the Dagster multi-asset `ticktick_tables`; a run loads only
+the ones its delta touched, plus `raw_task_changes`, which carries the checkpoint.
+
+| action in TickTick | arrives as | tables written |
+|---|---|---|
+| add, edit, move or reschedule a task | `update[]` in the sync delta | `raw_task_changes`; `tasks` |
+| type in a task's description | `update[]`, about every 10 s while typing | `raw_task_changes` at once; `tasks` with the next real change or safety run (the gate) |
+| complete or won't-do a task, or a recurring occurrence | `update[]` with the new status; closed history paged back to the cursor | `raw_task_changes`, `tasks`; `raw_closed_tasks`, `closed_tasks` |
+| delete, restore, empty trash | delete lanes; a restore as `update[]` | `raw_task_changes`; the row leaves or returns in `tasks` |
+| create, rename, archive or delete a list | the whole list array | `raw_lists` (when its hash changed), `lists` replaced; no task change at all |
+| create, rename or delete a folder | the whole folder array | `raw_folders` (when its hash changed), `folders` replaced |
+| nothing (safety net, every 30 min) | an empty delta plus closed history | closed tables if anything new; pending description edits flushed into `tasks` |
 
 The raw tables are the history: they never lose a row. `tasks` is current state
 only. A task in any delete lane becomes a tombstone row that dlt's hard-delete
