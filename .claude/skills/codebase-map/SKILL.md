@@ -24,7 +24,8 @@ something is implemented.
 | [Grafana dashboards, exports and contracts](../../../docs/architecture/grafana-dashboards.md) | where the dashboard JSON comes from, why it contains ${DBT_BQ_PROJECT} placeholders, how dashboard regressions are tested | 2026-10-09 |
 | [Legacy Lightdash layer (dashboards as code, retired for Grafana)](../../../docs/architecture/legacy-lightdash.md) | what the Lightdash CI/CD loop did, which files and workflows belong to it, what can be deleted | 2026-10-09 |
 | [Legacy v1 pipeline (Open API + dbt snapshots + branch workflow)](../../../docs/architecture/legacy-v1-snapshot.md) | what the incremental_run_gha branch and the Serverless snapshot workflow did, why stg__ticktick__tasks unions snapshot rows, what can be deleted | 2026-10-09 |
-| [Current pipeline (v3 poller to Grafana)](../../../docs/architecture/pipeline-v3.md) | where TickTick data comes from today, how it reaches BigQuery, which dbt models feed the dashboard, where to restart the poller | 2026-10-09 |
+| [Current pipeline (websocket hint, Dagster and dlt into BigQuery)](../../../docs/architecture/pipeline-ingest.md) | how a TickTick edit reaches BigQuery today, which run kinds exist, the body-edit gate, the ingest tables and bookmarks, the compat views the v3 dbt models read, the failure alert, where state lives and how to rebuild it, known gaps | 2026-10-11 |
+| [Legacy pipeline (v3 poller to Grafana)](../../../docs/architecture/pipeline-v3.md) | (legacy, superseded by pipeline-ingest.md) where TickTick data came from before the ingestion stack, how it reaches BigQuery, which dbt models feed the dashboard, where to restart the poller | 2026-10-09 |
 
 ## Guides
 

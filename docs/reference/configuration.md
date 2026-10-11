@@ -1,7 +1,7 @@
 ---
 title: Configuration and environment variables
 summary: every deployment-specific value, where it is set (GitHub, poller host, local .env), and its default
-verified: 2026-10-09
+verified: 2026-10-11
 ---
 
 # Configuration and environment variables
@@ -9,8 +9,9 @@ verified: 2026-10-09
 This repository is public. Anything that identifies a deployment (GCP project,
 buckets, hosts, emails, tokens) comes from the environment. Locally, copy
 `.env.example` to `.env` (gitignored) and fill it in. In GitHub Actions, the same
-names are repository **secrets** or **variables**. On the poller host they go in
-`EL/ticktick/v3/docker/.env`.
+names are repository **secrets** or **variables**. On the ingestion host they go in
+`EL/ticktick/ingest/docker/.env` (template: `EL/ticktick/ingest/docker/.env.example`).
+The legacy v3 poller host reads `EL/ticktick/v3/docker/.env`.
 
 ## dbt (`profiles.yml`, `dbt_project.yml`)
 
@@ -23,6 +24,7 @@ names are repository **secrets** or **variables**. On the poller host they go in
 | `DBT_DEV_DATASET` | no | `ticktick_dbt_dev` | dataset for `dev` |
 | `DBT_PROD_DATASET` | no | `ticktick_dbt_prod` | dataset for `prod`; Grafana queries this one |
 | `DBT_CI_SCHEMA` | no | `ticktick_dbt_ci` | per-PR dataset in CI (`PR_<n>`) |
+| `TICKTICK_INGEST_DATASET` | no | `ticktick_ingest` | dataset of source `ticktick_ingest` (`models/staging/ticktick/source_ticktick_ingest.yml`), read by the `compat__ticktick_v3__*` views; must match the dataset the ingestion stack writes to |
 | `GCS_RAW_BUCKET` | yes | | bucket behind the external tables in `models/raw/external_table_stage/dump.yml` |
 | `GCS_KEY`, `GCS_SECRET` | legacy targets | | GCS HMAC pair for DuckDB targets (`load_raw`, `load_snapshot`, `dump_snapshot`) |
 | `GCS_REGION` | no | `auto` | region on those DuckDB S3 secrets |
@@ -33,7 +35,34 @@ names are repository **secrets** or **variables**. On the poller host they go in
 | `DBT_OWNER_EMAIL` | no | `owner@example.com` | owner on Lightdash exposures |
 | `LIGHTDASH_URL` | no | `https://lightdash.example.com` | base URL on Lightdash exposures; also used by the Lightdash workflows (legacy) |
 
+## Ingestion stack (`EL/ticktick/ingest/`)
+
+Read by the dlt pipeline, the websocket listener and the Dagster definitions. On the
+host they live in `EL/ticktick/ingest/docker/.env`; `docker-compose.yml` loads that file
+into both containers. Real values never go in the repository.
+
+| variable | required | default | used for |
+|---|---|---|---|
+| `TICKTICK_COOKIE_T` | yes | | value of the TickTick web session cookie `t`; sent by the fetcher and the listener. A 401 means it expired |
+| `TICKTICK_USER_AGENT` | yes | | browser user agent the cookie was issued to |
+| `TICKTICK_X_DEVICE` | yes | | the web app's `X-Device` JSON header |
+| `TICKTICK_TIMEZONE` | no | `Asia/Ho_Chi_Minh` | the `x-tz` request header |
+| `TICKTICK_INGEST_DATASET` | yes | | BigQuery dataset dlt loads into (prod and dev use different datasets) |
+| `DBT_BQ_PROJECT` | yes | | BigQuery project of the destination (shared with dbt) |
+| `DBT_BQ_LOCATION` | no | `US` | BigQuery location of the destination (shared with dbt) |
+| `GOOGLE_APPLICATION_CREDENTIALS` | yes | `/secrets/sa.json` in the containers | service-account key file; compose mounts `docker/secrets/` read-only at `/secrets` |
+| `NTFY_URL` | no | | full ntfy topic URL the failure sensor posts to; unset = the alert is only logged |
+| `INGEST_STATE_DIR` | no | `/state` in the containers (compose sets it); `~/.local/state/ticktick_ingest` for the CLI outside them | hint file, gate cache, dlt working dir; the Dagster storage sits at `/state/dagster` |
+| `DAGSTER_WEB_BIND` | no | `127.0.0.1` | host address the Dagster UI is published on; set a private (VPN) address, never a public one |
+| `DAGSTER_WEB_PORT` | no | `3070` | host port of the Dagster UI |
+
+The credential is the bare `t` cookie, not a pasted cURL. There is no login and no
+password anywhere; when TickTick rejects the cookie, replace the value and recreate
+the containers.
+
 ## v3 poller (`EL/ticktick/v3/poller/config.py`)
+
+Legacy, superseded by the ingestion stack above.
 
 | variable | default | meaning |
 |---|---|---|

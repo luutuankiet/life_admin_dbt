@@ -23,8 +23,9 @@ One person runs it, and it is public on GitHub.
 ## Layout
 
 ```
-EL/ticktick/v3/poller/     - current extractor: FastAPI + SQLite replica, emits Parquet to GCS
-EL/ticktick/v3/docker/     - compose file and .env.example for the poller host
+EL/ticktick/ingest/        - current extractor: websocket listener + Dagster + dlt into BigQuery
+EL/ticktick/v3/poller/     - legacy extractor: FastAPI + SQLite replica, emits Parquet to GCS
+EL/ticktick/v3/docker/     - legacy compose file and .env.example for the poller host
 EL/ticktick/fetch_ticktick.py - legacy v1 Open API fetcher (frozen)
 EL/todoist/                - legacy Todoist fetcher (habits moved to TickTick)
 models/raw/                - external table definitions over GCS (dbt-external-tables)

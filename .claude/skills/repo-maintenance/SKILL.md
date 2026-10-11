@@ -36,7 +36,7 @@ Simply true, and expensive to re-derive.
 
 | page | summary | verified |
 |---|---|---|
-| [Configuration and environment variables](../../../docs/reference/configuration.md) | every deployment-specific value, where it is set (GitHub, poller host, local .env), and its default | 2026-10-09 |
+| [Configuration and environment variables](../../../docs/reference/configuration.md) | every deployment-specific value, where it is set (GitHub, poller host, local .env), and its default | 2026-10-11 |
 | [TickTick v3 sync payload semantics](../../../docs/reference/ticktick-v3-sync-payload.md) | what /api/v3/batch/check/{checkpoint} returns for each user action, and how the poller merges it | 2026-10-09 |
 | [v1 (Open API) vs v3 (sync endpoint) task schema](../../../docs/reference/v1-vs-v3-schema.md) | column-level differences between the two TickTick sources and their dbt chains | 2026-10-09 |
 

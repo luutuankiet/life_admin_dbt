@@ -1,10 +1,14 @@
 ---
-title: Current pipeline (v3 poller to Grafana)
-covers: where TickTick data comes from today, how it reaches BigQuery, which dbt models feed the dashboard, where to restart the poller
+title: Legacy pipeline (v3 poller to Grafana)
+covers: (legacy, superseded by pipeline-ingest.md) where TickTick data came from before the ingestion stack, how it reaches BigQuery, which dbt models feed the dashboard, where to restart the poller
 verified: 2026-10-09
 ---
 
 # Current pipeline: v3 poller to Grafana
+
+> **Legacy.** The v3 dbt models no longer read the poller's GCS Parquet tables. The
+> current pipeline is described in `docs/architecture/pipeline-ingest.md`. The body
+> below is kept as written for whoever still runs or retires the poller.
 
 ```mermaid
 flowchart LR

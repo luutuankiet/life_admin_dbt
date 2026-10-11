@@ -29,6 +29,9 @@ On the host, as a user that can run Docker:
    docker compose -p ticktick-ingest up -d --build
    ```
 
+   Wait until the first sensor-launched run (Runs page) has finished before step 4:
+   the listener writes a hint as soon as it connects, that hint starts a sync, and the
+   sync and `cli backfill` share the same dlt working dir.
 4. Load the full closed-task history once:
 
    ```sh
