@@ -224,8 +224,11 @@ def purge_runs(context: dg.OpExecutionContext) -> int:
     )
     n = 0
     for record in records:
-        if record.dagster_run.run_id != context.run_id:
-            context.instance.delete_run(record.dagster_run.run_id)
+        run_id = record.dagster_run.run_id
+        if run_id != context.run_id:
+            context.instance.delete_run(run_id)
+            # delete_run leaves the run's stdout/stderr files behind.
+            context.instance.compute_log_manager.delete_logs(prefix=[run_id])
             n += 1
     context.log.info("deleted %d runs older than %s", n, cutoff.isoformat())
     return n

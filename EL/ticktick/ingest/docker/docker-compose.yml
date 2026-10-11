@@ -18,6 +18,12 @@ x-common: &common
     - state:/state
     - ./secrets:/secrets:ro
   restart: unless-stopped
+  # Docker keeps container stdout forever by default; cap it at 3 x 10 MB per container.
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "3"
 
 services:
   dagster:
