@@ -30,9 +30,18 @@ The Todoist data ingestion process involves a few steps:
 
 ### TickTick
 
-Data is ingested into the data warehouse using a custom Python script that makes HTTP requests directly to the TickTick Open API. The script can be found here: [ticktick_fetcher.py](https://github.com/luutuankiet/life_admin_dbt/blob/incremental_run_gha/ticktick_fetcher.py).
+A TickTick edit reaches BigQuery in about a minute. Nothing polls on a timer:
 
-The script loads the raw data into the data warehouse, which then serves as the source for dbt transformations.
+1. **Listener.** A small container holds the same websocket TickTick's web app keeps open. TickTick pushes a `needSync` frame on every change; the listener only records the time of it.
+2. **Dagster.** A sensor sees the new hint and launches one sync run, at most one a minute. A schedule runs the same job every 30 minutes as a safety net, and a failed run sends a phone alert through ntfy.
+3. **dlt.** The run fetches the change feed since the last checkpoint and writes everything in one load: append-only raw history, current-state tables, and the new checkpoint itself. A load either lands with its checkpoint or not at all.
+4. **dbt and Grafana.** Views over the current-state tables feed the existing dbt models and the Grafana planning dashboard.
+
+Both containers run from one compose file on a small VPS, reached over a private VPN. The warehouse is the only state that matters: the stack can be rebuilt on any machine from its `.env` and resumes where the last finished load left off.
+
+Diagrams (excalidraw.com): architecture `https://excalidraw.com/#json=R5hl_wruHCekuCldgNm68,NkzpJ-Qnwep3xDlcBWTkvQ`, run lifecycle and recovery `https://excalidraw.com/#json=fR-TItqRreAkeb0q9_aEJ,Krz31pI7IDpD7eb1aBMEjg`.
+
+How each part works, what happens when a run is cancelled or fails, and how a moved or rebooted host recovers: [docs/architecture/pipeline-ingest.md](docs/architecture/pipeline-ingest.md). Deploying and operating it: [EL/ticktick/ingest/README.md](EL/ticktick/ingest/README.md). Every deployment value is an environment variable, listed in [docs/reference/configuration.md](docs/reference/configuration.md).
 
 ## Data Transformation with dbt Snapshots
 

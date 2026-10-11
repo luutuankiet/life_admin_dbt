@@ -1,6 +1,6 @@
 ---
 title: Current pipeline (websocket hint, Dagster and dlt into BigQuery)
-covers: how a TickTick edit reaches BigQuery today, which run kinds exist, the body-edit gate, the ingest tables and bookmarks, the compat views the v3 dbt models read, the failure alert, where state lives and how to rebuild it, known gaps
+covers: how a TickTick edit reaches BigQuery today, which run kinds exist, the run lifecycle and what a cancelled, failed or killed run or a lost host does, the body-edit gate, the ingest tables and bookmarks, the compat views the v3 dbt models read, the failure alert, retention and log rotation, where state lives and how to rebuild it, known gaps
 verified: 2026-10-11
 ---
 
@@ -24,6 +24,12 @@ flowchart LR
   J -.->|run failed| N[ntfy_on_failure<br/>POST NTFY_URL]
 ```
 
+Editable diagrams on excalidraw.com: the architecture
+`https://excalidraw.com/#json=R5hl_wruHCekuCldgNm68,NkzpJ-Qnwep3xDlcBWTkvQ` and the
+run lifecycle with its failure and recovery paths
+`https://excalidraw.com/#json=fR-TItqRreAkeb0q9_aEJ,Krz31pI7IDpD7eb1aBMEjg`. Their
+sources are not in the repo; the mermaid blocks on this page say the same.
+
 Line numbers below are a starting point, not an address. Jump roughly there and
 confirm by what the code says. If a range is off by more than a screen, fix it and
 re-date this page. Deploy and operating steps are in `EL/ticktick/ingest/README.md`;
@@ -41,7 +47,7 @@ variables in `docs/reference/configuration.md`.
 | `src/ticktick_ingest/defs.py` | ~56-82 | the multi-asset (one asset per table) and job `ticktick_sync` |
 | `src/ticktick_ingest/defs.py` | ~106-150 | `hint_decision`, `hint_sensor`, `safety_net` schedule |
 | `src/ticktick_ingest/defs.py` | ~167-213 | failure message and `ntfy_on_failure` sensor |
-| `src/ticktick_ingest/defs.py` | ~219-244 | `purge_old_runs_daily`: deletes Dagster runs older than 7 days |
+| `src/ticktick_ingest/defs.py` | ~219-247 | `purge_old_runs_daily`: deletes Dagster runs and their compute logs older than 7 days |
 | `src/ticktick_ingest/pipeline.py` | ~124-185 | `plan_tasks`: gate decisions, pending flush, tombstones |
 | `src/ticktick_ingest/pipeline.py` | ~195-308 | `run_sync` and `_run` (the run logic), `_add_closed` (closed history) |
 | `src/ticktick_ingest/source.py` | ~84-200 | the eight dlt resources: dispositions, keys, schema contracts, bookmarks |
@@ -183,6 +189,57 @@ Nothing retries a 401 and there is no scripted login. The listener exits with co
 the containers are recreated (`EL/ticktick/ingest/README.md`, "Alerts"). Network
 errors are retried twice inside a run and are never reported as a cookie problem.
 
+## Run lifecycle, and what happens when it goes wrong
+
+```mermaid
+flowchart TD
+  T[run starts: hint or safety net] --> R[sync_destination: restore bookmarks<br/>from loads that finished; drop half-loads]
+  R --> F[fetch delta since checkpoint]
+  F -->|401| C[run fails, ntfy alert<br/>no retry; repeats every 30 min]
+  F -->|empty, kind=hint| E[end: nothing loaded]
+  F -->|changes| G[gate holds body-only edits as pending]
+  G --> L[one dlt load: raw rows, current state, new bookmark]
+  L -->|finished| OK[bookmark advanced; views show it]
+  L -->|cancelled, crashed, errored| X[bookmark not advanced, ntfy alert<br/>next run re-fetches the same delta]
+```
+
+**One load.** Every run, whatever started it, does the same four things: restore
+the bookmarks, fetch the delta since the checkpoint, sort it through the gate, and
+hand everything to a single `pipeline.run`. dlt writes the bookmark into its state
+table in that same load, and **`sync_destination()` restores state only from loads
+that finished**: it joins the state table to `_dlt_loads`, which gets its row when a
+load completes. A load that stopped half way therefore never moves the bookmark.
+
+| what happens | what you see | what the next run does |
+|---|---|---|
+| a run is cancelled in the Dagster UI | run `CANCELED` | aborts the leftover load package and re-fetches the same delta |
+| a run errors (network after two retries, type drift in a typed table, BigQuery error) | run `FAILURE`, ntfy alert | same: the bookmark did not move, so nothing is skipped |
+| the container is killed mid-run | run stuck `STARTED`, failed after 30 min, ntfy alert | same; queued runs start once it is failed |
+| TickTick answers 401 | `cookie rejected: paste a fresh t`, listener exits 3 | fails again every 30 min until a new cookie is in `.env` |
+
+A re-fetched delta is safe to load twice. Current-state tables upsert on `id`, lists
+and folders are replaced, and the compat views keep one row per id. Only the raw
+tables can hold a repeated entry if part of a failed load landed before it
+stopped; each copy carries its own `_run_id`.
+
+**A host that goes away.** Power cut, lost VPS or a move to another machine all
+recover the same way, because nothing on the host is the only copy of anything (next
+section). Start the stack from the same compose file with the same `.env` and the
+same service-account key. The listener connects and writes a hint, and the first
+run restores the checkpoint and completion cursor from BigQuery, fetches everything
+changed since the last finished load, and pages closed tasks back to the cursor.
+What is lost: Dagster run history, and body-only edits that were pending in the gate
+(already in `raw_task_changes`; the task's next edit or a `safety` run re-captures it).
+
+- **Never run the old and the new stack at once.** Both derive the same `X-Device`
+  id from the compose project name, and TickTick pushes to one socket per id, so one
+  of them goes deaf without an error. Stop the old one, or start the new one with
+  another `-p` name.
+- **A checkpoint days old has not been replayed in testing.** The longest gap tested
+  is the 30-minute safety net. If the first run after a long outage fails or looks
+  incomplete, `cli reset` fetches from checkpoint 0 (all open tasks) and merges
+  every task; closed history still pages back to the stored cursor.
+
 ## Where state lives, and rebuilding it
 
 | state | where | if lost |
@@ -206,6 +263,23 @@ firewall. Binding a Tailscale address instead adds a boot-order dependency:
 container stays down after a reboot without alerting. A systemd drop-in template for
 that lives in `EL/ticktick/ingest/docker/host/`; see
 `docs/traps/INGEST_STACK_ABSENT_AFTER_HOST_REBOOT.md`.
+
+## Retention: what is purged, and when
+
+None of this touches BigQuery. The raw tables keep every row for good; retention
+only bounds what the stack keeps on its host.
+
+| what | where | kept for | done by |
+|---|---|---|---|
+| Dagster runs and their event logs | SQLite under `/state/dagster` | 7 days | `purge_old_runs_daily` (03:17 UTC daily, `defs.py`), up to 1,000 runs a day; OSS Dagster has no run retention setting |
+| run stdout/stderr (compute logs) | `$DAGSTER_HOME/storage/<run id>/` inside the `dagster` container | 7 days, or until the container is recreated | the same purge job: `delete_run` alone leaves these files, so it also calls `compute_log_manager.delete_logs` |
+| sensor and schedule ticks | SQLite under `/state/dagster` | skipped 1 day, others 7 days | the `retention` block in `docker/dagster.yaml`, applied by the daemon |
+| container stdout (what `docker logs` shows) | Docker's `json-file` log on the host | 3 files of 10 MB per container | `logging` in `docker-compose.yml`; without it Docker never rotates |
+| dlt load packages | `$INGEST_STATE_DIR/dlt` | until the load finishes | dlt deletes completed packages; a failed run's leftovers are aborted by the next run |
+
+The SQLite files do not shrink after a purge; the freed pages are reused, so the size
+levels off at about a week of runs. Run history is the only thing purging can lose,
+and nothing in the pipeline reads it.
 
 ## Known gaps
 

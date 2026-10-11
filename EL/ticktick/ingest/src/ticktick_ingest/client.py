@@ -171,8 +171,8 @@ class TickTickClient:
 
     def completed_page(self, to: str = "", limit: int = 1000) -> list[dict[str, Any]]:
         """One page of closed tasks (status 2 and -1), newest first, completed at or
-        before ``to`` (``yyyy-MM-dd HH:mm:ss``; empty = now). The server caps a page
-        at 100 rows whatever ``limit`` says."""
+        before ``to`` (``yyyy-MM-dd HH:mm:ss``; empty = now). Pages hold up to
+        ``limit`` rows; the server accepts at most 1000."""
         params = {"from": "", "to": to, "limit": limit}
         return self._get("/api/v2/project/all/completedInAll/", params=params)
 
