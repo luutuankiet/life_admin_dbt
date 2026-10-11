@@ -14,6 +14,21 @@ local_artifact_storage:
 run_queue:
   max_concurrent_runs: 1
 
+# Fail runs whose worker is gone, so one cannot hold the single run slot forever.
+# A container stop mid-run leaves the run STARTED with no process behind it. The
+# default run launcher (what `dagster dev` uses) cannot check worker health, so for a
+# STARTED run the monitor only enforces max_runtime_seconds: past it, the run is
+# marked failed (the failure sensor alerts) and the queue moves on. Normal runs take
+# about a minute; 30 min leaves room for a cold backfill. The launcher cannot resume
+# runs either, so max_resume_run_attempts must stay 0.
+run_monitoring:
+  enabled: true
+  start_timeout_seconds: 300
+  cancel_timeout_seconds: 180
+  max_runtime_seconds: 1800
+  max_resume_run_attempts: 0
+  poll_interval_seconds: 60
+
 # Tick history. Run history (7 days) is purged by the purge_old_runs_daily schedule,
 # since OSS Dagster has no run retention setting.
 retention:
