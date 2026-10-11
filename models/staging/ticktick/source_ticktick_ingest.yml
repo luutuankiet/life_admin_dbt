@@ -1,0 +1,17 @@
+version: 2
+sources:
+  - name: ticktick_ingest
+    schema: "{{ env_var('TICKTICK_INGEST_DATASET', 'ticktick_ingest') }}"
+    description: >
+      Current-state tables written by the dlt ingestion pipeline (EL/ticktick/ingest).
+      Every table keeps the original TickTick object in raw_json and the envelope
+      column _extracted_at. Read through the compat__ticktick_v3__* views.
+    tables:
+      - name: tasks
+        description: Current state of every task seen in the sync feed; merged on id, hard-deleted from the delete lanes
+      - name: closed_tasks
+        description: Current state of every closed task returned by the completed-history endpoint; merged on id
+      - name: lists
+        description: TickTick lists (projectProfiles), replaced whole when the sync feed carries them
+      - name: folders
+        description: TickTick folders (projectGroups), replaced whole when the sync feed carries them

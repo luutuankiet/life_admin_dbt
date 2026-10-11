@@ -1,7 +1,7 @@
 WITH source AS (
     SELECT
         *
-    FROM {{ source('ticktick_raw', 'tasks_v3') }}
+    FROM {{ ref('compat__ticktick_v3__tasks') }}
 ),
 
 renamed_and_typed AS (

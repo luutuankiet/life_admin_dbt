@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: compat__ticktick_v3__tasks
+    description: >
+      dlt tasks UNION ALL closed_tasks, one row per task id (newest modifiedTime wins,
+      ties go to the sync-feed table), shaped exactly like the legacy tasks_v3 external table.
+    config:
+      materialized: view
+    columns:
+      - name: task_id
+        data_tests:
+          - unique
+          - not_null
+
+  - name: compat__ticktick_v3__projects
+    description: dlt lists shaped exactly like the legacy projects_v3 external table.
+    config:
+      materialized: view
+    columns:
+      - name: project_id
+        data_tests:
+          - unique
+          - not_null
+
+  - name: compat__ticktick_v3__groups
+    description: dlt folders shaped exactly like the legacy groups_v3 external table.
+    config:
+      materialized: view
+    columns:
+      - name: group_id
+        data_tests:
+          - unique
+          - not_null
