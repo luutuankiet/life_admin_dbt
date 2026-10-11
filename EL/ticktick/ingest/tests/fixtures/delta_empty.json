@@ -1,0 +1,20 @@
+{
+ "checkPoint": 1791561968860,
+ "syncTaskBean": {
+  "update": [],
+  "tagUpdate": [],
+  "delete": [],
+  "add": [],
+  "empty": true
+ },
+ "projectProfiles": null,
+ "projectGroups": null,
+ "filters": null,
+ "tags": null,
+ "syncTaskOrderBean": null,
+ "syncOrderBean": null,
+ "syncOrderBeanV3": null,
+ "inboxId": null,
+ "checks": null,
+ "remindChanges": null
+}

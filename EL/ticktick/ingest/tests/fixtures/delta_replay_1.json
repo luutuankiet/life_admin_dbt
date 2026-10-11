@@ -1,0 +1,32 @@
+{
+ "checkPoint": 1791563470048,
+ "syncTaskBean": {
+  "update": [],
+  "tagUpdate": [],
+  "delete": [
+   {
+    "taskId": "6ac9158adb2144149a14e5e3",
+    "projectId": "6ac91589e15fe56a167f5107"
+   },
+   {
+    "taskId": "6ac9158ac4028cdf6431afd7",
+    "projectId": "6ac91589e15fe56a167f5107"
+   }
+  ],
+  "add": [],
+  "deletedInTrash": [
+   {
+    "taskId": "6ac9158adb2144149a14e5e3",
+    "projectId": "6ac91589e15fe56a167f5107"
+   },
+   {
+    "taskId": "6ac9158ac4028cdf6431afd7",
+    "projectId": "6ac91589e15fe56a167f5107"
+   }
+  ],
+  "empty": false
+ },
+ "projectProfiles": null,
+ "projectGroups": null,
+ "inboxId": null
+}

@@ -1,0 +1,57 @@
+[
+ {
+  "id": "6ac915bd413890781f5da4ba",
+  "title": "zz-sandbox-capture-02b A recurring daily",
+  "projectId": "6ac91589e15fe56a167f5107",
+  "status": 2,
+  "completedTime": "2026-10-09T16:26:37.000+0000",
+  "deleted": 0,
+  "repeatTaskId": "6ac9158ac4028cdf6431afd7",
+  "modifiedTime": "2026-10-09T16:25:46.826+0000"
+ },
+ {
+  "id": "6ac9158aa09f0c0ad318a6b3",
+  "title": "zz-sandbox-capture-02b B completed",
+  "projectId": "6ac91589e3c3dc851fb83f7a",
+  "status": 2,
+  "completedTime": "2026-10-09T16:25:58.615+0000",
+  "deleted": 0,
+  "modifiedTime": "2026-10-09T16:25:58.765+0000"
+ },
+ {
+  "id": "6ac9158ae334e9657803c532",
+  "title": "zz-sandbox-capture-02b D completed",
+  "projectId": "6ac91589d035f8e7d70c193d",
+  "status": 2,
+  "completedTime": "2026-10-09T16:25:58.615+0000",
+  "deleted": 0,
+  "modifiedTime": "2026-10-09T16:25:58.782+0000"
+ },
+ {
+  "id": "6ac9158a643822de9496ab7a",
+  "title": "zz-sandbox-capture-02b C completed",
+  "projectId": "6ac915897756ece7d2588ca5",
+  "status": 2,
+  "completedTime": "2026-10-09T16:25:58.615+0000",
+  "deleted": 0,
+  "modifiedTime": "2026-10-09T16:25:58.773+0000"
+ },
+ {
+  "id": "6ac9158ad15ed517e5e826b2",
+  "title": "zz-sandbox-capture-02b A completed",
+  "projectId": "6ac91589e15fe56a167f5107",
+  "status": 2,
+  "completedTime": "2026-10-09T16:25:58.615+0000",
+  "deleted": 0,
+  "modifiedTime": "2026-10-09T16:25:58.742+0000"
+ },
+ {
+  "id": "6ac9158adb2144149a14e5e3",
+  "title": "zz-sandbox-capture-02b A wontdo",
+  "projectId": "6ac91589e15fe56a167f5107",
+  "status": -1,
+  "completedTime": "2026-10-09T16:25:58.615+0000",
+  "deleted": 0,
+  "modifiedTime": "2026-10-09T16:25:58.756+0000"
+ }
+]

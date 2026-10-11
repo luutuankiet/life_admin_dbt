@@ -1,0 +1,59 @@
+{
+ "checkPoint": 1791563470056,
+ "syncTaskBean": {
+  "update": [
+   {
+    "id": "6ac9158ad15ed517e5e826b2",
+    "projectId": "6ac91589e15fe56a167f5107",
+    "sortOrder": -2199023255552,
+    "title": "zz-sandbox-capture-02b A completed",
+    "timeZone": "Asia/Ho_Chi_Minh",
+    "isFloating": false,
+    "isAllDay": true,
+    "reminder": "",
+    "reminders": [],
+    "completedTime": "2026-10-09T16:25:58.615+0000",
+    "completedUserId": 1,
+    "priority": 0,
+    "status": 2,
+    "items": [],
+    "modifiedTime": "2026-10-09T16:33:05.368+0000",
+    "etag": "gc81ujbm",
+    "deleted": 0,
+    "createdTime": "2026-10-09T16:25:46.824+0000",
+    "creator": 1,
+    "kind": "TEXT",
+    "deletedBy": 1,
+    "deletedTime": 1791563356767
+   }
+  ],
+  "tagUpdate": [],
+  "delete": [
+   {
+    "taskId": "6ac9158add914fa42fcaddca",
+    "projectId": "6ac91589e15fe56a167f5107"
+   },
+   {
+    "taskId": "6ac9158ac4028cdf6431afd7",
+    "projectId": "6ac91589e15fe56a167f5107"
+   }
+  ],
+  "add": [],
+  "deletedInTrash": [
+   {
+    "taskId": "6ac9158ac4028cdf6431afd7",
+    "projectId": "6ac91589e15fe56a167f5107"
+   }
+  ],
+  "deletedForever": [
+   {
+    "taskId": "6ac9158add914fa42fcaddca",
+    "projectId": "6ac91589e15fe56a167f5107"
+   }
+  ],
+  "empty": false
+ },
+ "projectProfiles": null,
+ "projectGroups": null,
+ "inboxId": null
+}

@@ -1,0 +1,130 @@
+{
+ "checkPoint": 1791562241035,
+ "syncTaskBean": {
+  "update": [
+   {
+    "id": "6ac90f6714765b0354155912",
+    "projectId": "6ac9107ed594069021202e62",
+    "sortOrder": 0,
+    "title": "zz cap T5 for move",
+    "startDate": "2026-10-09T17:00:00.000+0000",
+    "dueDate": "2026-10-09T17:00:00.000+0000",
+    "timeZone": "Asia/Ho_Chi_Minh",
+    "isFloating": false,
+    "isAllDay": true,
+    "reminders": [],
+    "priority": 0,
+    "status": 0,
+    "items": [],
+    "modifiedTime": "2026-10-09T16:06:13.859+0000",
+    "etag": "gmn8sir3",
+    "deleted": 0,
+    "createdTime": "2026-10-09T15:59:35.152+0000",
+    "creator": 1,
+    "tags": [],
+    "kind": "TEXT"
+   }
+  ],
+  "tagUpdate": [],
+  "delete": [],
+  "add": [],
+  "empty": false
+ },
+ "projectProfiles": [
+  {
+   "id": "6ac9107ed594069021202e62",
+   "name": "zz-sandbox-capture-02-P2-renamed",
+   "isOwner": true,
+   "color": null,
+   "sortOrder": 1,
+   "sortOption": {
+    "groupBy": "sortOrder",
+    "orderBy": "sortOrder",
+    "order": null
+   },
+   "sortType": "sortOrder",
+   "userCount": 1,
+   "etag": "jd9tmxu2",
+   "modifiedTime": "2026-10-09T16:07:03.411+0000",
+   "inAll": true,
+   "showType": null,
+   "muted": false,
+   "reminderType": null,
+   "closed": null,
+   "transferred": null,
+   "groupId": null,
+   "viewMode": "list",
+   "notificationOptions": [],
+   "teamId": null,
+   "permission": null,
+   "kind": "TASK",
+   "timeline": {
+    "range": null,
+    "sortType": "sortOrder",
+    "sortOption": {
+     "groupBy": "sortOrder",
+     "orderBy": "sortOrder",
+     "order": null
+    }
+   },
+   "needAudit": true,
+   "barcodeNeedAudit": false,
+   "openToTeam": null,
+   "teamMemberPermission": null,
+   "source": 1,
+   "background": null
+  },
+  {
+   "id": "6ac9107edcfe7b23833cb493",
+   "name": "zz-sandbox-capture-02-P3",
+   "isOwner": true,
+   "color": null,
+   "sortOrder": 2,
+   "sortOption": {
+    "groupBy": "sortOrder",
+    "orderBy": "sortOrder",
+    "order": null
+   },
+   "sortType": "sortOrder",
+   "userCount": 1,
+   "etag": "864i8lfl",
+   "modifiedTime": "2026-10-09T16:09:56.755+0000",
+   "inAll": true,
+   "showType": null,
+   "muted": false,
+   "reminderType": null,
+   "closed": null,
+   "transferred": null,
+   "groupId": null,
+   "viewMode": "list",
+   "notificationOptions": [],
+   "teamId": null,
+   "permission": null,
+   "kind": "TASK",
+   "timeline": {
+    "range": null,
+    "sortType": "sortOrder",
+    "sortOption": {
+     "groupBy": "sortOrder",
+     "orderBy": "sortOrder",
+     "order": null
+    }
+   },
+   "needAudit": true,
+   "barcodeNeedAudit": false,
+   "openToTeam": null,
+   "teamMemberPermission": null,
+   "source": 1,
+   "background": null
+  }
+ ],
+ "projectGroups": [
+  {
+   "id": "fixture-group-1",
+   "name": "Fixture folder",
+   "etag": "x",
+   "sortOrder": 0
+  }
+ ],
+ "inboxId": null
+}
