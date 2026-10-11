@@ -18,6 +18,12 @@ A 401 on register means the ``t`` cookie is dead: log "cookie rejected" and exit
 non-zero. It is never retried and there is no login. Anything else (drop, network
 error, non-401 register failure) reconnects with exponential backoff.
 
+Idle reconnect: the server sends nothing between changes (no reply to ``hello``, no
+heartbeat), so a socket whose registration was taken over looks exactly like a quiet
+account. When no frame has arrived for ``INGEST_LISTENER_IDLE_MINUTES`` (default 60,
+0 = never), the listener logs one line and reconnects at once. Like any reconnect,
+that writes one hint, so a quiet account costs one empty fetch per idle period.
+
 Run: ``python -m ticktick_ingest.listener``.
 """
 
@@ -45,8 +51,26 @@ HELLO_INTERVAL_S = 540.0
 BACKOFF_START_S = 2.0
 BACKOFF_MAX_S = 300.0
 HINT_FILE = "last_hint"
+IDLE_MINUTES_DEFAULT = 60.0
 
 log = logging.getLogger("ticktick_ingest.listener")
+
+
+class ListenerIdle(Exception):
+    """No frame arrived within the idle timeout."""
+
+
+def idle_timeout_from_env(env: dict[str, str] | None = None) -> float | None:
+    """Seconds from ``INGEST_LISTENER_IDLE_MINUTES`` (default 60); ``None`` when 0."""
+    env = dict(os.environ) if env is None else env
+    raw = (env.get("INGEST_LISTENER_IDLE_MINUTES") or "").strip()
+    try:
+        minutes = float(raw) if raw else IDLE_MINUTES_DEFAULT
+    except ValueError as exc:
+        raise RuntimeError(f"INGEST_LISTENER_IDLE_MINUTES is not a number: {raw!r}") from exc
+    if minutes < 0:
+        raise RuntimeError("INGEST_LISTENER_IDLE_MINUTES must be 0 (off) or more")
+    return minutes * 60 if minutes > 0 else None
 
 
 class Socket(Protocol):
@@ -116,11 +140,22 @@ async def run_session(
     clock: Callable[[], int] = now_ms,
     hello_interval: float = HELLO_INTERVAL_S,
     on_hint: Callable[[int, str], None] | None = None,
+    idle_timeout: float | None = None,
 ) -> None:
     """Serve one connected socket until it closes (returns or raises).
 
     Writes a hint at once (a (re)connect is a hint), sends ``hello``, registers the
-    first frame as the push token, then writes a hint per ``needSync`` frame."""
+    first frame as the push token, then writes a hint per ``needSync`` frame. Raises
+    ``ListenerIdle`` when no frame arrives for ``idle_timeout`` seconds."""
+
+    async def recv() -> str | bytes:
+        if idle_timeout is None:
+            return await ws.recv()
+        try:
+            return await asyncio.wait_for(ws.recv(), idle_timeout)
+        except TimeoutError:
+            raise ListenerIdle(f"no frame for {idle_timeout / 60:g} min") from None
+
     write_hint(state_dir, clock())
     log.info("connected; hint written")
     await ws.send(HELLO)
@@ -132,7 +167,7 @@ async def run_session(
 
     pinger = asyncio.create_task(keep_alive())
     try:
-        token = await ws.recv()
+        token = await recv()
         if isinstance(token, bytes):
             token = token.decode("utf-8", "replace")
         await register(token)
@@ -140,7 +175,7 @@ async def run_session(
         while True:
             if pinger.done():  # keep-alive failed: surface its error
                 pinger.result()
-            frame = await ws.recv()
+            frame = await recv()
             if is_need_sync(frame):
                 ms = clock()
                 write_hint(state_dir, ms)
@@ -167,8 +202,11 @@ async def listen(
     sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
     max_sessions: int | None = None,
     on_hint: Callable[[int, str], None] | None = None,
+    idle_timeout: float | None = None,
 ) -> None:
     """Connect, serve, reconnect with backoff, forever. ``AuthRejected`` escapes.
+
+    An idle session (``ListenerIdle``) reconnects at once, without backoff.
 
     ``connect`` returns an async context manager yielding a socket; ``register``
     registers a push token. Both default to the live TickTick endpoints."""
@@ -186,9 +224,19 @@ async def listen(
         started = time.monotonic()
         try:
             async with connect() as ws:
-                await run_session(ws, state_dir=state_dir, register=register, on_hint=on_hint)
+                await run_session(
+                    ws,
+                    state_dir=state_dir,
+                    register=register,
+                    on_hint=on_hint,
+                    idle_timeout=idle_timeout,
+                )
         except AuthRejected:
             raise
+        except ListenerIdle as exc:
+            log.info("%s; reconnecting now", exc)
+            backoff = BACKOFF_START_S
+            continue
         except Exception as exc:  # drop, network error, non-401 register failure
             log.warning("socket session ended: %s: %s", type(exc).__name__, str(exc)[:200])
         # a session that lived a while resets the backoff
@@ -219,12 +267,15 @@ def main(argv: list[str] | None = None) -> int:
     state_dir = Path(os.environ.get("INGEST_STATE_DIR") or "/state")
     try:
         config = TickTickConfig.from_env()
+        idle_timeout = idle_timeout_from_env()
     except RuntimeError as exc:
         log.error("%s", exc)
         return 2
     log.info("listening on %s; hints -> %s", WS_URL, state_dir / HINT_FILE)
+    idle = f"{idle_timeout / 60:g} min" if idle_timeout else "off"
+    log.info("device id %s; idle reconnect %s", config.device_id, idle)
     try:
-        asyncio.run(listen(config, state_dir))
+        asyncio.run(listen(config, state_dir, idle_timeout=idle_timeout))
     except AuthRejected as exc:
         log.error("cookie rejected: paste a fresh t (%s)", exc)
         return 3

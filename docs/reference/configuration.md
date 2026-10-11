@@ -45,7 +45,10 @@ into both containers. Real values never go in the repository.
 |---|---|---|---|
 | `TICKTICK_COOKIE_T` | yes | | value of the TickTick web session cookie `t`; sent by the fetcher and the listener. A 401 means it expired |
 | `TICKTICK_USER_AGENT` | yes | | browser user agent the cookie was issued to |
-| `TICKTICK_X_DEVICE` | yes | | the web app's `X-Device` JSON header |
+| `TICKTICK_X_DEVICE` | yes | | the web app's `X-Device` JSON header; its `id` field is replaced (next two rows) |
+| `INGEST_STACK_NAME` | no | the compose project name (compose sets it) | seeds a device id unique to the stack, so two stacks never share TickTick's per-device push channel; unset outside compose = the header's own `id` is sent |
+| `TICKTICK_DEVICE_ID` | no | | explicit device id (24 lowercase hex); wins over `INGEST_STACK_NAME`. Only needed when stacks on different hosts share a project name |
+| `INGEST_LISTENER_IDLE_MINUTES` | no | `60` | the listener reconnects after this long without a frame; `0` = never. Each idle reconnect writes one hint, so a quiet account costs one empty fetch per period |
 | `TICKTICK_TIMEZONE` | no | `Asia/Ho_Chi_Minh` | the `x-tz` request header |
 | `TICKTICK_INGEST_DATASET` | yes | | BigQuery dataset dlt loads into (prod and dev use different datasets) |
 | `DBT_BQ_PROJECT` | yes | | BigQuery project of the destination (shared with dbt) |

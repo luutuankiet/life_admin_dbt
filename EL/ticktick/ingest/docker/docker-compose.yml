@@ -10,6 +10,9 @@ x-common: &common
   env_file: .env
   environment:
     INGEST_STATE_DIR: /state
+    # Seeds this stack's own TickTick device id (see TICKTICK_DEVICE_ID in .env.example),
+    # so a second stack (`-p <other name>`) never takes over this one's push channel.
+    INGEST_STACK_NAME: ${COMPOSE_PROJECT_NAME}
     GOOGLE_APPLICATION_CREDENTIALS: /secrets/sa.json
   volumes:
     - state:/state

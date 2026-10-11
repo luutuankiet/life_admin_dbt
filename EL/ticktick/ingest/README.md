@@ -56,6 +56,12 @@ session (`TICKTICK_COOKIE_T`, `TICKTICK_USER_AGENT`, `TICKTICK_X_DEVICE`,
 (`INGEST_STATE_DIR`) and the UI address (`DAGSTER_WEB_BIND`, `DAGSTER_WEB_PORT`). The
 repo is public: real values go only in the ignored `docker/.env`.
 
+Each stack sends its own TickTick device id, derived from the compose project name,
+because TickTick pushes change hints to one socket per device id: a second stack
+under the same id silences the first. A dev stack therefore needs only a different
+`-p` name. `TICKTICK_DEVICE_ID` overrides the derived id; `INGEST_LISTENER_IDLE_MINUTES`
+(default 60) sets how long the listener waits without a frame before it reconnects.
+
 ## CLI
 
 Run inside the Dagster container so it shares the state volume:

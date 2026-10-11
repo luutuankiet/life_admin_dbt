@@ -37,7 +37,7 @@ variables in `docs/reference/configuration.md`.
 
 | file | lines | what lives there |
 |---|---|---|
-| `src/ticktick_ingest/listener.py` | ~61-85, ~111-200 | atomic `last_hint` write and read; socket session, push-token register, `hello` keep-alive, reconnect backoff, exit 3 on 401 |
+| `src/ticktick_ingest/listener.py` | ~59-108, ~135-262 | atomic `last_hint` write and read; socket session, push-token register, `hello` keep-alive, idle reconnect, reconnect backoff, exit 3 on 401 |
 | `src/ticktick_ingest/defs.py` | ~56-82 | the multi-asset (one asset per table) and job `ticktick_sync` |
 | `src/ticktick_ingest/defs.py` | ~106-150 | `hint_decision`, `hint_sensor`, `safety_net` schedule |
 | `src/ticktick_ingest/defs.py` | ~167-213 | failure message and `ntfy_on_failure` sensor |
@@ -47,9 +47,10 @@ variables in `docs/reference/configuration.md`.
 | `src/ticktick_ingest/source.py` | ~84-200 | the eight dlt resources: dispositions, keys, schema contracts, bookmarks |
 | `src/ticktick_ingest/gate.py` | whole file | gate cache (SQLite) and its rebuild from BigQuery |
 | `src/ticktick_ingest/parse.py` | whole file | pure payload helpers; `BODY_FIELDS` and `gate_decision` |
-| `src/ticktick_ingest/client.py` | ~98-145 | the two HTTP calls, `AuthRejected` on 401, retries on network errors only |
+| `src/ticktick_ingest/client.py` | ~35-75 | `resolve_x_device`: the per-stack device id |
+| `src/ticktick_ingest/client.py` | ~121-197 | the two HTTP calls, `AuthRejected` on 401, retries on network errors only |
 | `src/ticktick_ingest/cli.py` | whole file | `sync`, `backfill`, `reset`, `rebuild-gate` |
-| `docker/dagster.yaml` | whole file | storage on the state volume, one run at a time, tick retention |
+| `docker/dagster.yaml` | whole file | storage on the state volume, one run at a time, run monitoring, tick retention |
 
 ## Trigger: listener, hint, sensor, safety net
 
@@ -59,12 +60,34 @@ way an open browser tab does. On every `needSync` frame, and on every (re)connec
 (frames sent while disconnected are lost), it writes the current time in ms to
 `$INGEST_STATE_DIR/last_hint`. It never fetches anything itself.
 
+**Pushes go to one socket per device id.** When a second listener registered under
+the same `X-Device` id, the first one stopped receiving frames without any error,
+while sockets under different ids each get every push. So the fetcher and the
+listener replace the header's `id` with one derived from the compose project name
+(`INGEST_STACK_NAME`, or `TICKTICK_DEVICE_ID` when set): a dev stack started with
+another `-p` name has its own channel. The listener logs the id it uses at start.
+
+**Silence is normal, so the listener reconnects when idle.** The server sends
+nothing between changes: no reply to `hello`, no heartbeat. A socket whose
+registration was taken over looks the same as a quiet account. After
+`INGEST_LISTENER_IDLE_MINUTES` (default 60) without a frame, the listener logs
+`no frame for 60 min; reconnecting now` and reconnects without backoff. The
+reconnect writes one hint, like any connect.
+
 `hint_sensor` ticks every 30 s. It launches `ticktick_sync` with `kind=hint` when
 `last_hint` is newer than the hint it last launched for **and** the last launch was
 over 60 s ago. A hint inside the gap is not lost: the cursor stays put and a later
 tick picks it up. `safety_net` runs the same job with `kind=safety` every 30 minutes
 whatever the hints say. `dagster.yaml` caps the instance at one run at a time, so two
 runs never race the same bookmark.
+
+**A run cut off by a container stop is failed after 30 minutes.** It stays STARTED
+with no process behind it and would hold the single run slot forever. `dagster dev`
+uses the default run launcher, which cannot check whether a worker is alive, so run
+monitoring in `dagster.yaml` catches it only by `max_runtime_seconds` (1800): past
+it, the run is marked failed, `ntfy_on_failure` alerts, and queued runs start.
+`enabled: true` alone would leave it STARTED. A real run that takes over 30 minutes
+is failed the same way.
 
 | kind | started by | what it does beyond fetching the delta |
 |---|---|---|

@@ -3,7 +3,12 @@ import json
 import httpx
 import pytest
 
-from ticktick_ingest.client import AuthRejected, TickTickClient, TickTickConfig
+from ticktick_ingest.client import (
+    AuthRejected,
+    TickTickClient,
+    TickTickConfig,
+    stack_device_id,
+)
 
 CONFIG = TickTickConfig(cookie_t="c" * 368, user_agent="UA/1.0", x_device='{"platform":"web"}')
 
@@ -156,3 +161,56 @@ def test_config_from_env_and_repr_hides_cookie():
     assert "secret" not in repr(cfg)
     with pytest.raises(RuntimeError, match="TICKTICK_COOKIE_T"):
         TickTickConfig.from_env({})
+
+
+# ---------------------------------------------------------------- device id
+
+DEVICE = '{"platform":"web","name":"browser","id":"aaaaaaaaaaaaaaaaaaaaaaaa","version":1}'
+
+
+def _env(**extra):
+    return {
+        "TICKTICK_COOKIE_T": "c",
+        "TICKTICK_USER_AGENT": "UA",
+        "TICKTICK_X_DEVICE": DEVICE,
+    } | extra
+
+
+def test_x_device_sent_as_given_without_override():
+    cfg = TickTickConfig.from_env(_env())
+    assert cfg.x_device == DEVICE
+    assert cfg.device_id == "aaaaaaaaaaaaaaaaaaaaaaaa"
+
+
+def test_stack_name_replaces_only_the_device_id():
+    cfg = TickTickConfig.from_env(_env(INGEST_STACK_NAME="ticktick-ingest"))
+    sent = json.loads(cfg.headers()["X-Device"])
+    assert sent["id"] == stack_device_id("ticktick-ingest")
+    assert sent["id"] != "aaaaaaaaaaaaaaaaaaaaaaaa"
+    rest = {k: v for k, v in sent.items() if k != "id"}
+    assert rest == {"platform": "web", "name": "browser", "version": 1}
+
+
+def test_each_stack_gets_its_own_stable_id():
+    prod, e2e = stack_device_id("ticktick-ingest"), stack_device_id("ticktick-ingest-e2e")
+    assert prod != e2e
+    assert prod == stack_device_id("ticktick-ingest")
+    assert len(prod) == 24 and int(prod, 16) >= 0
+
+
+def test_explicit_device_id_wins_over_stack_name():
+    cfg = TickTickConfig.from_env(
+        _env(INGEST_STACK_NAME="ticktick-ingest", TICKTICK_DEVICE_ID="0123456789ABCDEF01234567")
+    )
+    assert cfg.device_id == "0123456789abcdef01234567"
+
+
+@pytest.mark.parametrize("bad", ["123", "zz23456789abcdef01234567", "0123456789abcdef012345678"])
+def test_malformed_explicit_device_id_is_refused(bad):
+    with pytest.raises(RuntimeError, match="TICKTICK_DEVICE_ID"):
+        TickTickConfig.from_env(_env(TICKTICK_DEVICE_ID=bad))
+
+
+def test_override_on_non_json_x_device_is_refused():
+    with pytest.raises(RuntimeError, match="not JSON"):
+        TickTickConfig.from_env(_env(TICKTICK_X_DEVICE="nope", INGEST_STACK_NAME="s"))

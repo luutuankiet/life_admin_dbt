@@ -214,13 +214,118 @@ def test_register_push_posts_token_and_raises_on_401():
 
 
 def test_main_exits_non_zero_on_cookie_rejected(monkeypatch, tmp_path, caplog):
-    async def fake_listen(config, state_dir):
+    async def fake_listen(config, state_dir, **kwargs):
         raise AuthRejected("401 user_not_sign_on")
 
     monkeypatch.setattr(listener, "listen", fake_listen)
     monkeypatch.setenv("INGEST_STATE_DIR", str(tmp_path))
+    for name in ("INGEST_STACK_NAME", "TICKTICK_DEVICE_ID", "INGEST_LISTENER_IDLE_MINUTES"):
+        monkeypatch.delenv(name, raising=False)
     for name in ("TICKTICK_COOKIE_T", "TICKTICK_USER_AGENT", "TICKTICK_X_DEVICE"):
         monkeypatch.setenv(name, "x")
     with caplog.at_level("ERROR"):
         assert listener.main() != 0
     assert "cookie rejected" in caplog.text
+
+
+# ---------------------------------------------------------------- idle reconnect
+
+
+class QuietSocket(FakeSocket):
+    """Replays frames, then stays open and silent (no drop, no frame)."""
+
+    async def recv(self):
+        await asyncio.sleep(0)
+        if self.frames:
+            return self.frames.pop(0)
+        await asyncio.Event().wait()
+
+
+@pytest.mark.parametrize(
+    ("raw", "seconds"), [(None, 3600.0), ("", 3600.0), ("5", 300.0), ("0.5", 30.0), ("0", None)]
+)
+def test_idle_timeout_from_env(raw, seconds):
+    env = {} if raw is None else {"INGEST_LISTENER_IDLE_MINUTES": raw}
+    assert listener.idle_timeout_from_env(env) == seconds
+
+
+@pytest.mark.parametrize("raw", ["abc", "-1"])
+def test_idle_timeout_rejects_garbage(raw):
+    with pytest.raises(RuntimeError, match="INGEST_LISTENER_IDLE_MINUTES"):
+        listener.idle_timeout_from_env({"INGEST_LISTENER_IDLE_MINUTES": raw})
+
+
+def test_silent_session_raises_idle_after_one_hint(tmp_path):
+    hints = []
+    with pytest.raises(listener.ListenerIdle):
+        run(
+            listener.run_session(
+                QuietSocket([TOKEN]),
+                state_dir=tmp_path,
+                register=lambda t: _register_ok(t, []),
+                clock=Clock(),
+                on_hint=lambda ms, f: hints.append(ms),
+                idle_timeout=0.05,
+            )
+        )
+    assert listener.read_hint(tmp_path) == 1001  # the on-connect hint only
+    assert hints == []
+
+
+def test_frames_inside_the_timeout_keep_the_session(tmp_path):
+    class Trickle(QuietSocket):
+        async def recv(self):
+            if self.frames:
+                await asyncio.sleep(0.03)  # each gap is under the timeout, the sum is over
+            return await super().recv()
+
+    hints = []
+    with pytest.raises(listener.ListenerIdle):
+        run(
+            listener.run_session(
+                Trickle([TOKEN, NEED_SYNC, NEED_SYNC, NEED_SYNC]),
+                state_dir=tmp_path,
+                register=lambda t: _register_ok(t, []),
+                on_hint=lambda ms, f: hints.append(ms),
+                idle_timeout=0.06,
+            )
+        )
+    assert len(hints) == 3
+
+
+def test_idle_session_reconnects_at_once_without_backoff(tmp_path, caplog):
+    sleeps, seen = [], []
+
+    async def fake_sleep(s):
+        sleeps.append(s)
+
+    with caplog.at_level("INFO"):
+        run(
+            listener.listen(
+                CONFIG,
+                tmp_path,
+                connect=_connector([QuietSocket([TOKEN]), QuietSocket([TOKEN]), FakeSocket([])]),
+                register=lambda t: _register_ok(t, seen),
+                sleep=fake_sleep,
+                max_sessions=3,
+                idle_timeout=0.05,
+            )
+        )
+    assert seen == [TOKEN, TOKEN]  # re-registered on the fresh socket
+    assert sleeps == [2.0]  # only the third session's drop backs off
+    assert caplog.text.count("no frame for") == 2
+    assert caplog.text.count("reconnecting in") == 1
+
+
+def test_no_idle_timeout_waits_forever(tmp_path):
+    async def go():
+        task = asyncio.create_task(
+            listener.run_session(
+                QuietSocket([TOKEN]), state_dir=tmp_path, register=lambda t: _register_ok(t, [])
+            )
+        )
+        await asyncio.sleep(0.1)
+        assert not task.done()
+        task.cancel()
+
+    run(go())

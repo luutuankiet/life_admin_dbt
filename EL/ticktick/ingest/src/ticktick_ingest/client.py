@@ -11,7 +11,10 @@ read, timeout) are retried, at most ``retries`` times with exponential backoff.
 
 from __future__ import annotations
 
+import hashlib
+import json
 import os
+import re
 import time
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
@@ -22,10 +25,51 @@ import httpx
 from .parse import completed_cursor
 
 BASE_URL = "https://api.ticktick.com"
+DEVICE_ID_RE = re.compile(r"^[0-9a-f]{24}$")
 
 
 class AuthRejected(Exception):
     """TickTick answered 401: the ``t`` cookie is no longer accepted."""
+
+
+def stack_device_id(stack: str) -> str:
+    """A stable 24-hex device id for one deployment, derived from its stack name."""
+    return hashlib.sha256(f"ticktick-ingest:{stack}".encode()).hexdigest()[:24]
+
+
+def with_device_id(x_device: str, device_id: str) -> str:
+    """``x_device`` (the X-Device JSON header) with only its ``id`` field replaced."""
+    try:
+        device = json.loads(x_device)
+    except ValueError as exc:
+        raise RuntimeError("TICKTICK_X_DEVICE is not JSON; cannot set its id") from exc
+    if not isinstance(device, dict):
+        raise RuntimeError("TICKTICK_X_DEVICE is not a JSON object; cannot set its id")
+    device["id"] = device_id
+    return json.dumps(device, separators=(",", ":"))
+
+
+def resolve_x_device(env: dict[str, str]) -> str:
+    """The X-Device header this process sends.
+
+    Push registrations appear to be keyed by device id: when a second socket
+    registered under the same id, the first one went silent without any error (two
+    sockets under different ids both receive pushes). A stack sharing its id with
+    another stack, or with a browser profile, can lose its push channel. So the
+    ``id`` field is replaced, by ``TICKTICK_DEVICE_ID`` when set,
+    else by an id derived from ``INGEST_STACK_NAME`` (compose passes its project name).
+    With neither set, the header is sent as given.
+    """
+    x_device = env["TICKTICK_X_DEVICE"]
+    explicit = (env.get("TICKTICK_DEVICE_ID") or "").strip().lower()
+    stack = (env.get("INGEST_STACK_NAME") or "").strip()
+    if explicit:
+        if not DEVICE_ID_RE.match(explicit):
+            raise RuntimeError("TICKTICK_DEVICE_ID must be 24 lowercase hex characters")
+        return with_device_id(x_device, explicit)
+    if stack:
+        return with_device_id(x_device, stack_device_id(stack))
+    return x_device
 
 
 @dataclass(frozen=True)
@@ -47,12 +91,21 @@ class TickTickConfig:
         return cls(
             cookie_t=env["TICKTICK_COOKIE_T"],
             user_agent=env["TICKTICK_USER_AGENT"],
-            x_device=env["TICKTICK_X_DEVICE"],
+            x_device=resolve_x_device(env),
             timezone=env.get("TICKTICK_TIMEZONE") or "Asia/Ho_Chi_Minh",
         )
 
     def __repr__(self) -> str:  # never leak the cookie into logs
         return f"TickTickConfig(cookie_t=<{len(self.cookie_t)} chars>, base_url={self.base_url!r})"
+
+    @property
+    def device_id(self) -> str | None:
+        """The ``id`` field of the X-Device header, if it has one."""
+        try:
+            device = json.loads(self.x_device)
+        except ValueError:
+            return None
+        return device.get("id") if isinstance(device, dict) else None
 
     def headers(self) -> dict[str, str]:
         return {
