@@ -4,7 +4,7 @@ with expected as (
         project_id,
         count(distinct task_id) as expected_open_task_count
     from {{ ref('fct_tasks_v3_semantic_base') }}
-    where status != 2
+    where status = 0
       and due_date_day is not null
     group by 1, 2
 ),

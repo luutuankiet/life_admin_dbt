@@ -164,7 +164,7 @@ models:
           tags: []
         data_type: DATETIME
       - name: status
-        description: 'Task completion status. Value : Normal: 0, Completed: 2'
+        description: 'Task completion status. Value : Normal: 0, Completed: 2, Won''t do: -1'
         config:
           meta:
             dimension:
@@ -430,7 +430,7 @@ models:
             sql: |
               CASE WHEN 
                 ${TABLE}.due_date < current_timestamp()
-                AND ${TABLE}.status != 2 
+                AND ${TABLE}.status = 0 
               THEN ${TABLE}.task_id ELSE NULL END
             description: The number of tasks that are past their due date but not completed.
           completion_rate:
@@ -1379,7 +1379,7 @@ models:
           tags: []
         data_type: DATETIME
       - name: status
-        description: 'Task completion status. Value: Normal=0, Completed=2'
+        description: 'Task completion status. Value: Normal=0, Completed=2, Won''t do=-1'
         config:
           meta:
             dimension:
@@ -1591,7 +1591,7 @@ models:
             sql: |
               CASE
                 WHEN ${TABLE}.due_date < current_timestamp()
-                AND ${TABLE}.status != 2
+                AND ${TABLE}.status = 0
                 THEN ${TABLE}.task_id
                 ELSE NULL
               END

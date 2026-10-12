@@ -22,7 +22,8 @@ with open_tasks as (
         folder_url_web,
         folder_url_native
     from {{ ref('fct_tasks_v3_semantic_base') }}
-    where status != 2
+    -- open only: won't do (-1) is closed too, like completed (2)
+    where status = 0
       and due_date_day is not null
       and is_habit = false
 ),
