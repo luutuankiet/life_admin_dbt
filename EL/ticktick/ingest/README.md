@@ -64,7 +64,7 @@ under the same id silences the first. A dev stack therefore needs only a differe
 
 ## CLI
 
-Run inside the Dagster container so it shares the state volume:
+Run inside the Dagster container so it shares `/state`:
 
 ```sh
 docker compose -p ticktick-ingest exec dagster python -m ticktick_ingest.cli <command>

@@ -1,7 +1,7 @@
 ---
 title: Current pipeline (websocket hint, Dagster and dlt into BigQuery)
 covers: how a TickTick edit reaches BigQuery today, which run kinds exist, the run lifecycle and what a cancelled, failed or killed run or a lost host does, the body-edit gate, the ingest tables and bookmarks, the compat views the v3 dbt models read, the failure alert, retention and log rotation, where state lives and how to rebuild it, known gaps
-verified: 2026-10-11
+verified: 2026-10-13
 ---
 
 # Current pipeline: websocket hint, Dagster and dlt into BigQuery
@@ -13,7 +13,7 @@ three compat views shaped like the old raw tables.
 ```mermaid
 flowchart LR
   WS[TickTick websocket<br/>needSync frames] --> L[listener container<br/>writes last_hint]
-  L -->|state volume| HS[hint_sensor<br/>30 s tick, 60 s gap]
+  L -->|/state/last_hint| HS[hint_sensor<br/>30 s tick, 60 s gap]
   SN[safety_net<br/>every 30 min] --> J
   HS --> J[job ticktick_sync<br/>run_sync kind]
   J -->|GET batch/check, completedInAll| TT[TickTick private API]
@@ -44,7 +44,7 @@ variables in `docs/reference/configuration.md`.
 
 `EL/ticktick/ingest/` is its own uv project. One Docker image runs two containers
 (`docker/docker-compose.yml`): `dagster` (webserver and daemon via `dagster dev`) and
-`listener`. Both mount the named volume `state` at `/state`.
+`listener`. Both bind-mount `docker/state/` (gitignored) at `/state`.
 
 | file | lines | what lives there |
 |---|---|---|
@@ -61,7 +61,7 @@ variables in `docs/reference/configuration.md`.
 | `src/ticktick_ingest/client.py` | ~35-75 | `resolve_x_device`: the per-stack device id |
 | `src/ticktick_ingest/client.py` | ~121-197 | the two HTTP calls, `AuthRejected` on 401, retries on network errors only |
 | `src/ticktick_ingest/cli.py` | whole file | `sync`, `backfill`, `reset`, `rebuild-gate` |
-| `docker/dagster.yaml` | whole file | storage on the state volume, one run at a time, run monitoring, tick retention |
+| `docker/dagster.yaml` | whole file | storage under `/state`, one run at a time, run monitoring, tick retention |
 
 ## Trigger: listener, hint, sensor, safety net
 
@@ -241,6 +241,19 @@ and folders are replaced, and the compat views keep one row per id. Only the raw
 tables can hold a repeated entry if part of a failed load landed before it
 stopped; each copy carries its own `_run_id`.
 
+Five layers keep a duplicate run harmless; each covers a different way one happens.
+
+| layer | mechanism | a duplicate costs |
+|---|---|---|
+| sensor | `run_key` `hint-<ms>` is never launched twice; a hint inside the 60 s gap leaves the cursor where it was, so it is delayed, not lost | nothing |
+| queue | `max_concurrent_runs: 1` in `docker/dagster.yaml` | the second run waits |
+| bookmark | the checkpoint commits in the same load as its rows | a failed run re-fetches the same range |
+| current-state tables | `tasks`, `closed_tasks` upsert on `id`; `lists`, `folders` replace | nothing |
+| raw tables | append | repeated rows, told apart by `_run_id` |
+
+The sensor's cursor and run keys live in `$INGEST_STATE_DIR/dagster`, so emptying
+it costs one extra run; the bookmark and table layers make that run harmless.
+
 **A host that goes away.** Power cut, lost VPS or a move to another machine all
 recover the same way, because nothing on the host is the only copy of anything (next
 section). Start the stack from the same compose file with the same `.env` and the
@@ -268,9 +281,9 @@ What is lost: Dagster run history, and body-only edits that were pending in the 
 | gate cache | `$INGEST_STATE_DIR/gate.db` | rebuilt from `tasks.raw_json` on the next run (`cli rebuild-gate` forces it) |
 | pending body edits | inside the gate cache | dropped, but already in `raw_task_changes`; the next edit to the task re-captures it |
 | `last_hint` | `$INGEST_STATE_DIR/last_hint` | the listener rewrites it on connect |
-| Dagster runs, ticks, sensor cursor | `$INGEST_STATE_DIR/dagster` | run history only; nothing the pipeline needs |
+| Dagster runs, ticks, sensor cursor | `$INGEST_STATE_DIR/dagster` | run history only; nothing the pipeline needs. Every asset shows "never materialized" until a run loads rows into its table, and the sensor launches one run on its first tick |
 
-Nothing on the host is the only copy of anything. Removing the `state` volume costs
+Nothing on the host is the only copy of anything. Emptying or moving `docker/state/` costs
 run history and any pending body edits, nothing else. The CLI and Dagster share the
 dlt working dir: do not run a CLI command while a run is in progress.
 
