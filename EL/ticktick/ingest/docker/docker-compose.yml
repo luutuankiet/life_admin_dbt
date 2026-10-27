@@ -29,7 +29,10 @@ services:
   dagster:
     <<: *common
     command: ["dagster", "dev", "-m", "ticktick_ingest.defs", "-h", "0.0.0.0", "-p", "3000"]
-    mem_limit: 1536m
+    # `dagster dev` (webserver, daemon, code servers) sits near 900 MiB idle, and each run
+    # is a subprocess adding about 300 MiB. Page cache from the run history in state/
+    # counts toward the limit too, but the kernel reclaims it before an OOM kill.
+    mem_limit: 2048m
     # No Traefik labels: the reverse proxy does not expose containers by default, so
     # there is no public route. The UI is published only on DAGSTER_WEB_BIND (loopback
     # by default; 0.0.0.0 is safe only behind a provider firewall, see the README).
